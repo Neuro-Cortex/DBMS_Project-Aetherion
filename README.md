@@ -42,6 +42,32 @@ triggers/      → Database triggers
 indexes/       → Indexing for performance optimization  
 ```
 
+
+
+
+
+##  Project Structure
+
+```
+├── Framework: React 18 + TypeScript
+├── Styling: Tailwind CSS + Shadcn UI
+├── State Management: Redux Toolkit + RTK Query
+├── Routing: React Router v6
+├── Animations: Framer Motion
+├── Charts: Recharts
+├── Forms: React Hook Form + Zod
+├── Icons: Lucide React + Heroicons
+├── Notifications: React Hot Toast
+├── Calendar: React Big Calendar
+└── Build Tool: Vite
+```
+
+
+
+
+
+
+
 ---
 
 ##  Getting Started
