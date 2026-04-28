@@ -46,7 +46,8 @@ indexes/       → Indexing for performance optimization
 
 
 
-##  Project Structure
+##  Technology Stack for Frontend
+
 
 ```
 ├── Framework: React 18 + TypeScript
