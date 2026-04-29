@@ -1,4 +1,141 @@
-# [DBMS] Project Aetherion
+#Project Aetherion
+
+
+smart-hospital-system/
+├── public/
+│   ├── favicon.ico
+│   ├── logo.svg
+│   └── manifest.json
+├── src/
+│   ├── components/
+│   │   ├── ui/                    # Reusable UI components
+│   │   │   ├── Button.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── Badge.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Select.tsx
+│   │   │   ├── Table.tsx
+│   │   │   ├── Tabs.tsx
+│   │   │   ├── Avatar.tsx
+│   │   │   ├── Dropdown.tsx
+│   │   │   └── Loader.tsx
+│   │   ├── layout/
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   └── DashboardLayout.tsx
+│   │   ├── common/
+│   │   │   ├── SearchBar.tsx
+│   │   │   ├── NotificationBell.tsx
+│   │   │   ├── UserAvatar.tsx
+│   │   │   └── BreadCrumb.tsx
+│   │   ├── dashboard/
+│   │   │   ├── StatCard.tsx
+│   │   │   ├── ActivityChart.tsx
+│   │   │   ├── RecentAppointments.tsx
+│   │   │   └── ResourceStatus.tsx
+│   │   ├── doctor/
+│   │   │   ├── DoctorCard.tsx
+│   │   │   ├── DoctorProfile.tsx
+│   │   │   ├── DoctorSchedule.tsx
+│   │   │   └── DoctorRanking.tsx
+│   │   ├── patient/
+│   │   │   ├── PatientProfile.tsx
+│   │   │   ├── MedicalHistory.tsx
+│   │   │   ├── MedicineTracker.tsx
+│   │   │   └── VaccinationTracker.tsx
+│   │   ├── hospital/
+│   │   │   ├── HospitalCard.tsx
+│   │   │   ├── BedAvailability.tsx
+│   │   │   ├── ICUTracker.tsx
+│   │   │   └── EmergencyServices.tsx
+│   │   ├── emergency/
+│   │   │   ├── BloodDonorCard.tsx
+│   │   │   ├── AmbulanceTracker.tsx
+│   │   │   ├── OxygenLocator.tsx
+│   │   │   └── EmergencyRequest.tsx
+│   │   ├── appointment/
+│   │   │   ├── BookingForm.tsx
+│   │   │   ├── AppointmentCalendar.tsx
+│   │   │   └── AppointmentList.tsx
+│   │   ├── pharmacy/
+│   │   │   ├── MedicineSearch.tsx
+│   │   │   ├── PharmacyCard.tsx
+│   │   │   └── StockIndicator.tsx
+│   │   ├── ai-assistant/
+│   │   │   ├── ChatBot.tsx
+│   │   │   ├── SymptomChecker.tsx
+│   │   │   ├── PregnancyGuide.tsx
+│   │   │   └── BabyCareAdvice.tsx
+│   │   └── women/
+│   │       ├── PregnancyTracker.tsx
+│   │       ├── GynecologistCard.tsx
+│   │       ├── VaccineSchedule.tsx
+│   │       └── SpecialCare.tsx
+│   ├── pages/
+│   │   ├── Home.tsx
+│   │   ├── Login.tsx
+│   │   ├── Register.tsx
+│   │   ├── Dashboard.tsx
+│   │   ├── Doctors.tsx
+│   │   ├── DoctorProfile.tsx
+│   │   ├── Hospitals.tsx
+│   │   ├── Appointments.tsx
+│   │   ├── Emergency.tsx
+│   │   ├── Pharmacy.tsx
+│   │   ├── MedicalRecords.tsx
+│   │   ├── AIAssistant.tsx
+│   │   ├── WomenHealth.tsx
+│   │   ├── BloodDonors.tsx
+│   │   ├── AdminPanel.tsx
+│   │   └── NotFound.tsx
+│   ├── hooks/
+│   │   ├── useAuth.ts
+│   │   ├── useDoctor.ts
+│   │   ├── useHospital.ts
+│   │   ├── useAppointment.ts
+│   │   └── useEmergency.ts
+│   ├── services/
+│   │   ├── api.ts
+│   │   ├── authService.ts
+│   │   ├── doctorService.ts
+│   │   ├── hospitalService.ts
+│   │   ├── emergencyService.ts
+│   │   └── aiService.ts
+│   ├── store/
+│   │   ├── index.ts
+│   │   ├── slices/
+│   │   │   ├── authSlice.ts
+│   │   │   ├── doctorSlice.ts
+│   │   │   ├── hospitalSlice.ts
+│   │   │   ├── appointmentSlice.ts
+│   │   │   └── emergencySlice.ts
+│   ├── utils/
+│   │   ├── constants.ts
+│   │   ├── helpers.ts
+│   │   ├── validators.ts
+│   │   └── formatters.ts
+│   ├── types/
+│   │   ├── index.ts
+│   │   ├── user.ts
+│   │   ├── doctor.ts
+│   │   ├── hospital.ts
+│   │   ├── appointment.ts
+│   │   └── emergency.ts
+│   ├── styles/
+│   │   ├── globals.css
+│   │   ├── themes.ts
+│   │   └── animations.ts
+│   ├── App.tsx
+│   ├── main.tsx
+│   └── vite-env.d.ts
+├── package.json
+├── tailwind.config.js
+├── tsconfig.json
+└── vite.config.ts
+
+
 
 Greek mythology:
 upper air → Aether → “life / air / purity”
