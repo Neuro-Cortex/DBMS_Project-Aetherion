@@ -1,403 +1,740 @@
 // src/components/layout/Navbar.tsx
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
+import { Link, useNavigate, useLocation, useMatches } from 'react-router-dom';
 import {
   Menu, X, Search, Bell, User, Settings, LogOut, Activity, Calendar, Users,
-  Building2 as Hospital, Stethoscope, Home, Pill, Siren, MessageCircle,
-  ChevronDown, Shield, Heart, Brain, Sparkles, Clock, BadgeCheck, ArrowRight,
-  Command, Zap, Star, Moon, Sun, Globe, Layers, Grid, BarChart3, TrendingUp,
-  CreditCard, Headphones, Video, Phone, MapPin, Navigation, Wifi, Bluetooth,
-  Battery, Signal, Antenna, Satellite,  Radio, Tv, Cast, Airplay,
-  Monitor, Tablet, Smartphone, Laptop, Camera, Mic, MicOff, Volume2, VolumeX,
-  Play, Pause, SkipForward, SkipBack, RefreshCw, RotateCw, Maximize, Minimize,
-  Fullscreen, Scan, ScanLine, QrCode, Barcode, Fingerprint, Key, Lock, Unlock,
-  Eye, EyeOff, AlertTriangle, CheckCircle2, XCircle, HelpCircle, Info,
-  FileText, Clipboard, Edit3, Trash2, Plus, Minus, ExternalLink, Link2,
-  Share2, Bookmark, Flag, ThumbsUp, ThumbsDown, Smile, Frown, Meh
+  Hospital, Stethoscope, Home, Siren, ChevronDown, Shield, 
+  Clock, Command, Sparkles, ExternalLink
 } from 'lucide-react';
-import { GlassmorphicCard } from '@/components/ui/GlassmorphicCard';
-import { Badge } from '@/components/ui/Badge';
 
 // ============================================
-// TYPES
+// TYPES (Enhanced with strict typing)
 // ============================================
-export interface Notification {
+type NotificationType = 'appointment' | 'message' | 'alert' | 'system' | 'emergency';
+
+interface Notification {
   id: string;
   title: string;
   description: string;
   time: string;
   unread: boolean;
-  type?: 'appointment' | 'message' | 'alert' | 'system' | 'emergency';
+  type: NotificationType;
   icon?: React.ElementType;
-  action?: { label: string; href: string };
+  action?: {
+    label: string;
+    href: string;
+  };
 }
 
-export interface UserType {
+interface User {
   name: string;
   email: string;
   role: string;
   department?: string;
-  status?: 'online' | 'offline' | 'busy';
+  status: 'online' | 'offline' | 'busy';
+  avatar?: string;
 }
 
-export interface NavbarProps {
+interface NavbarProps {
   onMenuClick?: () => void;
   sidebarOpen?: boolean;
-  user?: UserType;
+  user?: User;
+  notifications?: Notification[];
+}
+
+interface NavLink {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+  badge?: number;
+  exact?: boolean;
 }
 
 // ============================================
-// DEFAULT DATA
+// CONSTANTS (Memoized outside component)
 // ============================================
-const defaultNotifications: Notification[] = [
-  { id: '1', title: 'New Appointment', description: 'John Doe - Cardiology', time: '2m ago', unread: true, type: 'appointment', icon: Calendar, action: { label: 'View', href: '/appointments' } },
-  { id: '2', title: 'Emergency: Code Blue', description: 'ICU Room 302', time: '5m ago', unread: true, type: 'emergency', icon: Siren, action: { label: 'Respond', href: '/emergency' } },
-  { id: '3', title: 'Lab Results Ready', description: 'Sarah Connor - Blood work', time: '15m ago', unread: false, type: 'system', icon: Activity },
-  { id: '4', title: 'AI Diagnosis Complete', description: 'Chest X-ray #45892', time: '30m ago', unread: false, type: 'system', icon: Brain },
-];
-
-const defaultUser: UserType = {
-  name: 'Dr. Sarah Johnson',
-  email: 'sarah@aetherion.com',
-  role: 'Administrator',
-  department: 'Cardiology',
-  status: 'online',
-};
-
-const navLinks = [
-  { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
+const NAV_LINKS: NavLink[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: BarChart3, exact: true },
   { name: 'Doctors', href: '/doctors', icon: Stethoscope },
   { name: 'Hospitals', href: '/hospitals', icon: Hospital },
   { name: 'Appointments', href: '/appointments', icon: Calendar },
-  { name: 'Emergency', href: '/emergency', icon: Siren },
+  { name: 'Emergency', href: '/emergency', icon: Siren, badge: 2 },
 ];
 
-// ============================================
-// SUB-COMPONENTS
-// ============================================
+const PROFILE_MENU_ITEMS = [
+  { icon: User, label: 'Profile', href: '/profile' },
+  { icon: Settings, label: 'Settings', href: '/settings' },
+  { icon: Activity, label: 'Activity', href: '/activity' },
+  { icon: Shield, label: 'Security', href: '/security' },
+] as const;
 
-const NotificationBadge: React.FC<{ count: number }> = ({ count }) => {
+const NOTIFICATION_COLORS: Record<NotificationType, string> = {
+  emergency: 'bg-red-500/10 text-red-400 border-red-500/20',
+  alert: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+  appointment: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  message: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  system: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+};
+
+const STATUS_COLORS = {
+  online: 'bg-emerald-400',
+  offline: 'bg-gray-500',
+  busy: 'bg-amber-400',
+} as const;
+
+// ============================================
+// ANIMATION VARIANTS (Outside component to prevent recreation)
+// ============================================
+const dropdownVariants = {
+  hidden: {
+    opacity: 0,
+    y: -8,
+    scale: 0.96,
+    transition: { duration: 0.15, ease: 'easeIn' }
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] }
+  },
+  exit: {
+    opacity: 0,
+    y: -8,
+    scale: 0.96,
+    transition: { duration: 0.12, ease: 'easeIn' }
+  }
+};
+
+const overlayVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.2 } },
+  exit: { opacity: 0, transition: { duration: 0.15 } }
+};
+
+// ============================================
+// UTILITY FUNCTIONS (Outside component)
+// ============================================
+const formatTime = (date: Date): string => {
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
+const cn = (...classes: (string | boolean | undefined | null)[]): string => {
+  return classes.filter(Boolean).join(' ');
+};
+
+// ============================================
+// SUB-COMPONENTS (Memoized)
+// ============================================
+const NotificationBadge: React.FC<{ count: number }> = React.memo(({ count }) => {
   if (count === 0) return null;
+  
   return (
     <motion.span
       initial={{ scale: 0, rotate: -90 }}
       animate={{ scale: 1, rotate: 0 }}
-      className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[9px] font-black text-white bg-red-500 rounded-full border-2 border-[#050508] shadow-lg"
+      className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[9px] font-black text-white bg-red-500 rounded-full border-2 border-[#050508] shadow-lg shadow-red-500/20"
+      aria-label={`${count} unread notifications`}
     >
       {count > 99 ? '99+' : count}
     </motion.span>
   );
-};
+});
 
-const StatusDot: React.FC<{ status?: string }> = ({ status = 'online' }) => {
-  const colors: Record<string, string> = {
-    online: 'bg-emerald-400',
-    offline: 'bg-gray-500',
-    busy: 'bg-amber-400',
-  };
+NotificationBadge.displayName = 'NotificationBadge';
+
+const StatusDot: React.FC<{ status: User['status'] }> = React.memo(({ status }) => {
   return (
-    <span className="relative flex h-2.5 w-2.5">
+    <span className="relative flex h-2.5 w-2.5" role="status" aria-label={`User is ${status}`}>
       {status === 'online' && (
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
       )}
-      <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${colors[status] || colors.online}`} />
+      <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${STATUS_COLORS[status]}`} />
     </span>
   );
-};
+});
+
+StatusDot.displayName = 'StatusDot';
+
+const NavItem: React.FC<{
+  link: NavLink;
+  isActive: boolean;
+  isHovered: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+}> = React.memo(({ link, isActive, isHovered, onMouseEnter, onMouseLeave }) => {
+  const Icon = link.icon;
+  
+  return (
+    <Link
+      to={link.href}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className={cn(
+        'relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 group',
+        isActive
+          ? 'text-white bg-white/[0.06]'
+          : 'text-white/45 hover:text-white/80 hover:bg-white/[0.03]'
+      )}
+      aria-current={isActive ? 'page' : undefined}
+    >
+      <Icon
+        className={cn(
+          'w-4 h-4 transition-transform duration-300',
+          isHovered && 'scale-110',
+          isActive && 'text-cyan-400'
+        )}
+      />
+      <span className="hidden sm:inline">{link.name}</span>
+      
+      {isActive && (
+        <motion.div
+          layoutId="navbar-active-indicator"
+          className="absolute bottom-0 left-3 right-3 h-[2px] bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full"
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+        />
+      )}
+      
+      {link.badge && link.badge > 0 && (
+        <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-lg shadow-red-500/50" />
+      )}
+    </Link>
+  );
+});
+
+NavItem.displayName = 'NavItem';
 
 // ============================================
-// MAIN NAVBAR
+// MAIN NAVBAR COMPONENT
 // ============================================
-export const Navbar: React.FC<NavbarProps> = ({
+export const Navbar: React.FC<NavbarProps> = React.memo(({
   onMenuClick,
   sidebarOpen = false,
-  user = defaultUser,
+  user = {
+    name: 'Dr. Sarah Johnson',
+    email: 'sarah@aetherion.com',
+    role: 'Administrator',
+    department: 'Cardiology',
+    status: 'online',
+  },
+  notifications = [],
 }) => {
+  // State management
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [time, setTime] = useState(new Date());
-
-  const searchRef = useRef<HTMLInputElement>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // Refs
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+  
+  // Hooks
   const { scrollY } = useScroll();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const unreadCount = defaultNotifications.filter(n => n.unread).length;
-
-  // Scroll effect
+  
+  // Memoized values
+  const unreadCount = useMemo(
+    () => notifications.filter(n => n.unread).length,
+    [notifications]
+  );
+  
+  // Scroll effect with debounce
   useMotionValueEvent(scrollY, 'change', (latest) => {
-    setScrolled(latest > 15);
+    const isScrolled = latest > 15;
+    if (isScrolled !== scrolled) {
+      setScrolled(isScrolled);
+    }
   });
-
-  // Clock
+  
+  // Time update with cleanup
   useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 60000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
   }, []);
-
+  
   // Keyboard shortcuts
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); setSearchOpen(true); }
-      if (e.key === 'Escape') { setSearchOpen(false); setNotificationOpen(false); setProfileOpen(false); }
+    const handleKeyboard = (e: KeyboardEvent) => {
+      const isMod = e.ctrlKey || e.metaKey;
+      
+      if (isMod && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+        setTimeout(() => searchInputRef.current?.focus(), 100);
+      }
+      
+      if (e.key === 'Escape') {
+        setSearchOpen(false);
+        setNotificationOpen(false);
+        setProfileOpen(false);
+      }
     };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    
+    window.addEventListener('keydown', handleKeyboard);
+    return () => window.removeEventListener('keydown', handleKeyboard);
   }, []);
-
-  // Close on click outside
+  
+  // Click outside handlers
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest('.notification-area')) setNotificationOpen(false);
-      if (!target.closest('.profile-area')) setProfileOpen(false);
+      
+      if (notificationRef.current && !notificationRef.current.contains(target)) {
+        setNotificationOpen(false);
+      }
+      
+      if (profileRef.current && !profileRef.current.contains(target)) {
+        setProfileOpen(false);
+      }
     };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const isActive = useCallback((path: string) => location.pathname === path || location.pathname.startsWith(path + '/'), [location.pathname]);
-
-  const handleLogout = () => { setProfileOpen(false); navigate('/login'); };
-
-  const getNotifColor = (type?: string) => {
-    const c: Record<string, string> = {
-      emergency: 'bg-red-500/10 text-red-400 border-red-500/20',
-      alert: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      appointment: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-      message: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-      system: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-    };
-    return c[type || 'system'] || c.system;
-  };
-
+  
+  // Route matching
+  const isActiveRoute = useCallback(
+    (path: string, exact?: boolean) => {
+      if (exact) return location.pathname === path;
+      return location.pathname === path || location.pathname.startsWith(path + '/');
+    },
+    [location.pathname]
+  );
+  
+  // Handlers
+  const handleLogout = useCallback(() => {
+    setProfileOpen(false);
+    navigate('/login');
+  }, [navigate]);
+  
+  const handleNotificationClick = useCallback((notification: Notification) => {
+    if (notification.action) {
+      navigate(notification.action.href);
+      setNotificationOpen(false);
+    }
+  }, [navigate]);
+  
+  const handleSearchClose = useCallback(() => {
+    setSearchOpen(false);
+    setSearchQuery('');
+  }, []);
+  
+  const toggleNotifications = useCallback(() => {
+    setNotificationOpen(prev => !prev);
+    setProfileOpen(false);
+  }, []);
+  
+  const toggleProfile = useCallback(() => {
+    setProfileOpen(prev => !prev);
+    setNotificationOpen(false);
+  }, []);
+  
   return (
     <>
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={cn(
+          'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
           scrolled
             ? 'bg-[#050508]/90 backdrop-blur-2xl border-b border-white/[0.04] shadow-2xl shadow-black/20 py-2'
             : 'bg-transparent py-4'
-        }`}
+        )}
+        role="navigation"
+        aria-label="Main navigation"
       >
         {/* Ambient glow line */}
-        <div className={`absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent transition-opacity duration-500 ${scrolled ? 'opacity-100' : 'opacity-0'}`} />
-
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 flex items-center justify-between">
-          
-          {/* ============================================ */}
-          {/* LEFT — Logo + Links */}
-          {/* ============================================ */}
-          <div className="flex items-center gap-6">
-            {/* Mobile Toggle */}
-            <button type="button" onClick={onMenuClick} className="lg:hidden p-2 -ml-2 text-white/60 hover:text-white transition-colors">
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-              <motion.div whileHover={{ rotate: -10, scale: 1.1 }} className="relative w-9 h-9">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 rounded-xl rotate-45 group-hover:rotate-[135deg] transition-transform duration-700 shadow-lg shadow-cyan-500/20" />
-                <Sparkles className="absolute inset-0 m-auto w-4.5 h-4.5 text-white" />
-              </motion.div>
-              <div className="hidden sm:block">
-                <span className="text-lg font-bold text-white tracking-[-0.02em]">Aetherion</span>
-                <span className="text-xs text-cyan-400 font-medium -mt-1 block">Health</span>
-              </div>
-            </Link>
-
-            {/* Desktop Nav Links */}
-            <nav className="hidden lg:flex items-center gap-0.5 ml-6">
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                const active = isActive(link.href);
-                const isHovered = hoveredLink === link.href;
-                return (
-                  <Link
+        <div
+          className={cn(
+            'absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent transition-opacity duration-500',
+            scrolled ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+        
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-12">
+            {/* LEFT SECTION */}
+            <div className="flex items-center gap-4 lg:gap-6">
+              {/* Mobile menu button */}
+              <button
+                type="button"
+                onClick={onMenuClick}
+                className="lg:hidden p-2 -ml-2 text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/[0.05]"
+                aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                aria-expanded={sidebarOpen}
+              >
+                {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+              
+              {/* Logo */}
+              <Link
+                to="/"
+                className="flex items-center gap-2.5 group shrink-0"
+                aria-label="Aetherion Health - Home"
+              >
+                <motion.div
+                  whileHover={{ rotate: -10, scale: 1.1 }}
+                  className="relative w-9 h-9"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 rounded-xl rotate-45 group-hover:rotate-[135deg] transition-transform duration-700 shadow-lg shadow-cyan-500/20" />
+                  <Sparkles className="absolute inset-0 m-auto w-[18px] h-[18px] text-white" />
+                </motion.div>
+                
+                <div className="hidden sm:block">
+                  <span className="text-lg font-bold text-white tracking-tight">
+                    Aetherion
+                  </span>
+                  <span className="text-xs text-cyan-400 font-medium block -mt-0.5">
+                    Health
+                  </span>
+                </div>
+              </Link>
+              
+              {/* Desktop Navigation */}
+              <nav className="hidden lg:flex items-center gap-0.5 ml-6" role="menubar">
+                {NAV_LINKS.map((link) => (
+                  <NavItem
                     key={link.href}
-                    to={link.href}
+                    link={link}
+                    isActive={isActiveRoute(link.href, link.exact)}
+                    isHovered={hoveredLink === link.href}
                     onMouseEnter={() => setHoveredLink(link.href)}
                     onMouseLeave={() => setHoveredLink(null)}
-                    className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      active ? 'text-white bg-white/[0.06]' : 'text-white/45 hover:text-white/80 hover:bg-white/[0.03]'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 transition-transform duration-300 ${isHovered ? 'scale-110' : ''}`} />
-                    <span>{link.name}</span>
-                    {active && (
-                      <motion.div layoutId="nav-active" className="absolute bottom-0 left-3 right-3 h-[2px] bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full"
-                        transition={{ type: 'spring', stiffness: 400, damping: 25 }} />
-                    )}
-                    {link.name === 'Emergency' && (
-                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* ============================================ */}
-          {/* RIGHT — Actions */}
-          {/* ============================================ */}
-          <div className="flex items-center gap-1.5">
-            {/* Time */}
-            <div className="hidden xl:flex items-center gap-2 px-3 py-2 text-white/25 text-xs font-mono">
-              <Clock className="w-3.5 h-3.5" />
-              {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                  />
+                ))}
+              </nav>
             </div>
-
-            {/* Search */}
-            <button type="button" onClick={() => setSearchOpen(true)}
-              className="hidden sm:flex items-center gap-2 px-3 py-2 text-white/35 hover:text-white/70 bg-white/[0.02] hover:bg-white/[0.05] rounded-xl text-xs transition-all border border-white/[0.04] hover:border-white/[0.08]">
-              <Search className="w-4 h-4" />
-              <span className="hidden lg:inline">Search...</span>
-              <kbd className="hidden lg:flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] text-white/20 bg-white/[0.04] rounded-md font-mono border border-white/[0.04]">
-                <Command className="w-2.5 h-2.5" />K
-              </kbd>
-            </button>
-
-            {/* Emergency SOS */}
-            <Link to="/emergency"
-              className="relative flex items-center gap-1.5 px-3 py-2 bg-red-500/5 hover:bg-red-500/10 border border-red-500/15 hover:border-red-500/25 rounded-xl text-red-400 text-xs font-bold transition-all group">
-              <Siren className="w-4 h-4 animate-pulse" />
-              <span className="hidden md:inline">SOS</span>
-            </Link>
-
-            {/* Notifications */}
-            <div className="relative notification-area">
-              <button type="button" onClick={() => { setNotificationOpen(!notificationOpen); setProfileOpen(false); }}
-                className="relative p-2.5 text-white/40 hover:text-white bg-white/[0.01] hover:bg-white/[0.05] rounded-xl transition-all">
-                <Bell className="w-4.5 h-4.5" />
-                <NotificationBadge count={unreadCount} />
+            
+            {/* RIGHT SECTION */}
+            <div className="flex items-center gap-1.5">
+              {/* Clock */}
+              <div className="hidden xl:flex items-center gap-2 px-3 py-2 text-white/25 text-xs font-mono select-none">
+                <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+                <time dateTime={currentTime.toISOString()}>
+                  {formatTime(currentTime)}
+                </time>
+              </div>
+              
+              {/* Search button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchOpen(true);
+                  setTimeout(() => searchInputRef.current?.focus(), 100);
+                }}
+                className="hidden sm:flex items-center gap-2 px-3 py-2 text-white/35 hover:text-white/70 bg-white/[0.02] hover:bg-white/[0.05] rounded-xl text-xs transition-all border border-white/[0.04] hover:border-white/[0.08] focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                aria-label="Search (Command+K)"
+              >
+                <Search className="w-4 h-4" aria-hidden="true" />
+                <span className="hidden lg:inline">Search...</span>
+                <kbd className="hidden lg:flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] text-white/20 bg-white/[0.04] rounded-md font-mono border border-white/[0.04]">
+                  <Command className="w-2.5 h-2.5" aria-hidden="true" />K
+                </kbd>
               </button>
-
-              <AnimatePresence>
-                {notificationOpen && (
-                  <motion.div initial={{ opacity: 0, y: 8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }} transition={{ duration: 0.2 }}
-                    className="absolute right-0 top-full mt-2 w-80 bg-[#0a0a10]/98 backdrop-blur-2xl rounded-2xl border border-white/[0.06] shadow-2xl shadow-black/40 overflow-hidden z-50">
-                    <div className="p-4 border-b border-white/[0.04] flex items-center justify-between">
-                      <div>
-                        <h3 className="text-white font-semibold text-sm">Notifications</h3>
-                        <p className="text-white/30 text-[10px] mt-0.5">{unreadCount} unread</p>
+              
+              {/* Emergency button */}
+              <Link
+                to="/emergency"
+                className="relative flex items-center gap-1.5 px-3 py-2 bg-red-500/5 hover:bg-red-500/10 border border-red-500/15 hover:border-red-500/25 rounded-xl text-red-400 text-xs font-bold transition-all group focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                aria-label="Emergency services"
+              >
+                <Siren className="w-4 h-4 animate-pulse" aria-hidden="true" />
+                <span className="hidden md:inline">SOS</span>
+              </Link>
+              
+              {/* Notifications */}
+              <div className="relative" ref={notificationRef}>
+                <button
+                  type="button"
+                  onClick={toggleNotifications}
+                  className="relative p-2.5 text-white/40 hover:text-white bg-white/[0.01] hover:bg-white/[0.05] rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                  aria-label={`Notifications (${unreadCount} unread)`}
+                  aria-expanded={notificationOpen}
+                  aria-haspopup="true"
+                >
+                  <Bell className="w-[18px] h-[18px]" aria-hidden="true" />
+                  <NotificationBadge count={unreadCount} />
+                </button>
+                
+                <AnimatePresence>
+                  {notificationOpen && (
+                    <motion.div
+                      variants={dropdownVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className="absolute right-0 top-full mt-2 w-80 bg-[#0a0a10]/98 backdrop-blur-2xl rounded-2xl border border-white/[0.06] shadow-2xl shadow-black/40 overflow-hidden z-50"
+                      role="menu"
+                      aria-label="Notifications menu"
+                    >
+                      {/* Notification header */}
+                      <div className="p-4 border-b border-white/[0.04]">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-white font-semibold text-sm">
+                              Notifications
+                            </h3>
+                            <p className="text-white/30 text-[10px] mt-0.5">
+                              {unreadCount} unread
+                            </p>
+                          </div>
+                          {unreadCount > 0 && (
+                            <span className="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 text-[10px] font-medium rounded-full border border-cyan-500/20">
+                              New
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <Badge variant="info" size="xs">New</Badge>
+                      
+                      {/* Notification list */}
+                      <div className="max-h-[350px] overflow-y-auto custom-scrollbar">
+                        {notifications.length === 0 ? (
+                          <div className="p-8 text-center">
+                            <Bell className="w-8 h-8 text-white/10 mx-auto mb-3" />
+                            <p className="text-white/30 text-xs">No notifications yet</p>
+                          </div>
+                        ) : (
+                          notifications.map((notification) => {
+                            const Icon = notification.icon || Bell;
+                            return (
+                              <button
+                                key={notification.id}
+                                type="button"
+                                onClick={() => handleNotificationClick(notification)}
+                                className={cn(
+                                  'w-full text-left p-3.5 flex items-start gap-3 hover:bg-white/[0.03] transition-colors',
+                                  notification.unread && 'bg-cyan-500/[0.03]'
+                                )}
+                                role="menuitem"
+                              >
+                                <div className={cn(
+                                  'p-2 rounded-lg border shrink-0',
+                                  NOTIFICATION_COLORS[notification.type]
+                                )}>
+                                  <Icon className="w-3.5 h-3.5" />
+                                </div>
+                                
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white text-xs font-medium truncate">
+                                    {notification.title}
+                                  </p>
+                                  <p className="text-white/35 text-[10px] mt-0.5 line-clamp-1">
+                                    {notification.description}
+                                  </p>
+                                  <span className="text-white/15 text-[10px] mt-1.5 flex items-center gap-1">
+                                    <Clock className="w-2.5 h-2.5" aria-hidden="true" />
+                                    {notification.time}
+                                  </span>
+                                </div>
+                                
+                                {notification.unread && (
+                                  <span
+                                    className="w-1.5 h-1.5 bg-cyan-400 rounded-full shrink-0 mt-1.5"
+                                    aria-label="Unread"
+                                  />
+                                )}
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+                      
+                      {/* View all link */}
+                      {notifications.length > 0 && (
+                        <Link
+                          to="/notifications"
+                          onClick={() => setNotificationOpen(false)}
+                          className="block text-center py-3 text-cyan-400 text-xs font-medium hover:bg-white/[0.02] transition-colors border-t border-white/[0.04]"
+                        >
+                          View all notifications
+                        </Link>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              
+              {/* Profile dropdown */}
+              <div className="relative" ref={profileRef}>
+                <button
+                  type="button"
+                  onClick={toggleProfile}
+                  className="flex items-center gap-2 p-1.5 hover:bg-white/[0.04] rounded-xl transition-all group focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+                  aria-label={`User menu for ${user.name}`}
+                  aria-expanded={profileOpen}
+                  aria-haspopup="true"
+                >
+                  <div className="relative">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-cyan-500/10">
+                      {user.name.charAt(0)}
                     </div>
-                    <div className="max-h-[350px] overflow-y-auto custom-scrollbar">
-                      {defaultNotifications.map((n) => {
-                        const Icon = n.icon || Bell;
-                        return (
-                          <button key={n.id} type="button" onClick={() => { if (n.action) navigate(n.action.href); setNotificationOpen(false); }}
-                            className={`w-full text-left p-3.5 flex items-start gap-3 hover:bg-white/[0.03] transition-colors ${n.unread ? 'bg-cyan-500/[0.03]' : ''}`}>
-                            <div className={`p-2 rounded-lg border shrink-0 ${getNotifColor(n.type)}`}><Icon className="w-3.5 h-3.5" /></div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-white text-xs font-medium truncate">{n.title}</p>
-                              <p className="text-white/35 text-[10px] mt-0.5 line-clamp-1">{n.description}</p>
-                              <span className="text-white/15 text-[10px] mt-1.5 flex items-center gap-1"><Clock className="w-2.5 h-2.5" />{n.time}</span>
-                            </div>
-                            {n.unread && <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full shrink-0 mt-1.5" />}
-                          </button>
-                        );
-                      })}
+                    <div className="absolute -bottom-0.5 -right-0.5">
+                      <StatusDot status={user.status} />
                     </div>
-                    <Link to="/notifications" onClick={() => setNotificationOpen(false)} className="block text-center py-3 text-cyan-400 text-xs font-medium hover:bg-white/[0.02] transition-colors border-t border-white/[0.04]">
-                      View all notifications
-                    </Link>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Profile */}
-            <div className="relative profile-area">
-              <button type="button" onClick={() => { setProfileOpen(!profileOpen); setNotificationOpen(false); }}
-                className="flex items-center gap-2 p-1.5 hover:bg-white/[0.04] rounded-xl transition-all">
-                <div className="relative">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow-lg">
-                    {user.name.charAt(0)}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5"><StatusDot status={user.status} /></div>
-                </div>
-                <ChevronDown className={`hidden md:block w-3.5 h-3.5 text-white/30 transition-transform duration-300 ${profileOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              <AnimatePresence>
-                {profileOpen && (
-                  <motion.div initial={{ opacity: 0, y: 8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }} transition={{ duration: 0.2 }}
-                    className="absolute right-0 top-full mt-2 w-56 bg-[#0a0a10]/98 backdrop-blur-2xl rounded-2xl border border-white/[0.06] shadow-2xl shadow-black/40 overflow-hidden z-50">
-                    <div className="p-4 border-b border-white/[0.04]">
-                      <p className="text-white text-sm font-semibold">{user.name}</p>
-                      <p className="text-white/30 text-[10px] mt-0.5">{user.email}</p>
-                      <p className="text-cyan-400 text-[10px] mt-1">{user.role}</p>
-                    </div>
-                    <div className="p-1.5">
-                      {[{ icon: User, label: 'Profile' }, { icon: Settings, label: 'Settings' }, { icon: Activity, label: 'Activity' }, { icon: Shield, label: 'Security' }].map((item) => {
-                        const Icon = item.icon;
-                        return (
-                          <button key={item.label} type="button" onClick={() => setProfileOpen(false)} className="w-full flex items-center gap-2.5 px-3 py-2.5 text-white/50 hover:text-white hover:bg-white/[0.04] rounded-lg text-xs transition-all">
-                            <Icon className="w-3.5 h-3.5" />{item.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div className="p-1.5 border-t border-white/[0.04]">
-                      <button type="button" onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2.5 text-red-400 hover:bg-red-500/10 rounded-lg text-xs transition-all">
-                        <LogOut className="w-3.5 h-3.5" />Sign Out
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  
+                  <ChevronDown
+                    className={cn(
+                      'hidden md:block w-3.5 h-3.5 text-white/30 transition-transform duration-300',
+                      profileOpen && 'rotate-180'
+                    )}
+                    aria-hidden="true"
+                  />
+                </button>
+                
+                <AnimatePresence>
+                  {profileOpen && (
+                    <motion.div
+                      variants={dropdownVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className="absolute right-0 top-full mt-2 w-56 bg-[#0a0a10]/98 backdrop-blur-2xl rounded-2xl border border-white/[0.06] shadow-2xl shadow-black/40 overflow-hidden z-50"
+                      role="menu"
+                      aria-label="User menu"
+                    >
+                      {/* User info */}
+                      <div className="p-4 border-b border-white/[0.04]">
+                        <p className="text-white text-sm font-semibold">
+                          {user.name}
+                        </p>
+                        <p className="text-white/30 text-[10px] mt-0.5">
+                          {user.email}
+                        </p>
+                        <p className="text-cyan-400 text-[10px] mt-1 font-medium">
+                          {user.role}
+                        </p>
+                      </div>
+                      
+                      {/* Menu items */}
+                      <div className="p-1.5">
+                        {PROFILE_MENU_ITEMS.map(({ icon: Icon, label, href }) => (
+                          <Link
+                            key={label}
+                            to={href}
+                            onClick={() => setProfileOpen(false)}
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-white/50 hover:text-white hover:bg-white/[0.04] rounded-lg text-xs transition-all"
+                            role="menuitem"
+                          >
+                            <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+                            {label}
+                          </Link>
+                        ))}
+                      </div>
+                      
+                      {/* Logout */}
+                      <div className="p-1.5 border-t border-white/[0.04]">
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-red-400 hover:bg-red-500/10 rounded-lg text-xs transition-all"
+                          role="menuitem"
+                        >
+                          <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>
       </motion.nav>
-
+      
       {/* ============================================ */}
       {/* SEARCH OVERLAY */}
       {/* ============================================ */}
       <AnimatePresence>
         {searchOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[70] flex items-start justify-center pt-28 px-4">
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setSearchOpen(false)} />
-            <motion.div initial={{ opacity: 0, y: -15, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -15, scale: 0.95 }} transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="relative w-full max-w-xl bg-[#0a0a10]/98 backdrop-blur-2xl rounded-2xl border border-white/[0.06] shadow-2xl shadow-black/40 overflow-hidden">
+          <motion.div
+            variants={overlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="fixed inset-0 z-[70] flex items-start justify-center pt-28 px-4"
+          >
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/70 backdrop-blur-md"
+              onClick={handleSearchClose}
+              aria-hidden="true"
+            />
+            
+            {/* Search dialog */}
+            <motion.div
+              initial={{ opacity: 0, y: -15, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -15, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="relative w-full max-w-xl bg-[#0a0a10]/98 backdrop-blur-2xl rounded-2xl border border-white/[0.06] shadow-2xl shadow-black/40 overflow-hidden"
+              role="dialog"
+              aria-label="Search"
+            >
+              {/* Search input */}
               <div className="flex items-center gap-3 p-5">
-                <Search className="w-5 h-5 text-white/30 shrink-0" />
-                <input ref={searchRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                <Search className="w-5 h-5 text-white/30 shrink-0" aria-hidden="true" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search anything... (doctors, hospitals, appointments)"
-                  className="w-full bg-transparent text-white text-sm placeholder-white/20 outline-none" autoFocus />
-                <kbd className="text-[10px] text-white/20 bg-white/[0.04] px-2 py-1 rounded-md font-mono border border-white/[0.04]">ESC</kbd>
+                  className="w-full bg-transparent text-white text-sm placeholder-white/20 outline-none"
+                  autoFocus
+                  aria-label="Search input"
+                />
+                <kbd className="flex-shrink-0 text-[10px] text-white/20 bg-white/[0.04] px-2 py-1 rounded-md font-mono border border-white/[0.04]">
+                  ESC
+                </kbd>
               </div>
+              
+              {/* Search results */}
               {searchQuery && (
-                <div className="border-t border-white/[0.04] p-3 max-h-64 overflow-y-auto">
-                  <p className="text-white/20 text-xs px-3 py-4 text-center">Type to search across the platform...</p>
+                <div className="border-t border-white/[0.04] max-h-64 overflow-y-auto">
+                  <div className="p-8 text-center">
+                    <Search className="w-8 h-8 text-white/10 mx-auto mb-3" />
+                    <p className="text-white/30 text-xs">
+                      Type to search across the platform...
+                    </p>
+                  </div>
                 </div>
               )}
+              
+              {/* Keyboard shortcuts */}
               <div className="border-t border-white/[0.04] p-3 flex items-center gap-4 text-[10px] text-white/15">
-                <span className="flex items-center gap-1"><ArrowRight className="w-3 h-3" /> to navigate</span>
-                <span className="flex items-center gap-1"><Command className="w-3 h-3" />K to open</span>
+                <span className="flex items-center gap-1">
+                  <ExternalLink className="w-3 h-3" aria-hidden="true" /> to navigate
+                </span>
+                <span className="flex items-center gap-1">
+                  <Command className="w-3 h-3" aria-hidden="true" />K to open
+                </span>
                 <span>ESC to close</span>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Spacer */}
-      <div className={scrolled ? 'h-14' : 'h-[4.5rem]'} />
+      
+      {/* Spacer for fixed navbar */}
+      <div className={cn('transition-all duration-500', scrolled ? 'h-14' : 'h-[4.5rem]')} />
     </>
   );
-};
+});
+
+Navbar.displayName = 'Navbar';
 
 export default Navbar;
