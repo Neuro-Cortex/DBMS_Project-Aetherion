@@ -16,21 +16,21 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Button } from '../../ui/Button';
-import { Badge } from '../../ui/Badge';
-import { GlassmorphicCard } from '../../ui/GlassmorphicCard';
+import { Button } from 'src/components/ui/Button';
+import { Badge } from 'src/components/ui/Badge';
+import { GlassmorphicCard } from 'src/components/ui/GlassmorphicCard';
+import { Doctor } from 'src/components/doctors/DoctorRanking';
 
 // ============================================
 // TYPES & INTERFACES
 // ============================================
 export interface DoctorScheduleProps {
-  doctor: Doctor;
+  doctor: Doctor;  // ✅ Fixed
   variant?: 'glass' | 'gradient' | 'neon';
   onSlotSelect?: (slot: TimeSlot) => void;
   onDateSelect?: (date: Date) => void;
   className?: string;
 }
-
 export interface TimeSlot {
   id: string;
   time: string;

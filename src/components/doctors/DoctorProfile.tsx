@@ -1,43 +1,42 @@
+// src/components/doctor/DoctorProfile.tsx
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  User, 
-  Star, 
-  MapPin, 
-  DollarSign, 
-  Calendar,
-  Clock,
-  Phone,
-  Video,
-  MessageSquare,
-  Award,
-  BookOpen,
-  Briefcase,
-  Heart,
-  Shield,
-  Globe,
-  ChevronDown,
-  ChevronUp,
-  ThumbsUp,
-  ThumbsDown,
-  Share2,
-  Printer,
-  Edit2
+import { motion } from 'framer-motion';
+import {
+  User, Star, MapPin, DollarSign, Calendar, Clock, Phone,
+  Video, MessageSquare, Award, BookOpen, Briefcase, Heart,
+  Shield, Globe, ChevronDown, ChevronUp, ThumbsUp, Share2,
+  Printer, Users
 } from 'lucide-react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { Avatar } from '../../ui/Avatar';
-import { Badge } from '../../ui/Badge';
-import { Button } from '../../ui/Button';
-import { Tabs } from '../../ui/Tabs';
-import { ActivityChart } from '../dashboard/ActivityChart';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 
 // ============================================
-// TYPES & INTERFACES
+// TYPES
 // ============================================
+export interface Doctor {
+  id: string;
+  name: string;
+  title: string;
+  specialty: string;
+  avatar?: string;
+  rating: number;
+  reviewCount: number;
+  experience: number;
+  price: number;
+  location: string;
+  hospital: string;
+  availableSlots: number;
+  nextAvailable: string;
+  verified: boolean;
+  premium?: boolean;
+  languages: string[];
+  services: string[];
+  education: string[];
+  achievements: string[];
+}
+
 export interface DoctorProfileProps {
   doctor: Doctor;
-  variant?: 'glass' | 'gradient' | 'neon';
   onBookAppointment?: () => void;
   onContact?: (method: 'call' | 'video' | 'message') => void;
   onShare?: () => void;
@@ -45,15 +44,9 @@ export interface DoctorProfileProps {
   className?: string;
 }
 
-// ============================================
-// REVIEW INTERFACE
-// ============================================
 interface Review {
   id: string;
-  patient: {
-    name: string;
-    avatar?: string;
-  };
+  patient: { name: string; avatar?: string };
   rating: number;
   date: string;
   comment: string;
@@ -61,252 +54,287 @@ interface Review {
 }
 
 // ============================================
-// DOCTOR PROFILE COMPONENT
+// MOCK REVIEWS
+// ============================================
+const mockReviews: Review[] = [
+  { id: '1', patient: { name: 'Sarah Johnson' }, rating: 5, date: '2024-01-15', comment: 'Exceptional care! Dr. explained my condition in detail and provided a comprehensive treatment plan. Highly recommended.', helpful: 24 },
+  { id: '2', patient: { name: 'Mike Chen' }, rating: 5, date: '2024-01-10', comment: 'Very professional and caring. The staff was also very helpful. Great experience overall.', helpful: 18 },
+  { id: '3', patient: { name: 'Emily Davis' }, rating: 4, date: '2024-01-05', comment: 'Good experience overall. Waiting time was a bit long but the consultation was thorough and informative.', helpful: 12 },
+  { id: '4', patient: { name: 'Robert Wilson' }, rating: 5, date: '2024-01-02', comment: 'Dr. saved my life! Incredible cardiologist with amazing bedside manner.', helpful: 35 },
+];
+
+// ============================================
+// MAIN COMPONENT
 // ============================================
 export const DoctorProfile: React.FC<DoctorProfileProps> = ({
   doctor,
-  variant = 'glass',
   onBookAppointment,
   onContact,
   onShare,
   onPrint,
-  className,
+  className = '',
 }) => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'experience' | 'reviews' | 'availability'>('overview');
   const [showAllReviews, setShowAllReviews] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
-  // Sample reviews
-  const reviews: Review[] = [
-    {
-      id: '1',
-      patient: { name: 'Sarah Johnson' },
-      rating: 5,
-      date: '2024-01-15',
-      comment: 'Dr. Johnson is an exceptional cardiologist. He explained my condition in detail and provided a comprehensive treatment plan.',
-      helpful: 24,
-    },
-    {
-      id: '2',
-      patient: { name: 'Mike Chen' },
-      rating: 5,
-      date: '2024-01-10',
-      comment: 'Very professional and caring. The staff was also very helpful.',
-      helpful: 18,
-    },
-    {
-      id: '3',
-      patient: { name: 'Emily Davis' },
-      rating: 4,
-      date: '2024-01-05',
-      comment: 'Good experience overall. Waiting time was a bit long but the consultation was thorough.',
-      helpful: 12,
-    },
-  ];
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: User },
-    { id: 'experience', label: 'Experience', icon: Briefcase },
-    { id: 'reviews', label: 'Reviews', icon: Star },
-    { id: 'availability', label: 'Availability', icon: Calendar },
+    { id: 'overview' as const, label: 'Overview', icon: User },
+    { id: 'experience' as const, label: 'Experience', icon: Briefcase },
+    { id: 'reviews' as const, label: 'Reviews', icon: Star },
+    { id: 'availability' as const, label: 'Availability', icon: Calendar },
   ];
 
+  const displayedReviews = showAllReviews ? mockReviews : mockReviews.slice(0, 3);
+
   return (
-    <motion.div
-      className={twMerge(
-        clsx(
-          'max-w-6xl mx-auto p-6 space-y-6',
-          className
-        )
-      )}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-    >
-      {/* Header Card */}
-      <GlassmorphicCard variant={variant}>
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Doctor Info */}
-          <div className="flex items-start gap-6 flex-1">
-            <motion.div
-              whileHover={{ scale: 1.05, rotate: 3 }}
-              transition={{ type: 'spring', stiffness: 300 }}
-            >
-              <Avatar
-                src={!imageError ? doctor.avatar : undefined}
-                name={doctor.name}
-                size="xl"
-                onError={() => setImageError(true)}
-                className="border-4 border-cyan-400 shadow-lg shadow-cyan-500/30"
-              />
-              {doctor.verified && (
-                <motion.div
-                  className="absolute -bottom-2 -right-2"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.3, type: 'spring' }}
-                >
-                  <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800">
-                    <Shield className="w-4 h-4 text-white" />
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
+    <div className={`max-w-6xl mx-auto p-6 space-y-6 ${className}`}>
 
-            <div className="flex-1">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <motion.h1 
-                    className="text-3xl font-black text-white mb-2"
-                    animate={{ scale: [1, 1.02, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    {doctor.name}
-                  </motion.h1>
-                  <p className="text-lg text-white/80 mb-2">{doctor.title}</p>
-                  <div className="flex items-center gap-3 mb-3">
-                    <Badge variant="gradient" size="sm">
-                      {doctor.specialty}
-                    </Badge>
-                    {doctor.premium && (
-                      <Badge variant="gradient" size="xs">
-                        PREMIUM
-                      </Badge>
-                    )}
-                  </div>
+      {/* ============================================ */}
+      {/* HEADER CARD */}
+      {/* ============================================ */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+        className="bg-white/[0.015] backdrop-blur-sm rounded-2xl border border-white/[0.06] p-6 md:p-8">
+        
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* LEFT — Doctor Info */}
+          <div className="flex-1">
+            <div className="flex items-start gap-5 mb-6">
+              {/* Avatar */}
+              <div className="relative shrink-0">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-3xl shadow-xl">
+                  {doctor.name.charAt(0)}
                 </div>
+                {doctor.verified && (
+                  <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-cyan-500 rounded-full flex items-center justify-center border-2 border-[#050508]">
+                    <Shield className="w-3.5 h-3.5 text-white" />
+                  </div>
+                )}
+              </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="glassmorphic"
-                    size="sm"
-                    iconOnly
-                    onClick={onShare}
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="glassmorphic"
-                    size="sm"
-                    iconOnly
-                    onClick={onPrint}
-                    whileHover={{ scale: 1.1, rotate: -5 }}
-                  >
-                    <Printer className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="glassmorphic"
-                    size="sm"
-                    iconOnly
-                    whileHover={{ scale: 1.1, rotate: 180 }}
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </Button>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">{doctor.name}</h1>
+                <p className="text-white/50 text-sm mb-2">{doctor.title}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="info" size="xs">{doctor.specialty}</Badge>
+                  {doctor.premium && <Badge variant="warning" size="xs">PREMIUM</Badge>}
+                  <span className="flex items-center gap-1 text-white/30 text-xs"><MapPin className="w-3 h-3" />{doctor.location}</span>
                 </div>
               </div>
+            </div>
 
-              {/* Quick Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  className="text-center p-3 bg-white/5 rounded-xl"
-                >
-                  <Star className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">{doctor.rating}</p>
-                  <p className="text-xs text-white/60">Rating</p>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  className="text-center p-3 bg-white/5 rounded-xl"
-                >
-                  <Users className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">{doctor.reviewCount}</p>
-                  <p className="text-xs text-white/60">Reviews</p>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  className="text-center p-3 bg-white/5 rounded-xl"
-                >
-                  <Award className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">{doctor.experience}</p>
-                  <p className="text-xs text-white/60">Years Exp.</p>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  className="text-center p-3 bg-white/5 rounded-xl"
-                >
-                  <DollarSign className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">${doctor.price}</p>
-                  <p className="text-xs text-white/60">Per Visit</p>
-                </motion.div>
-              </div>
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              {[
+                { label: 'Rating', value: doctor.rating, icon: Star, color: 'text-amber-400', suffix: `/5` },
+                { label: 'Reviews', value: doctor.reviewCount, icon: Users, color: 'text-blue-400', suffix: '+' },
+                { label: 'Experience', value: doctor.experience, icon: Award, color: 'text-purple-400', suffix: ' yrs' },
+                { label: 'Price', value: `$${doctor.price}`, icon: DollarSign, color: 'text-emerald-400', suffix: '' },
+              ].map((stat, i) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={i} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] text-center">
+                    <Icon className={`w-5 h-5 mx-auto mb-1.5 ${stat.color}`} />
+                    <p className="text-lg font-bold text-white">{stat.value}<span className="text-sm font-normal text-white/40">{stat.suffix}</span></p>
+                    <p className="text-white/30 text-[10px]">{stat.label}</p>
+                  </div>
+                );
+              })}
+            </div>
 
-              {/* Contact Actions */}
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  variant="gradient"
-                  size="lg"
-                  leftIcon={Calendar}
-                  onClick={onBookAppointment}
-                  className="flex-1"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Book Appointment
-                </Button>
-                <Button
-                  variant="neon"
-                  size="lg"
-                  leftIcon={Phone}
-                  onClick={() => onContact?.('call')}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Call Now
-                </Button>
-                <Button
-                  variant="glassmorphic"
-                  size="lg"
-                  leftIcon={Video}
-                  onClick={() => onContact?.('video')}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Video Call
-                </Button>
-                <Button
-                  variant="glassmorphic"
-                  size="lg"
-                  leftIcon={MessageSquare}
-                  onClick={() => onContact?.('message')}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Message
-                </Button>
-              </div>
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-3">
+              <Button variant="gradient" size="sm" onClick={onBookAppointment} className="gap-2">
+                <Calendar className="w-4 h-4" /> Book Appointment
+              </Button>
+              <Button variant="glass" size="sm" onClick={() => onContact?.('call')} className="gap-2">
+                <Phone className="w-4 h-4" /> Call
+              </Button>
+              <Button variant="glass" size="sm" onClick={() => onContact?.('video')} className="gap-2">
+                <Video className="w-4 h-4" /> Video
+              </Button>
+              <Button variant="glass" size="sm" onClick={() => onContact?.('message')} className="gap-2">
+                <MessageSquare className="w-4 h-4" /> Message
+              </Button>
+              <Button variant="glass" size="sm" onClick={onShare} className="gap-2">
+                <Share2 className="w-4 h-4" /> Share
+              </Button>
             </div>
           </div>
 
-          {/* Quick Info */}
-          <div className="lg:w-80 space-y-4">
+          {/* RIGHT — Quick Info Cards */}
+          <div className="lg:w-72 space-y-4">
             {/* Availability */}
-            <GlassmorphicCard variant="glass">
-              <h3 className="text-lg font-bold text-white mb-3">Next Available</h3>
-              <p className="text-2xl font-black text-cyan-400 mb-2">{doctor.nextAvailable}</p>
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <h3 className="text-white font-semibold text-sm mb-3">Next Available</h3>
+              <p className="text-xl font-bold text-cyan-400 mb-2">{doctor.nextAvailable}</p>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-white/60">Available Slots</span>
-                <Badge variant="success" size="sm">
-                  {doctor.availableSlots} slots
-                </Badge>
+                <span className="text-white/40 text-xs">Available Slots</span>
+                <Badge variant={doctor.availableSlots > 0 ? 'success' : 'danger'} size="xs">{doctor.availableSlots} slots</Badge>
               </div>
-              <Button variant="glassmorphic" size="sm" fullWidth>
-                View Full Schedule
-              </Button>
-            </GlassmorphicCard>
+            </div>
 
             {/* Languages */}
-            <GlassmorphicCard variant="glass">
-              <h3 className="text-lg 
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <h3 className="text-white font-semibold text-sm mb-3">Languages</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {doctor.languages.map((lang) => (
+                  <span key={lang} className="px-2 py-0.5 rounded-md bg-white/[0.03] text-white/50 text-[10px] border border-white/[0.04]">{lang}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Hospital */}
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <h3 className="text-white font-semibold text-sm mb-3">Hospital</h3>
+              <p className="text-white/50 text-xs">{doctor.hospital}</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ============================================ */}
+      {/* TAB NAVIGATION */}
+      {/* ============================================ */}
+      <div className="flex items-center gap-1 bg-white/[0.02] rounded-xl p-1 w-fit">
+        {tabs.map(tab => {
+          const Icon = tab.icon;
+          return (
+            <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id ? 'bg-white/[0.08] text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}>
+              <Icon className="w-4 h-4" />{tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ============================================ */}
+      {/* TAB CONTENT */}
+      {/* ============================================ */}
+      <div className="bg-white/[0.015] rounded-2xl border border-white/[0.06] p-6">
+        
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-white font-semibold text-lg mb-3">About</h3>
+              <p className="text-white/50 text-sm leading-relaxed">
+                Dr. {doctor.name.split(' ').slice(-1)[0]} is a highly skilled {doctor.specialty.toLowerCase()} with over {doctor.experience} years of experience. 
+                Board-certified and dedicated to providing exceptional patient care through evidence-based medicine and compassionate approach.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold text-lg mb-3">Services</h3>
+              <div className="flex flex-wrap gap-2">
+                {doctor.services.map((service) => (
+                  <span key={service} className="px-3 py-1.5 rounded-lg bg-white/[0.03] text-white/50 text-xs border border-white/[0.04]">{service}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold text-lg mb-3">Achievements</h3>
+              <div className="space-y-2">
+                {doctor.achievements.map((achievement) => (
+                  <div key={achievement} className="flex items-center gap-2 text-white/40 text-sm">
+                    <Award className="w-4 h-4 text-amber-400 shrink-0" />{achievement}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'experience' && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-white font-semibold text-lg mb-3">Education</h3>
+              <div className="space-y-3">
+                {doctor.education.map((edu) => (
+                  <div key={edu} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02]">
+                    <BookOpen className="w-4 h-4 text-cyan-400 shrink-0" />
+                    <span className="text-white/60 text-sm">{edu}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold text-lg mb-3">Languages</h3>
+              <div className="flex flex-wrap gap-2">
+                {doctor.languages.map((lang) => (
+                  <span key={lang} className="px-3 py-1.5 rounded-lg bg-white/[0.03] text-white/50 text-xs border border-white/[0.04] flex items-center gap-1.5">
+                    <Globe className="w-3 h-3" />{lang}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'reviews' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-white font-semibold text-lg">Patient Reviews ({mockReviews.length})</h3>
+              <div className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+                <span className="text-white font-bold text-lg">{doctor.rating}</span>
+                <span className="text-white/30 text-sm">({doctor.reviewCount} reviews)</span>
+              </div>
+            </div>
+            {displayedReviews.map((review) => (
+              <div key={review.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                      {review.patient.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{review.patient.name}</p>
+                      <p className="text-white/25 text-[10px]">{review.date}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? 'text-amber-400 fill-amber-400' : 'text-white/10'}`} />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-white/50 text-sm">{review.comment}</p>
+                <div className="flex items-center gap-3 mt-3">
+                  <button type="button" className="flex items-center gap-1 text-white/30 text-xs hover:text-white/50 transition-colors">
+                    <ThumbsUp className="w-3 h-3" /> Helpful ({review.helpful})
+                  </button>
+                </div>
+              </div>
+            ))}
+            {mockReviews.length > 3 && (
+              <button type="button" onClick={() => setShowAllReviews(!showAllReviews)}
+                className="w-full py-2 text-white/40 text-xs hover:text-white/70 transition-colors">
+                {showAllReviews ? 'Show less' : `Show all ${mockReviews.length} reviews`}
+              </button>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'availability' && (
+          <div className="space-y-4">
+            <h3 className="text-white font-semibold text-lg mb-3">Availability</h3>
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-white/50 text-sm">Next Available</span>
+                <span className="text-cyan-400 font-bold">{doctor.nextAvailable}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-white/50 text-sm">Available Slots Today</span>
+                <Badge variant={doctor.availableSlots > 0 ? 'success' : 'danger'} size="xs">{doctor.availableSlots}</Badge>
+              </div>
+            </div>
+            <Button variant="gradient" size="sm" onClick={onBookAppointment} className="w-full gap-2">
+              <Calendar className="w-4 h-4" /> Book Appointment
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default DoctorProfile;
