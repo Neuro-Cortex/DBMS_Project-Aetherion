@@ -254,9 +254,10 @@ Unit Testing with Pytest
 Alembic Database Migration
 
 backend-python/
+
 │
 ├── app/
-│   ├── __init__.py
+     ├── __init__.py
 │   ├── main.py
 │   ├── config.py
 │   ├── database.py
