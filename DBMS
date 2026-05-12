@@ -1,0 +1,1313 @@
+-- ============================================
+-- SMART HOSPITAL MANAGEMENT SYSTEM
+-- Complete MySQL Database Schema (Fixed)
+-- Version: 1.0.2
+-- ============================================
+
+CREATE DATABASE IF NOT EXISTS smart_hospital
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+USE smart_hospital;
+
+
+-- ============================================
+-- TABLE 1: USERS
+-- ============================================
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    phone VARCHAR(20) NULL UNIQUE,
+    username VARCHAR(100) NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    date_of_birth DATE NULL,
+    gender ENUM('male','female','other') NULL,
+    blood_group ENUM('A+','A-','B+','B-','AB+','AB-','O+','O-') NULL,
+    profile_image VARCHAR(500) NULL,
+    nid_number VARCHAR(50) NULL UNIQUE,
+    address TEXT NULL,
+    city VARCHAR(100) NULL,
+    state VARCHAR(100) NULL,
+    country VARCHAR(100) DEFAULT 'Bangladesh',
+    postal_code VARCHAR(20) NULL,
+    latitude DECIMAL(10,8) NULL,
+    longitude DECIMAL(11,8) NULL,
+    role ENUM('admin','super_admin','doctor','patient','pharmacist','hospital_staff','lab_technician','nurse','receptionist','ambulance_driver') NOT NULL DEFAULT 'patient',
+    status ENUM('active','inactive','suspended','banned','pending_verification') NOT NULL DEFAULT 'pending_verification',
+    is_email_verified BOOLEAN DEFAULT FALSE,
+    is_phone_verified BOOLEAN DEFAULT FALSE,
+    is_2fa_enabled BOOLEAN DEFAULT FALSE,
+    failed_login_attempts INT DEFAULT 0,
+    locked_until TIMESTAMP NULL,
+    last_login_at TIMESTAMP NULL,
+    last_login_ip VARCHAR(45) NULL,
+    language VARCHAR(10) DEFAULT 'en',
+    timezone VARCHAR(50) DEFAULT 'Asia/Dhaka',
+    notification_preferences JSON NULL,
+    email_verified_at TIMESTAMP NULL,
+    phone_verified_at TIMESTAMP NULL,
+    remember_token VARCHAR(100) NULL,
+    password_reset_token VARCHAR(255) NULL,
+    password_reset_expires_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_users_role_status (role, status),
+    INDEX idx_users_name (first_name, last_name),
+    INDEX idx_users_blood_group (blood_group),
+    INDEX idx_users_city (city),
+    INDEX idx_users_location (latitude, longitude),
+    INDEX idx_users_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 2: SESSIONS
+-- ============================================
+CREATE TABLE IF NOT EXISTS sessions (
+    id VARCHAR(255) PRIMARY KEY,
+    user_id BIGINT UNSIGNED NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    payload TEXT NOT NULL,
+    last_activity INT NOT NULL,
+    INDEX idx_sessions_user (user_id),
+    INDEX idx_sessions_activity (last_activity),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 3: DOCTORS
+-- ============================================
+CREATE TABLE IF NOT EXISTS doctors (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL UNIQUE,
+    license_number VARCHAR(100) NOT NULL UNIQUE,
+    bmdc_registration VARCHAR(50) NULL UNIQUE,
+    specialization VARCHAR(255) NOT NULL,
+    sub_specializations JSON NULL,
+    qualifications JSON NULL,
+    experience_years INT DEFAULT 0,
+    about TEXT NULL,
+    languages_spoken JSON NULL,
+    consultation_fee DECIMAL(10,2) NOT NULL DEFAULT 500.00,
+    follow_up_fee DECIMAL(10,2) NULL,
+    currency VARCHAR(3) DEFAULT 'BDT',
+    max_patients_per_day INT DEFAULT 30,
+    appointment_duration_minutes INT DEFAULT 30,
+    available_days SET('saturday','sunday','monday','tuesday','wednesday','thursday','friday') NULL,
+    available_from TIME DEFAULT '09:00:00',
+    available_to TIME DEFAULT '17:00:00',
+    break_from TIME DEFAULT '13:00:00',
+    break_to TIME DEFAULT '14:00:00',
+    is_verified BOOLEAN DEFAULT FALSE,
+    is_available BOOLEAN DEFAULT TRUE,
+    is_featured BOOLEAN DEFAULT FALSE,
+    accepting_new_patients BOOLEAN DEFAULT TRUE,
+    is_online BOOLEAN DEFAULT FALSE,
+    offers_online_consultation BOOLEAN DEFAULT TRUE,
+    offers_home_visit BOOLEAN DEFAULT FALSE,
+    average_rating DECIMAL(3,2) DEFAULT 0.00,
+    total_reviews INT DEFAULT 0,
+    total_patients INT DEFAULT 0,
+    total_appointments INT DEFAULT 0,
+    bank_name VARCHAR(255) NULL,
+    bank_account_number VARCHAR(50) NULL,
+    bank_routing_number VARCHAR(50) NULL,
+    profile_photo VARCHAR(500) NULL,
+    license_image VARCHAR(500) NULL,
+    certificates JSON NULL,
+    website VARCHAR(255) NULL,
+    linkedin VARCHAR(255) NULL,
+    facebook VARCHAR(255) NULL,
+    slug VARCHAR(255) NULL UNIQUE,
+    verified_at TIMESTAMP NULL,
+    last_online_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_doctors_specialization (specialization),
+    INDEX idx_doctors_fee (consultation_fee),
+    INDEX idx_doctors_rating (average_rating),
+    INDEX idx_doctors_experience (experience_years),
+    INDEX idx_doctors_available (is_available),
+    INDEX idx_doctors_online (is_online),
+    INDEX idx_doctors_featured (is_featured, average_rating),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 4: DOCTOR_AVAILABILITY
+-- ============================================
+CREATE TABLE IF NOT EXISTS doctor_availability (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    doctor_id BIGINT UNSIGNED NOT NULL,
+    day_of_week ENUM('saturday','sunday','monday','tuesday','wednesday','thursday','friday') NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    slot_duration_minutes INT DEFAULT 30,
+    max_patients_per_slot INT DEFAULT 1,
+    is_available BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE INDEX idx_avail_unique (doctor_id, day_of_week, start_time, end_time),
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 5: DOCTOR_LEAVES
+-- ============================================
+CREATE TABLE IF NOT EXISTS doctor_leaves (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    doctor_id BIGINT UNSIGNED NOT NULL,
+    leave_date DATE NOT NULL,
+    start_time TIME NULL,
+    end_time TIME NULL,
+    reason VARCHAR(255) NULL,
+    leave_type ENUM('full_day','half_day','emergency') DEFAULT 'full_day',
+    status ENUM('pending','approved','rejected') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE INDEX idx_leave_unique (doctor_id, leave_date),
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 6: HOSPITALS
+-- ============================================
+CREATE TABLE IF NOT EXISTS hospitals (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    registration_number VARCHAR(100) NULL UNIQUE,
+    email VARCHAR(255) NULL,
+    phone VARCHAR(20) NULL,
+    emergency_phone VARCHAR(20) NULL,
+    ambulance_phone VARCHAR(20) NULL,
+    fax VARCHAR(20) NULL,
+    website VARCHAR(255) NULL,
+    address TEXT NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NULL,
+    country VARCHAR(100) DEFAULT 'Bangladesh',
+    postal_code VARCHAR(20) NULL,
+    latitude DECIMAL(10,8) NOT NULL,
+    longitude DECIMAL(11,8) NOT NULL,
+    hospital_type ENUM('government','private','clinic','diagnostic_center','specialized','teaching','military','ngo','corporate') NOT NULL,
+    category ENUM('primary','secondary','tertiary','super_specialty') DEFAULT 'secondary',
+    accreditation JSON NULL,
+    total_beds INT DEFAULT 0,
+    icu_beds INT DEFAULT 0,
+    nicu_beds INT DEFAULT 0,
+    emergency_beds INT DEFAULT 0,
+    operation_theaters INT DEFAULT 0,
+    icu_available INT DEFAULT 0,
+    general_beds_available INT DEFAULT 0,
+    emergency_beds_available INT DEFAULT 0,
+    has_emergency_services BOOLEAN DEFAULT TRUE,
+    has_ambulance_service BOOLEAN DEFAULT TRUE,
+    has_pharmacy BOOLEAN DEFAULT TRUE,
+    has_laboratory BOOLEAN DEFAULT TRUE,
+    has_radiology BOOLEAN DEFAULT TRUE,
+    has_blood_bank BOOLEAN DEFAULT TRUE,
+    has_icu BOOLEAN DEFAULT TRUE,
+    has_nicu BOOLEAN DEFAULT FALSE,
+    has_burn_unit BOOLEAN DEFAULT FALSE,
+    has_dialysis_unit BOOLEAN DEFAULT FALSE,
+    has_cath_lab BOOLEAN DEFAULT FALSE,
+    has_cancer_center BOOLEAN DEFAULT FALSE,
+    has_cafeteria BOOLEAN DEFAULT FALSE,
+    has_parking BOOLEAN DEFAULT FALSE,
+    has_wifi BOOLEAN DEFAULT FALSE,
+    has_atm BOOLEAN DEFAULT FALSE,
+    has_prayer_room BOOLEAN DEFAULT FALSE,
+    accepted_insurances JSON NULL,
+    payment_methods JSON NULL,
+    logo VARCHAR(500) NULL,
+    cover_image VARCHAR(500) NULL,
+    images JSON NULL,
+    opening_time TIME DEFAULT '00:00:00',
+    closing_time TIME DEFAULT '23:59:59',
+    is_24x7 BOOLEAN DEFAULT FALSE,
+    visiting_hours JSON NULL,
+    emergency_hours VARCHAR(100) DEFAULT '24/7',
+    average_rating DECIMAL(3,2) DEFAULT 0.00,
+    total_reviews INT DEFAULT 0,
+    total_doctors INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    is_verified BOOLEAN DEFAULT FALSE,
+    is_featured BOOLEAN DEFAULT FALSE,
+    admin_user_id BIGINT UNSIGNED NULL,
+    established_year YEAR NULL,
+    facebook VARCHAR(255) NULL,
+    youtube VARCHAR(255) NULL,
+    meta_title VARCHAR(255) NULL,
+    meta_description TEXT NULL,
+    verified_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_hosp_name (name),
+    INDEX idx_hosp_type (hospital_type, category),
+    INDEX idx_hosp_city (city, state),
+    INDEX idx_hosp_location (latitude, longitude),
+    INDEX idx_hosp_beds (total_beds, icu_beds, emergency_beds),
+    INDEX idx_hosp_emergency (has_emergency_services),
+    INDEX idx_hosp_rating (average_rating),
+    INDEX idx_hosp_featured (is_featured),
+    INDEX idx_hosp_active (is_active, is_verified),
+    FOREIGN KEY (admin_user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 7: HOSPITAL_DEPARTMENTS
+-- ============================================
+CREATE TABLE IF NOT EXISTS hospital_departments (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    hospital_id BIGINT UNSIGNED NOT NULL,
+    department_name VARCHAR(255) NOT NULL,
+    description TEXT NULL,
+    head_doctor_id BIGINT UNSIGNED NULL,
+    total_beds INT DEFAULT 0,
+    available_beds INT DEFAULT 0,
+    phone_extension VARCHAR(20) NULL,
+    floor_number VARCHAR(20) NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE INDEX idx_dept_unique (hospital_id, department_name),
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE CASCADE,
+    FOREIGN KEY (head_doctor_id) REFERENCES doctors(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 8: DOCTOR_HOSPITAL
+-- ============================================
+CREATE TABLE IF NOT EXISTS doctor_hospital (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    doctor_id BIGINT UNSIGNED NOT NULL,
+    hospital_id BIGINT UNSIGNED NOT NULL,
+    department_id BIGINT UNSIGNED NULL,
+    available_days SET('saturday','sunday','monday','tuesday','wednesday','thursday','friday') NULL,
+    available_from TIME NULL,
+    available_to TIME NULL,
+    consultation_fee DECIMAL(10,2) NULL,
+    room_number VARCHAR(50) NULL,
+    office_phone VARCHAR(20) NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    is_primary BOOLEAN DEFAULT FALSE,
+    joined_at DATE NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE INDEX idx_dh_unique (doctor_id, hospital_id),
+    INDEX idx_dh_doctor (doctor_id),
+    INDEX idx_dh_hospital (hospital_id),
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE CASCADE,
+    FOREIGN KEY (department_id) REFERENCES hospital_departments(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 9: PATIENTS
+-- ============================================
+CREATE TABLE IF NOT EXISTS patients (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL UNIQUE,
+    patient_id_number VARCHAR(50) NULL UNIQUE,
+    emergency_contact_name VARCHAR(255) NULL,
+    emergency_contact_phone VARCHAR(20) NULL,
+    emergency_contact_relation VARCHAR(100) NULL,
+    emergency_contact_email VARCHAR(255) NULL,
+    height_cm DECIMAL(5,2) NULL,
+    weight_kg DECIMAL(5,2) NULL,
+    bmi DECIMAL(5,2) NULL,
+    allergies JSON NULL,
+    chronic_diseases JSON NULL,
+    current_medications JSON NULL,
+    past_surgeries JSON NULL,
+    family_history JSON NULL,
+    medical_conditions TEXT NULL,
+    surgical_history TEXT NULL,
+    smoking_status ENUM('never','former','current','occasional') NULL,
+    alcohol_consumption ENUM('never','occasional','regular','former') NULL,
+    exercise_frequency ENUM('never','rarely','weekly','daily','athlete') NULL,
+    dietary_preference ENUM('vegetarian','non_vegetarian','vegan','keto','other') NULL,
+    insurance_provider VARCHAR(255) NULL,
+    insurance_policy_number VARCHAR(100) NULL,
+    insurance_expiry_date DATE NULL,
+    insurance_coverage_details JSON NULL,
+    occupation VARCHAR(255) NULL,
+    marital_status ENUM('single','married','divorced','widowed') NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    is_vip BOOLEAN DEFAULT FALSE,
+    last_visit_at TIMESTAMP NULL,
+    total_visits INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_patients_insurance (insurance_provider),
+    INDEX idx_patients_vip (is_vip),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 10: APPOINTMENTS
+-- ============================================
+CREATE TABLE IF NOT EXISTS appointments (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    appointment_number VARCHAR(50) NOT NULL UNIQUE,
+    serial_number INT NULL,
+    patient_id BIGINT UNSIGNED NOT NULL,
+    doctor_id BIGINT UNSIGNED NOT NULL,
+    hospital_id BIGINT UNSIGNED NULL,
+    department_id BIGINT UNSIGNED NULL,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    end_time TIME NULL,
+    duration_minutes INT DEFAULT 30,
+    appointment_type ENUM('in_person','online','home_visit','emergency','follow_up','lab_test','vaccination','consultation') NOT NULL DEFAULT 'in_person',
+    queue_number INT NULL,
+    queue_status ENUM('waiting','in_progress','completed','skipped') NULL,
+    status ENUM('pending','confirmed','checked_in','in_progress','completed','cancelled','no_show','rescheduled') NOT NULL DEFAULT 'pending',
+    patient_name VARCHAR(255) NOT NULL,
+    patient_phone VARCHAR(20) NOT NULL,
+    patient_email VARCHAR(255) NULL,
+    patient_age INT NULL,
+    patient_gender ENUM('male','female','other') NULL,
+    patient_blood_group ENUM('A+','A-','B+','B-','AB+','AB-','O+','O-') NULL,
+    symptoms JSON NULL,
+    reason_for_visit TEXT NULL,
+    is_emergency BOOLEAN DEFAULT FALSE,
+    previous_appointment_id BIGINT UNSIGNED NULL,
+    consultation_fee DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    service_charge DECIMAL(10,2) DEFAULT 0.00,
+    discount_amount DECIMAL(10,2) DEFAULT 0.00,
+    total_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    payment_status ENUM('pending','partial','paid','refunded','failed') DEFAULT 'pending',
+    payment_method ENUM('cash','card','mobile_banking','insurance','online','bkash','nagad') NULL,
+    payment_id VARCHAR(255) NULL,
+    payment_date TIMESTAMP NULL,
+    meeting_link VARCHAR(500) NULL,
+    meeting_platform ENUM('zoom','google_meet','microsoft_teams','custom') NULL,
+    meeting_id VARCHAR(100) NULL,
+    meeting_password VARCHAR(100) NULL,
+    doctor_notes TEXT NULL,
+    patient_notes TEXT NULL,
+    cancellation_reason TEXT NULL,
+    rescheduled_reason TEXT NULL,
+    patient_rating DECIMAL(3,2) NULL,
+    patient_feedback TEXT NULL,
+    rated_at TIMESTAMP NULL,
+    confirmed_at TIMESTAMP NULL,
+    checked_in_at TIMESTAMP NULL,
+    started_at TIMESTAMP NULL,
+    completed_at TIMESTAMP NULL,
+    cancelled_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_app_patient (patient_id, appointment_date),
+    INDEX idx_app_doctor (doctor_id, appointment_date),
+    INDEX idx_app_hospital (hospital_id, appointment_date),
+    INDEX idx_app_status (status, appointment_date),
+    INDEX idx_app_date (appointment_date, appointment_time),
+    INDEX idx_app_payment (payment_status),
+    INDEX idx_app_queue (serial_number, queue_status),
+    INDEX idx_app_type (appointment_type),
+    INDEX idx_app_emergency (is_emergency, status),
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE SET NULL,
+    FOREIGN KEY (department_id) REFERENCES hospital_departments(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 11: MEDICAL_RECORDS
+-- ============================================
+CREATE TABLE IF NOT EXISTS medical_records (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    record_number VARCHAR(50) NOT NULL UNIQUE,
+    patient_id BIGINT UNSIGNED NOT NULL,
+    doctor_id BIGINT UNSIGNED NULL,
+    appointment_id BIGINT UNSIGNED NULL,
+    hospital_id BIGINT UNSIGNED NULL,
+    record_type ENUM('consultation','lab_report','radiology','prescription','surgery','vaccination','allergy','diagnosis','emergency','follow_up','annual_checkup','other') NOT NULL,
+    blood_pressure_systolic INT NULL,
+    blood_pressure_diastolic INT NULL,
+    heart_rate INT NULL,
+    respiratory_rate INT NULL,
+    temperature_celsius DECIMAL(4,1) NULL,
+    oxygen_saturation DECIMAL(5,2) NULL,
+    blood_sugar DECIMAL(6,2) NULL,
+    vital_signs JSON NULL,
+    chief_complaint TEXT NULL,
+    diagnosis TEXT NULL,
+    differential_diagnosis TEXT NULL,
+    symptoms JSON NULL,
+    treatment_plan TEXT NULL,
+    doctor_notes TEXT NULL,
+    nurse_notes TEXT NULL,
+    physical_examination TEXT NULL,
+    systemic_examination JSON NULL,
+    lab_tests JSON NULL,
+    lab_results JSON NULL,
+    lab_report_url VARCHAR(500) NULL,
+    radiology_type ENUM('xray','mri','ct_scan','ultrasound','ecg','echo','mammogram','angiogram','other') NULL,
+    radiology_findings TEXT NULL,
+    radiology_images JSON NULL,
+    radiology_report_url VARCHAR(500) NULL,
+    attachments JSON NULL,
+    is_confidential BOOLEAN DEFAULT FALSE,
+    requires_follow_up BOOLEAN DEFAULT FALSE,
+    follow_up_date DATE NULL,
+    follow_up_instructions TEXT NULL,
+    icd10_codes JSON NULL,
+    record_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_rec_patient (patient_id, record_date),
+    INDEX idx_rec_doctor (doctor_id),
+    INDEX idx_rec_type (record_type),
+    INDEX idx_rec_date (record_date),
+    INDEX idx_rec_followup (requires_follow_up, follow_up_date),
+    INDEX idx_rec_appointment (appointment_id),
+    INDEX idx_rec_hospital (hospital_id),
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE SET NULL,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL,
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 12: PRESCRIPTIONS
+-- ============================================
+CREATE TABLE IF NOT EXISTS prescriptions (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    prescription_number VARCHAR(50) NOT NULL UNIQUE,
+    patient_id BIGINT UNSIGNED NOT NULL,
+    doctor_id BIGINT UNSIGNED NOT NULL,
+    appointment_id BIGINT UNSIGNED NULL,
+    medical_record_id BIGINT UNSIGNED NULL,
+    medicines JSON NOT NULL,
+    diagnosis TEXT NULL,
+    instructions TEXT NULL,
+    diet_advice TEXT NULL,
+    exercise_advice TEXT NULL,
+    prescribed_date DATE NOT NULL,
+    valid_until DATE NULL,
+    next_review_date DATE NULL,
+    status ENUM('active','completed','cancelled','expired','discontinued') DEFAULT 'active',
+    is_dispensed BOOLEAN DEFAULT FALSE,
+    dispensed_at TIMESTAMP NULL,
+    dispensed_by BIGINT UNSIGNED NULL,
+    digital_signature VARCHAR(500) NULL,
+    qr_code VARCHAR(500) NULL,
+    printed_at TIMESTAMP NULL,
+    print_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_pres_patient (patient_id, prescribed_date),
+    INDEX idx_pres_doctor (doctor_id, prescribed_date),
+    INDEX idx_pres_status (status),
+    INDEX idx_pres_dispensed (is_dispensed),
+    INDEX idx_pres_validity (valid_until),
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL,
+    FOREIGN KEY (medical_record_id) REFERENCES medical_records(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 13: PHARMACIES
+-- ============================================
+CREATE TABLE IF NOT EXISTS pharmacies (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    license_number VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(20) NULL,
+    alternate_phone VARCHAR(20) NULL,
+    email VARCHAR(255) NULL,
+    website VARCHAR(255) NULL,
+    address TEXT NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NULL,
+    postal_code VARCHAR(20) NULL,
+    latitude DECIMAL(10,8) NOT NULL,
+    longitude DECIMAL(11,8) NOT NULL,
+    opening_time TIME NOT NULL DEFAULT '08:00:00',
+    closing_time TIME NOT NULL DEFAULT '22:00:00',
+    is_24x7 BOOLEAN DEFAULT FALSE,
+    is_open_now BOOLEAN DEFAULT TRUE,
+    offers_delivery BOOLEAN DEFAULT FALSE,
+    delivery_radius_km DECIMAL(5,2) NULL,
+    minimum_order_amount DECIMAL(10,2) DEFAULT 0.00,
+    delivery_charge DECIMAL(10,2) DEFAULT 0.00,
+    accepts_prescriptions_online BOOLEAN DEFAULT FALSE,
+    offers_pharmacist_consultation BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
+    is_verified BOOLEAN DEFAULT FALSE,
+    is_featured BOOLEAN DEFAULT FALSE,
+    average_rating DECIMAL(3,2) DEFAULT 0.00,
+    total_reviews INT DEFAULT 0,
+    logo VARCHAR(500) NULL,
+    images JSON NULL,
+    pharmacist_name VARCHAR(255) NULL,
+    pharmacist_license VARCHAR(100) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_pharma_city (city),
+    INDEX idx_pharma_location (latitude, longitude),
+    INDEX idx_pharma_open (is_open_now, is_24x7),
+    INDEX idx_pharma_delivery (offers_delivery),
+    INDEX idx_pharma_rating (average_rating),
+    INDEX idx_pharma_verified (is_verified, is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 14: MEDICINES
+-- ============================================
+CREATE TABLE IF NOT EXISTS medicines (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    pharmacy_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    generic_name VARCHAR(255) NULL,
+    brand_name VARCHAR(255) NULL,
+    manufacturer VARCHAR(255) NULL,
+    category VARCHAR(255) NULL,
+    therapeutic_class VARCHAR(255) NULL,
+    drug_type ENUM('tablet','capsule','syrup','injection','cream','ointment','drops','inhaler','spray','gel','suppository','suspension','powder','other') NOT NULL,
+    strength VARCHAR(100) NULL,
+    dosage_form VARCHAR(100) NULL,
+    pack_size VARCHAR(100) NULL,
+    unit VARCHAR(50) DEFAULT 'piece',
+    stock_quantity INT DEFAULT 0,
+    min_stock_level INT DEFAULT 10,
+    max_stock_level INT DEFAULT 100,
+    reorder_point INT DEFAULT 20,
+    reorder_quantity INT DEFAULT 50,
+    purchase_price DECIMAL(10,2) NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    selling_price DECIMAL(10,2) NOT NULL,
+    mrp DECIMAL(10,2) NULL,
+    discount_percent DECIMAL(5,2) DEFAULT 0.00,
+    tax_percent DECIMAL(5,2) DEFAULT 0.00,
+    manufacture_date DATE NULL,
+    expiry_date DATE NOT NULL,
+    requires_prescription BOOLEAN DEFAULT TRUE,
+    is_controlled_substance BOOLEAN DEFAULT FALSE,
+    storage_conditions VARCHAR(255) NULL,
+    description TEXT NULL,
+    side_effects TEXT NULL,
+    contraindications TEXT NULL,
+    drug_interactions TEXT NULL,
+    is_available BOOLEAN DEFAULT TRUE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_med_pharmacy (pharmacy_id),
+    INDEX idx_med_name (name),
+    INDEX idx_med_generic (generic_name),
+    INDEX idx_med_category (category),
+    INDEX idx_med_stock (stock_quantity, is_available),
+    INDEX idx_med_expiry (expiry_date),
+    INDEX idx_med_prescription (requires_prescription),
+    INDEX idx_med_price (selling_price),
+    INDEX idx_med_brand (brand_name),
+    INDEX idx_med_manufacturer (manufacturer),
+    FOREIGN KEY (pharmacy_id) REFERENCES pharmacies(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 15: EMERGENCY_CASES
+-- ============================================
+CREATE TABLE IF NOT EXISTS emergency_cases (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    emergency_number VARCHAR(50) NOT NULL UNIQUE,
+    patient_id BIGINT UNSIGNED NULL,
+    patient_name VARCHAR(255) NOT NULL,
+    patient_phone VARCHAR(20) NOT NULL,
+    patient_age INT NULL,
+    patient_gender ENUM('male','female','other') NULL,
+    patient_blood_group ENUM('A+','A-','B+','B-','AB+','AB-','O+','O-') NULL,
+    emergency_type ENUM('accident','heart_attack','stroke','breathing_problem','severe_bleeding','burn','fracture','poisoning','pregnancy','allergic_reaction','covid19','other') NOT NULL,
+    severity ENUM('critical','high','medium','low','stable') NOT NULL DEFAULT 'medium',
+    description TEXT NOT NULL,
+    location TEXT NOT NULL,
+    latitude DECIMAL(10,8) NULL,
+    longitude DECIMAL(11,8) NULL,
+    assigned_hospital_id BIGINT UNSIGNED NULL,
+    assigned_doctor_id BIGINT UNSIGNED NULL,
+    ambulance_type ENUM('basic','advanced','icu','neonatal') NULL,
+    ambulance_id BIGINT UNSIGNED NULL,
+    ambulance_arrival_time TIMESTAMP NULL,
+    estimated_arrival_minutes INT NULL,
+    status ENUM('pending','dispatched','en_route','arrived','in_treatment','resolved','transferred','deceased','cancelled') NOT NULL DEFAULT 'pending',
+    blood_pressure VARCHAR(20) NULL,
+    heart_rate INT NULL,
+    temperature_celsius DECIMAL(4,1) NULL,
+    oxygen_saturation DECIMAL(5,2) NULL,
+    consciousness_level ENUM('conscious','semi_conscious','unconscious') NULL,
+    reported_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dispatched_at TIMESTAMP NULL,
+    arrived_at TIMESTAMP NULL,
+    resolved_at TIMESTAMP NULL,
+    outcome TEXT NULL,
+    follow_up_needed BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_emerg_patient (patient_id),
+    INDEX idx_emerg_hospital (assigned_hospital_id),
+    INDEX idx_emerg_status (status, severity),
+    INDEX idx_emerg_type (emergency_type),
+    INDEX idx_emerg_location (latitude, longitude),
+    INDEX idx_emerg_reported (reported_at),
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE SET NULL,
+    FOREIGN KEY (assigned_hospital_id) REFERENCES hospitals(id) ON DELETE SET NULL,
+    FOREIGN KEY (assigned_doctor_id) REFERENCES doctors(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 16: AMBULANCES
+-- ============================================
+CREATE TABLE IF NOT EXISTS ambulances (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    hospital_id BIGINT UNSIGNED NULL,
+    vehicle_number VARCHAR(50) NOT NULL UNIQUE,
+    vehicle_type ENUM('basic','advanced','icu','neonatal','mortuary') NOT NULL,
+    model VARCHAR(100) NULL,
+    man_year YEAR NULL,
+    has_oxygen BOOLEAN DEFAULT TRUE,
+    has_ventilator BOOLEAN DEFAULT FALSE,
+    has_defibrillator BOOLEAN DEFAULT FALSE,
+    has_suction BOOLEAN DEFAULT TRUE,
+    has_stretcher BOOLEAN DEFAULT TRUE,
+    has_wheelchair BOOLEAN DEFAULT TRUE,
+    equipment_list JSON NULL,
+    driver_name VARCHAR(255) NULL,
+    driver_phone VARCHAR(20) NULL,
+    paramedic_name VARCHAR(255) NULL,
+    paramedic_phone VARCHAR(20) NULL,
+    current_latitude DECIMAL(10,8) NULL,
+    current_longitude DECIMAL(11,8) NULL,
+    status ENUM('available','on_call','en_route','at_scene','transporting','maintenance','offline') DEFAULT 'available',
+    is_active BOOLEAN DEFAULT TRUE,
+    contact_number VARCHAR(20) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_amb_hospital (hospital_id),
+    INDEX idx_amb_status (status),
+    INDEX idx_amb_type (vehicle_type),
+    INDEX idx_amb_location (current_latitude, current_longitude),
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 17: BLOOD_DONORS
+-- ============================================
+CREATE TABLE IF NOT EXISTS blood_donors (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NULL UNIQUE,
+    donor_name VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(255) NULL,
+    date_of_birth DATE NULL,
+    gender ENUM('male','female','other') NULL,
+    blood_group ENUM('A+','A-','B+','B-','AB+','AB-','O+','O-') NOT NULL,
+    address TEXT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NULL,
+    latitude DECIMAL(10,8) NULL,
+    longitude DECIMAL(11,8) NULL,
+    weight_kg DECIMAL(5,2) NULL,
+    has_disease BOOLEAN DEFAULT FALSE,
+    disease_details TEXT NULL,
+    is_on_medication BOOLEAN DEFAULT FALSE,
+    medication_details TEXT NULL,
+    last_donation_date DATE NULL,
+    total_donations INT DEFAULT 0,
+    next_eligible_date DATE NULL,
+    is_available BOOLEAN DEFAULT TRUE,
+    is_verified BOOLEAN DEFAULT FALSE,
+    is_emergency_donor BOOLEAN DEFAULT FALSE,
+    status ENUM('active','inactive','temporary_unavailable','permanent_unavailable') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_donor_blood (blood_group, is_available),
+    INDEX idx_donor_city (city),
+    INDEX idx_donor_location (latitude, longitude),
+    INDEX idx_donor_emergency (is_emergency_donor),
+    INDEX idx_donor_eligible (next_eligible_date),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 18: BLOOD_REQUESTS
+-- ============================================
+CREATE TABLE IF NOT EXISTS blood_requests (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    request_number VARCHAR(50) NOT NULL UNIQUE,
+    requester_name VARCHAR(255) NOT NULL,
+    requester_phone VARCHAR(20) NOT NULL,
+    requester_email VARCHAR(255) NULL,
+    hospital_id BIGINT UNSIGNED NULL,
+    blood_group ENUM('A+','A-','B+','B-','AB+','AB-','O+','O-') NOT NULL,
+    units_needed INT NOT NULL DEFAULT 1,
+    units_fulfilled INT DEFAULT 0,
+    required_by_date DATE NOT NULL,
+    patient_name VARCHAR(255) NULL,
+    patient_age INT NULL,
+    patient_condition TEXT NULL,
+    urgency ENUM('critical','urgent','normal') DEFAULT 'normal',
+    status ENUM('pending','fulfilled','partially_fulfilled','cancelled','expired') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_blood_req_grp (blood_group, status),
+    INDEX idx_blood_req_urgency (urgency, status),
+    INDEX idx_blood_req_date (required_by_date),
+    INDEX idx_blood_req_hospital (hospital_id),
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 19: BLOOD_DONATIONS
+-- ============================================
+CREATE TABLE IF NOT EXISTS blood_donations (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    donor_id BIGINT UNSIGNED NOT NULL,
+    blood_request_id BIGINT UNSIGNED NULL,
+    hospital_id BIGINT UNSIGNED NULL,
+    donation_date DATE NOT NULL,
+    units_donated INT DEFAULT 1,
+    donation_type ENUM('voluntary','replacement','directed','emergency') DEFAULT 'voluntary',
+    hemoglobin_level DECIMAL(4,2) NULL,
+    blood_pressure VARCHAR(20) NULL,
+    pulse INT NULL,
+    temperature_celsius DECIMAL(4,1) NULL,
+    is_accepted BOOLEAN DEFAULT TRUE,
+    rejection_reason TEXT NULL,
+    collected_by VARCHAR(255) NULL,
+    collection_method VARCHAR(100) NULL,
+    bag_number VARCHAR(50) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_donation_donor (donor_id, donation_date),
+    INDEX idx_donation_hospital (hospital_id),
+    INDEX idx_donation_request (blood_request_id),
+    FOREIGN KEY (donor_id) REFERENCES blood_donors(id) ON DELETE CASCADE,
+    FOREIGN KEY (blood_request_id) REFERENCES blood_requests(id) ON DELETE SET NULL,
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 20: WOMEN_HEALTH
+-- ============================================
+CREATE TABLE IF NOT EXISTS women_health (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    patient_id BIGINT UNSIGNED NOT NULL UNIQUE,
+    last_menstrual_period DATE NULL,
+    menstrual_cycle_length INT NULL,
+    menstrual_flow ENUM('light','medium','heavy') NULL,
+    menstrual_regularity ENUM('regular','irregular') NULL,
+    menstrual_problems JSON NULL,
+    is_pregnant BOOLEAN DEFAULT FALSE,
+    pregnancy_weeks INT NULL,
+    expected_delivery_date DATE NULL,
+    pregnancy_type ENUM('single','twins','triplets','multiple') NULL DEFAULT 'single',
+    pregnancy_status ENUM('planning','pregnant','postpartum','not_applicable') DEFAULT 'not_applicable',
+    total_pregnancies INT DEFAULT 0,
+    live_births INT DEFAULT 0,
+    miscarriages INT DEFAULT 0,
+    abortions INT DEFAULT 0,
+    c_sections INT DEFAULT 0,
+    last_delivery_date DATE NULL,
+    last_delivery_type ENUM('normal','c_section','assisted') NULL,
+    gynecological_conditions JSON NULL,
+    pap_smear_last_date DATE NULL,
+    mammogram_last_date DATE NULL,
+    contraception_method ENUM('none','pill','iud','implant','injection','condom','sterilization','other') NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_women_pregnant (is_pregnant, pregnancy_weeks),
+    INDEX idx_women_edd (expected_delivery_date),
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 21: PREGNANCY_TRACKER
+-- ============================================
+CREATE TABLE IF NOT EXISTS pregnancy_tracker (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    women_health_id BIGINT UNSIGNED NOT NULL,
+    week_number INT NOT NULL,
+    weight_kg DECIMAL(5,2) NULL,
+    blood_pressure VARCHAR(20) NULL,
+    fundal_height_cm DECIMAL(5,2) NULL,
+    fetal_heart_rate INT NULL,
+    fetal_movement ENUM('normal','reduced','excessive','none') NULL,
+    symptoms JSON NULL,
+    mood ENUM('excellent','good','normal','anxious','depressed') NULL,
+    checkup_date DATE NULL,
+    doctor_id BIGINT UNSIGNED NULL,
+    ultrasound_done BOOLEAN DEFAULT FALSE,
+    ultrasound_findings TEXT NULL,
+    ultrasound_images JSON NULL,
+    blood_tests JSON NULL,
+    urine_tests JSON NULL,
+    has_complications BOOLEAN DEFAULT FALSE,
+    complications_details TEXT NULL,
+    prescribed_medications JSON NULL,
+    doctor_notes TEXT NULL,
+    patient_notes TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE INDEX idx_preg_week (women_health_id, week_number),
+    INDEX idx_preg_week_num (week_number),
+    INDEX idx_preg_checkup (checkup_date),
+    FOREIGN KEY (women_health_id) REFERENCES women_health(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 22: VACCINATIONS
+-- ============================================
+CREATE TABLE IF NOT EXISTS vaccinations (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    patient_id BIGINT UNSIGNED NOT NULL,
+    vaccine_name VARCHAR(255) NOT NULL,
+    vaccine_type VARCHAR(100) NULL,
+    dose_number INT DEFAULT 1,
+    total_doses INT NULL,
+    administered_date DATE NOT NULL,
+    next_due_date DATE NULL,
+    administered_by_doctor_id BIGINT UNSIGNED NULL,
+    administered_by_name VARCHAR(255) NULL,
+    hospital_id BIGINT UNSIGNED NULL,
+    batch_number VARCHAR(100) NULL,
+    manufacturer VARCHAR(255) NULL,
+    injection_site VARCHAR(100) NULL,
+    route_of_administration VARCHAR(100) NULL,
+    had_reaction BOOLEAN DEFAULT FALSE,
+    reaction_details TEXT NULL,
+    status ENUM('scheduled','completed','missed','cancelled') DEFAULT 'completed',
+    certificate_number VARCHAR(100) NULL,
+    certificate_url VARCHAR(500) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_vacc_patient (patient_id),
+    INDEX idx_vacc_dates (administered_date, next_due_date),
+    INDEX idx_vacc_name (vaccine_name),
+    INDEX idx_vacc_status (status),
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (administered_by_doctor_id) REFERENCES doctors(id) ON DELETE SET NULL,
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 23: INVOICES
+-- ============================================
+CREATE TABLE IF NOT EXISTS invoices (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    invoice_number VARCHAR(50) NOT NULL UNIQUE,
+    patient_id BIGINT UNSIGNED NOT NULL,
+    appointment_id BIGINT UNSIGNED NULL,
+    hospital_id BIGINT UNSIGNED NULL,
+    invoice_date DATE NOT NULL,
+    due_date DATE NULL,
+    subtotal DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    discount_amount DECIMAL(10,2) DEFAULT 0.00,
+    discount_percent DECIMAL(5,2) DEFAULT 0.00,
+    tax_amount DECIMAL(10,2) DEFAULT 0.00,
+    tax_percent DECIMAL(5,2) DEFAULT 0.00,
+    total_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    paid_amount DECIMAL(10,2) DEFAULT 0.00,
+    due_amount DECIMAL(10,2) DEFAULT 0.00,
+    invoice_items JSON NOT NULL,
+    payment_status ENUM('pending','partial','paid','overdue','cancelled','refunded') DEFAULT 'pending',
+    payment_method ENUM('cash','card','bkash','nagad','bank_transfer','insurance','online') NULL,
+    notes TEXT NULL,
+    terms_conditions TEXT NULL,
+    status ENUM('draft','sent','viewed','paid','cancelled','refunded') DEFAULT 'draft',
+    paid_at TIMESTAMP NULL,
+    cancelled_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_inv_patient (patient_id, invoice_date),
+    INDEX idx_inv_status (payment_status, status),
+    INDEX idx_inv_date (invoice_date, due_date),
+    INDEX idx_inv_appointment (appointment_id),
+    INDEX idx_inv_hospital (hospital_id),
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL,
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 24: PAYMENTS
+-- ============================================
+CREATE TABLE IF NOT EXISTS payments (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    payment_number VARCHAR(50) NOT NULL UNIQUE,
+    transaction_id VARCHAR(255) NULL UNIQUE,
+    invoice_id BIGINT UNSIGNED NOT NULL,
+    patient_id BIGINT UNSIGNED NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    payment_method ENUM('cash','credit_card','debit_card','bkash','nagad','rocket','bank_transfer','insurance','online_gateway') NOT NULL,
+    payment_gateway VARCHAR(100) NULL,
+    status ENUM('pending','processing','completed','failed','refunded','cancelled') DEFAULT 'pending',
+    failure_reason TEXT NULL,
+    card_last_four VARCHAR(4) NULL,
+    card_type VARCHAR(50) NULL,
+    bank_name VARCHAR(255) NULL,
+    mobile_number VARCHAR(20) NULL,
+    payment_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    refunded_at TIMESTAMP NULL,
+    gateway_response JSON NULL,
+    notes TEXT NULL,
+    received_by BIGINT UNSIGNED NULL,
+    ip_address VARCHAR(45) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_pay_invoice (invoice_id),
+    INDEX idx_pay_patient (patient_id),
+    INDEX idx_pay_status (status),
+    INDEX idx_pay_method (payment_method),
+    INDEX idx_pay_date (payment_date),
+    FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 25: REVIEWS
+-- ============================================
+CREATE TABLE IF NOT EXISTS reviews (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    patient_id BIGINT UNSIGNED NOT NULL,
+    appointment_id BIGINT UNSIGNED NULL,
+    reviewable_type ENUM('doctor','hospital','pharmacy','medicine') NOT NULL,
+    reviewable_id BIGINT UNSIGNED NOT NULL,
+    rating DECIMAL(3,2) NOT NULL,
+    title VARCHAR(255) NULL,
+    review_text TEXT NULL,
+    bedside_manner INT NULL,
+    waiting_time INT NULL,
+    staff_behavior INT NULL,
+    cleanliness INT NULL,
+    value_for_money INT NULL,
+    is_verified BOOLEAN DEFAULT FALSE,
+    is_recommended BOOLEAN DEFAULT TRUE,
+    status ENUM('pending','approved','rejected','flagged') DEFAULT 'pending',
+    response_text TEXT NULL,
+    responded_by BIGINT UNSIGNED NULL,
+    responded_at TIMESTAMP NULL,
+    helpful_count INT DEFAULT 0,
+    not_helpful_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    UNIQUE INDEX idx_rev_unique (patient_id, reviewable_type, reviewable_id),
+    INDEX idx_rev_entity (reviewable_type, reviewable_id),
+    INDEX idx_rev_patient (patient_id),
+    INDEX idx_rev_rating (rating),
+    INDEX idx_rev_status (status),
+    INDEX idx_rev_appointment (appointment_id),
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 26: NOTIFICATIONS
+-- ============================================
+CREATE TABLE IF NOT EXISTS notifications (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    data JSON NULL,
+    sent_via_email BOOLEAN DEFAULT FALSE,
+    sent_via_sms BOOLEAN DEFAULT FALSE,
+    sent_via_push BOOLEAN DEFAULT FALSE,
+    is_read BOOLEAN DEFAULT FALSE,
+    read_at TIMESTAMP NULL,
+    is_actioned BOOLEAN DEFAULT FALSE,
+    actioned_at TIMESTAMP NULL,
+    action_url VARCHAR(500) NULL,
+    action_text VARCHAR(100) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_notif_user (user_id, is_read),
+    INDEX idx_notif_type (type),
+    INDEX idx_notif_created (created_at),
+    INDEX idx_notif_read (is_read, read_at),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 27: AI_CHAT_LOGS
+-- ============================================
+CREATE TABLE IF NOT EXISTS ai_chat_logs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NULL,
+    session_id VARCHAR(255) NOT NULL,
+    chat_type ENUM('symptom_checker','pregnancy_guide','baby_care','medicine_info','general_health','emergency_guide') NOT NULL,
+    user_message TEXT NOT NULL,
+    ai_response TEXT NOT NULL,
+    intent VARCHAR(100) NULL,
+    confidence DECIMAL(5,4) NULL,
+    entities JSON NULL,
+    tokens_used INT NULL,
+    response_time_ms INT NULL,
+    is_helpful BOOLEAN NULL,
+    user_feedback TEXT NULL,
+    was_escalated BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_ai_user (user_id, created_at),
+    INDEX idx_ai_session (session_id),
+    INDEX idx_ai_type (chat_type),
+    INDEX idx_ai_created (created_at),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 28: AUDIT_LOGS
+-- ============================================
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NULL,
+    user_type VARCHAR(50) NULL,
+    user_name VARCHAR(255) NULL,
+    action VARCHAR(100) NOT NULL,
+    module VARCHAR(100) NOT NULL,
+    description TEXT NULL,
+    target_type VARCHAR(100) NULL,
+    target_id BIGINT UNSIGNED NULL,
+    old_values JSON NULL,
+    new_values JSON NULL,
+    changes JSON NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    request_method VARCHAR(10) NULL,
+    request_url TEXT NULL,
+    status ENUM('success','failed','error') DEFAULT 'success',
+    error_message TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_audit_user (user_id, created_at),
+    INDEX idx_audit_action (action, module),
+    INDEX idx_audit_target (target_type, target_id),
+    INDEX idx_audit_created (created_at),
+    INDEX idx_audit_ip (ip_address),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 29: SETTINGS
+-- ============================================
+CREATE TABLE IF NOT EXISTS settings (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    setting_key VARCHAR(255) NOT NULL UNIQUE,
+    setting_value TEXT NULL,
+    setting_type ENUM('string','integer','boolean','json','array') DEFAULT 'string',
+    setting_group VARCHAR(100) DEFAULT 'general',
+    description TEXT NULL,
+    is_public BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_set_group (setting_group)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 30: ACTIVITY_LOGS
+-- ============================================
+CREATE TABLE IF NOT EXISTS activity_logs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    activity_type VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    metadata JSON NULL,
+    ip_address VARCHAR(45) NULL,
+    device_info VARCHAR(255) NULL,
+    location_info VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_act_user (user_id, created_at),
+    INDEX idx_act_type (activity_type),
+    INDEX idx_act_created (created_at),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 31: FILES
+-- ============================================
+CREATE TABLE IF NOT EXISTS files (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    filename VARCHAR(255) NOT NULL,
+    original_filename VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    file_url VARCHAR(500) NULL,
+    file_size_bytes BIGINT NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    extension VARCHAR(20) NULL,
+    uploaded_by BIGINT UNSIGNED NULL,
+    related_type VARCHAR(100) NULL,
+    related_id BIGINT UNSIGNED NULL,
+    title VARCHAR(255) NULL,
+    description TEXT NULL,
+    tags JSON NULL,
+    is_public BOOLEAN DEFAULT FALSE,
+    storage_disk ENUM('local','s3','cloud') DEFAULT 'local',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_files_related (related_type, related_id),
+    INDEX idx_files_uploaded_by (uploaded_by),
+    INDEX idx_files_type (mime_type),
+    INDEX idx_files_public (is_public),
+    FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 32: CONTACTS
+-- ============================================
+CREATE TABLE IF NOT EXISTS contacts (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NULL,
+    subject VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    contact_type ENUM('general','feedback','complaint','suggestion','partnership','other') DEFAULT 'general',
+    status ENUM('unread','read','replied','resolved','closed') DEFAULT 'unread',
+    priority ENUM('low','medium','high','urgent') DEFAULT 'medium',
+    assigned_to BIGINT UNSIGNED NULL,
+    replied_by BIGINT UNSIGNED NULL,
+    reply_text TEXT NULL,
+    replied_at TIMESTAMP NULL,
+    ip_address VARCHAR(45) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_contact_status (status),
+    INDEX idx_contact_type (contact_type),
+    INDEX idx_contact_priority (priority),
+    INDEX idx_contact_created (created_at),
+    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (replied_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 33: FAQS
+-- ============================================
+CREATE TABLE IF NOT EXISTS faqs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    category VARCHAR(100) NOT NULL,
+    question TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    sort_order INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    is_featured BOOLEAN DEFAULT FALSE,
+    created_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_faq_category (category),
+    INDEX idx_faq_active (is_active, is_featured),
+    INDEX idx_faq_sort (sort_order),
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- TABLE 34: BLOG_POSTS
+-- ============================================
+CREATE TABLE IF NOT EXISTS blog_posts (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    excerpt TEXT NULL,
+    content LONGTEXT NOT NULL,
+    category VARCHAR(100) NULL,
+    tags JSON NULL,
+    featured_image VARCHAR(500) NULL,
+    author_id BIGINT UNSIGNED NULL,
+    status ENUM('draft','published','archived') DEFAULT 'draft',
+    is_featured BOOLEAN DEFAULT FALSE,
+    view_count INT DEFAULT 0,
+    like_count INT DEFAULT 0,
+    share_count INT DEFAULT 0,
+    meta_title VARCHAR(255) NULL,
+    meta_description TEXT NULL,
+    meta_keywords VARCHAR(500) NULL,
+    published_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    INDEX idx_blog_status (status, published_at),
+    INDEX idx_blog_category (category),
+    INDEX idx_blog_featured (is_featured),
+    INDEX idx_blog_author (author_id),
+    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================
+-- INSERT DEFAULT DATA
+-- ============================================
+INSERT INTO users (uuid, email, phone, username, password_hash, first_name, last_name, role, status, is_email_verified, is_phone_verified) VALUES
+(UUID(), 'admin@smarthospital.com', '+8801700000001', 'admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'System', 'Admin', 'super_admin', 'active', TRUE, TRUE);
+
+INSERT INTO settings (setting_key, setting_value, setting_type, setting_group, description) VALUES
+('hospital_name', 'Smart Hospital', 'string', 'general', 'Hospital name'),
+('hospital_email', 'info@smarthospital.com', 'string', 'general', 'Hospital email'),
+('hospital_phone', '+8801700000000', 'string', 'general', 'Hospital phone'),
+('appointment_booking_days', '7', 'integer', 'appointment', 'Days in advance'),
+('max_appointments_per_day', '100', 'integer', 'appointment', 'Max per day'),
+('consultation_fee_default', '500', 'integer', 'doctor', 'Default fee'),
+('emergency_hotline', '999', 'string', 'emergency', 'Hotline'),
+('enable_online_payment', 'true', 'boolean', 'payment', 'Online payment'),
+('enable_ai_assistant', 'true', 'boolean', 'ai', 'AI assistant');
+
+
+-- ============================================
+-- DATABASE CREATED SUCCESSFULLY
+-- ============================================
+SELECT '✅ Smart Hospital Database Created Successfully! 34 Tables Created.' AS message;
