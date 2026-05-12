@@ -424,7 +424,84 @@ smart-hospital-backend/
 ├── .env.production
 ├── .gitignore
 ├── Makefile
-└── README.md```
+└── README.md
+
+
+smart-hospital-database/
+├── config/
+│   ├── database.php                 # MongoDB connection config
+│   ├── mongodb.php                  # MongoDB client settings
+│   └── collections.php             # Collections configuration
+│
+├── src/
+│   ├── Core/
+│   │   ├── MongoDBManager.php       # Main MongoDB manager
+│   │   ├── MongoQueryBuilder.php    # Advanced query builder
+│   │   ├── Collection.php           # Collection base class
+│   │   ├── MongoMigration.php       # Migration system
+│   │   └── MongoGridFS.php          # File storage (GridFS)
+│   │
+│   ├── Models/
+│   │   ├── BaseModel.php            # Base MongoDB model
+│   │   ├── User.php
+│   │   ├── Doctor.php
+│   │   ├── Patient.php
+│   │   ├── Hospital.php
+│   │   ├── Appointment.php
+│   │   ├── Pharmacy.php
+│   │   ├── Emergency.php
+│   │   ├── BloodDonor.php
+│   │   ├── MedicalRecord.php
+│   │   ├── Prescription.php
+│   │   ├── Invoice.php
+│   │   └── AuditLog.php
+│   │
+│   ├── Migrations/
+│   │   ├── MigrationManager.php
+│   │   ├── CreateUsersCollection.php
+│   │   ├── CreateDoctorsCollection.php
+│   │   ├── CreatePatientsCollection.php
+│   │   ├── CreateHospitalsCollection.php
+│   │   ├── CreateAppointmentsCollection.php
+│   │   ├── CreateIndexes.php
+│   │   └── CreateRelations.php
+│   │
+│   ├── Seeds/
+│   │   ├── DatabaseSeeder.php
+│   │   ├── UsersSeeder.php
+│   │   ├── DoctorsSeeder.php
+│   │   ├── HospitalsSeeder.php
+│   │   └── SampleDataSeeder.php
+│   │
+│   ├── Validators/
+│   │   ├── SchemaValidator.php      # JSON Schema validation
+│   │   └── Rules.php
+│   │
+│   └── Utils/
+│       ├── AggregationPipeline.php
+│       ├── BackupManager.php
+│       └── IndexManager.php
+│
+├── public/
+│   └── admin/
+│       ├── index.php                # Database admin panel
+│       ├── collections.php          # View collections
+│       ├── queries.php              # Run queries
+│       └── api/
+│           └── database_api.php     # REST API for DB operations
+│
+├── composer.json
+├── .env
+└── README.md
+
+
+
+
+
+
+
+
+```
 
 Tech Stack
 Backend Framework: FastAPI
