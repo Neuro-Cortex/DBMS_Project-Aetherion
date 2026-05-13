@@ -54,143 +54,6 @@ This project focuses on developing a robust Database Management System using MyS
 ```
 
 
-
-##  Project Structure
-
-```
-smart-hospital-system/
-├── public/
-│   ├── favicon.ico
-│   ├── logo.svg
-│   └── manifest.json
-├── src/
-│   ├── components/
-│   │   ├── ui/                    # Reusable UI components
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── Modal.tsx
-│   │   │   ├── Badge.tsx
-│   │   │   ├── Input.tsx
-│   │   │   ├── Select.tsx
-│   │   │   ├── Table.tsx
-│   │   │   ├── Tabs.tsx
-│   │   │   ├── Avatar.tsx
-│   │   │   ├── Dropdown.tsx
-│   │   │   └── Loader.tsx
-│   │   ├── layout/
-│   │   │   ├── Navbar.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   ├── Footer.tsx
-│   │   │   └── DashboardLayout.tsx
-│   │   ├── common/
-│   │   │   ├── SearchBar.tsx
-│   │   │   ├── NotificationBell.tsx
-│   │   │   ├── UserAvatar.tsx
-│   │   │   └── BreadCrumb.tsx
-│   │   ├── dashboard/
-│   │   │   ├── StatCard.tsx
-│   │   │   ├── ActivityChart.tsx
-│   │   │   ├── RecentAppointments.tsx
-│   │   │   └── ResourceStatus.tsx
-│   │   ├── doctor/
-│   │   │   ├── DoctorCard.tsx
-│   │   │   ├── DoctorProfile.tsx
-│   │   │   ├── DoctorSchedule.tsx
-│   │   │   └── DoctorRanking.tsx
-│   │   ├── patient/
-│   │   │   ├── PatientProfile.tsx
-│   │   │   ├── MedicalHistory.tsx
-│   │   │   ├── MedicineTracker.tsx
-│   │   │   └── VaccinationTracker.tsx
-│   │   ├── hospital/
-│   │   │   ├── HospitalCard.tsx
-│   │   │   ├── BedAvailability.tsx
-│   │   │   ├── ICUTracker.tsx
-│   │   │   └── EmergencyServices.tsx
-│   │   ├── emergency/
-│   │   │   ├── BloodDonorCard.tsx
-│   │   │   ├── AmbulanceTracker.tsx
-│   │   │   ├── OxygenLocator.tsx
-│   │   │   └── EmergencyRequest.tsx
-│   │   ├── appointment/
-│   │   │   ├── BookingForm.tsx
-│   │   │   ├── AppointmentCalendar.tsx
-│   │   │   └── AppointmentList.tsx
-│   │   ├── pharmacy/
-│   │   │   ├── MedicineSearch.tsx
-│   │   │   ├── PharmacyCard.tsx
-│   │   │   └── StockIndicator.tsx
-│   │   ├── ai-assistant/
-│   │   │   ├── ChatBot.tsx
-│   │   │   ├── SymptomChecker.tsx
-│   │   │   ├── PregnancyGuide.tsx
-│   │   │   └── BabyCareAdvice.tsx
-│   │   └── women/
-│   │       ├── PregnancyTracker.tsx
-│   │       ├── GynecologistCard.tsx
-│   │       ├── VaccineSchedule.tsx
-│   │       └── SpecialCare.tsx
-│   ├── pages/
-│   │   ├── Home.tsx
-│   │   ├── Login.tsx
-│   │   ├── Register.tsx
-│   │   ├── Dashboard.tsx
-│   │   ├── Doctors.tsx
-│   │   ├── DoctorProfile.tsx
-│   │   ├── Hospitals.tsx
-│   │   ├── Appointments.tsx
-│   │   ├── Emergency.tsx
-│   │   ├── Pharmacy.tsx
-│   │   ├── MedicalRecords.tsx
-│   │   ├── AIAssistant.tsx
-│   │   ├── WomenHealth.tsx
-│   │   ├── BloodDonors.tsx
-│   │   ├── AdminPanel.tsx
-│   │   └── NotFound.tsx
-│   ├── hooks/
-│   │   ├── useAuth.ts
-│   │   ├── useDoctor.ts
-│   │   ├── useHospital.ts
-│   │   ├── useAppointment.ts
-│   │   └── useEmergency.ts
-│   ├── services/
-│   │   ├── api.ts
-│   │   ├── authService.ts
-│   │   ├── doctorService.ts
-│   │   ├── hospitalService.ts
-│   │   ├── emergencyService.ts
-│   │   └── aiService.ts
-│   ├── store/
-│   │   ├── index.ts
-│   │   ├── slices/
-│   │   │   ├── authSlice.ts
-│   │   │   ├── doctorSlice.ts
-│   │   │   ├── hospitalSlice.ts
-│   │   │   ├── appointmentSlice.ts
-│   │   │   └── emergencySlice.ts
-│   ├── utils/
-│   │   ├── constants.ts
-│   │   ├── helpers.ts
-│   │   ├── validators.ts
-│   │   └── formatters.ts
-│   ├── types/
-│   │   ├── index.ts
-│   │   ├── user.ts
-│   │   ├── doctor.ts
-│   │   ├── hospital.ts
-│   │   ├── appointment.ts
-│   │   └── emergency.ts
-│   ├── styles/
-│   │   ├── globals.css
-│   │   ├── themes.ts
-│   │   └── animations.ts
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── vite-env.d.ts
-├── package.json
-├── tailwind.config.js
-├── tsconfig.json
-└── vite.config.ts
 ```
 
 
@@ -254,249 +117,6 @@ Unit Testing with Pytest
 Alembic Database Migration
 
 ```
-backend-python/
-smart-hospital-backend/
-├── app/
-│   ├── __init__.py
-│   ├── main.py                          # FastAPI application entry point
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── deps.py                     # Dependencies injection
-│   │   └── v1/
-│   │       ├── __init__.py
-│   │       ├── router.py               # Main API router
-│   │       ├── auth.py                 # Authentication endpoints
-│   │       ├── users.py                # User management
-│   │       ├── doctors.py              # Doctor endpoints
-│   │       ├── patients.py             # Patient endpoints
-│   │       ├── hospitals.py            # Hospital endpoints
-│   │       ├── appointments.py         # Appointment endpoints
-│   │       ├── emergency.py            # Emergency services
-│   │       ├── pharmacy.py             # Pharmacy endpoints
-│   │       ├── ai_assistant.py         # AI chatbot/symptom checker
-│   │       ├── women_health.py         # Women health endpoints
-│   │       ├── blood_donors.py         # Blood donor management
-│   │       ├── dashboard.py            # Analytics dashboard
-│   │       ├── notifications.py        # Push notifications
-│   │       └── admin.py                # Admin panel endpoints
-│   │
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── config.py                   # Application settings
-│   │   ├── security.py                 # Security utilities
-│   │   ├── dependencies.py             # Common dependencies
-│   │   ├── exceptions.py               # Custom exceptions
-│   │   ├── middleware.py               # Custom middleware
-│   │   ├── logging_config.py           # Logging configuration
-│   │   └── rate_limiter.py            # Rate limiting
-│   │
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── base.py                     # Base model
-│   │   ├── user.py                     # User models
-│   │   ├── doctor.py                   # Doctor models
-│   │   ├── patient.py                  # Patient models
-│   │   ├── hospital.py                 # Hospital models
-│   │   ├── appointment.py              # Appointment models
-│   │   ├── pharmacy.py                 # Pharmacy models
-│   │   ├── emergency.py                # Emergency models
-│   │   ├── women_health.py             # Women health models
-│   │   ├── blood_donor.py              # Blood donor models
-│   │   ├── notification.py             # Notification models
-│   │   ├── review.py                   # Review/rating models
-│   │   ├── transaction.py              # Payment transaction models
-│   │   └── audit.py                    # Audit log models
-│   │
-│   ├── schemas/
-│   │   ├── __init__.py
-│   │   ├── auth.py                     # Auth schemas
-│   │   ├── user.py                     # User schemas
-│   │   ├── doctor.py                   # Doctor schemas
-│   │   ├── patient.py                  # Patient schemas
-│   │   ├── hospital.py                 # Hospital schemas
-│   │   ├── appointment.py              # Appointment schemas
-│   │   ├── pharmacy.py                 # Pharmacy schemas
-│   │   ├── emergency.py                # Emergency schemas
-│   │   ├── women_health.py             # Women health schemas
-│   │   ├── blood_donor.py              # Blood donor schemas
-│   │   ├── dashboard.py                # Dashboard schemas
-│   │   └── common.py                   # Common schemas (pagination, etc.)
-│   │
-│   ├── services/
-│   │   ├── __init__.py
-│   │   ├── auth_service.py             # Authentication service
-│   │   ├── user_service.py             # User service
-│   │   ├── doctor_service.py           # Doctor service
-│   │   ├── patient_service.py          # Patient service
-│   │   ├── hospital_service.py         # Hospital service
-│   │   ├── appointment_service.py      # Appointment service
-│   │   ├── pharmacy_service.py         # Pharmacy service
-│   │   ├── emergency_service.py        # Emergency service
-│   │   ├── ai_service.py               # AI/ML service
-│   │   ├── notification_service.py     # Notification service
-│   │   ├── payment_service.py          # Payment processing
-│   │   ├── search_service.py           # Search functionality
-│   │   ├── analytics_service.py        # Analytics & reporting
-│   │   ├── blood_donor_service.py      # Blood donor service
-│   │   ├── women_health_service.py     # Women health service
-│   │   ├── realtime_service.py         # WebSocket realtime service
-│   │   └── file_service.py            # File/Image handling
-│   │
-│   ├── repositories/
-│   │   ├── __init__.py
-│   │   ├── base.py                     # Base repository
-│   │   ├── user_repo.py
-│   │   ├── doctor_repo.py
-│   │   ├── patient_repo.py
-│   │   ├── hospital_repo.py
-│   │   ├── appointment_repo.py
-│   │   ├── pharmacy_repo.py
-│   │   ├── emergency_repo.py
-│   │   └── blood_donor_repo.py
-│   │
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   ├── hashing.py                  # Password hashing
-│   │   ├── jwt.py                      # JWT utilities
-│   │   ├── validators.py               # Custom validators
-│   │   ├── pagination.py               # Pagination helpers
-│   │   ├── file_upload.py              # File upload helpers
-│   │   ├── geolocation.py              # Geolocation utilities
-│   │   └── serializers.py              # Object serialization
-│   │
-│   ├── tasks/                          # Celery background tasks
-│   │   ├── __init__.py
-│   │   ├── celery_app.py               # Celery configuration
-│   │   ├── email_tasks.py              # Email tasks
-│   │   ├── notification_tasks.py       # Push notification tasks
-│   │   ├── report_tasks.py             # Report generation
-│   │   ├── backup_tasks.py             # Database backup
-│   │   └── cleanup_tasks.py            # Data cleanup
-│   │
-│   ├── websocket/
-│   │   ├── __init__.py
-│   │   ├── manager.py                  # WebSocket manager
-│   │   ├── chat_handler.py             # Chat handling
-│   │   └── realtime_handler.py         # Realtime updates
-│   │
-│   └── ml/
-│       ├── __init__.py
-│       ├── symptom_checker.py          # Symptom analysis
-│       ├── appointment_optimizer.py    # Smart scheduling
-│       ├── emergency_predictor.py      # Emergency prediction
-│       └── health_risk_assessment.py   # Risk assessment
-│
-├── migrations/                          # Alembic migrations
-│   ├── versions/
-│   └── env.py
-│
-├── tests/
-│   ├── __init__.py
-│   ├── conftest.py                     # Test configurations
-│   ├── test_auth.py
-│   ├── test_doctors.py
-│   ├── test_patients.py
-│   ├── test_hospitals.py
-│   ├── test_appointments.py
-│   └── test_emergency.py
-│
-├── logs/                                # Application logs
-├── media/                               # Uploaded files
-│   ├── profiles/
-│   ├── documents/
-│   └── medical_records/
-│
-├── scripts/
-│   ├── seed_data.py                    # Database seeding
-│   ├── backup.sh                       # Backup script
-│   └── deploy.sh                       # Deployment script
-│
-├── requirements/
-│   ├── base.txt                        # Core dependencies
-│   ├── dev.txt                         # Development dependencies
-│   ├── prod.txt                        # Production dependencies
-│   └── ml.txt                          # ML dependencies
-│
-├── alembic.ini
-├── docker-compose.yml
-├── Dockerfile
-├── .env.example
-├── .env.production
-├── .gitignore
-├── Makefile
-└── README.md
-
-
-smart-hospital-database/
-├── config/
-│   ├── database.php                 # MongoDB connection config
-│   ├── mongodb.php                  # MongoDB client settings
-│   └── collections.php             # Collections configuration
-│
-├── src/
-│   ├── Core/
-│   │   ├── MongoDBManager.php       # Main MongoDB manager
-│   │   ├── MongoQueryBuilder.php    # Advanced query builder
-│   │   ├── Collection.php           # Collection base class
-│   │   ├── MongoMigration.php       # Migration system
-│   │   └── MongoGridFS.php          # File storage (GridFS)
-│   │
-│   ├── Models/
-│   │   ├── BaseModel.php            # Base MongoDB model
-│   │   ├── User.php
-│   │   ├── Doctor.php
-│   │   ├── Patient.php
-│   │   ├── Hospital.php
-│   │   ├── Appointment.php
-│   │   ├── Pharmacy.php
-│   │   ├── Emergency.php
-│   │   ├── BloodDonor.php
-│   │   ├── MedicalRecord.php
-│   │   ├── Prescription.php
-│   │   ├── Invoice.php
-│   │   └── AuditLog.php
-│   │
-│   ├── Migrations/
-│   │   ├── MigrationManager.php
-│   │   ├── CreateUsersCollection.php
-│   │   ├── CreateDoctorsCollection.php
-│   │   ├── CreatePatientsCollection.php
-│   │   ├── CreateHospitalsCollection.php
-│   │   ├── CreateAppointmentsCollection.php
-│   │   ├── CreateIndexes.php
-│   │   └── CreateRelations.php
-│   │
-│   ├── Seeds/
-│   │   ├── DatabaseSeeder.php
-│   │   ├── UsersSeeder.php
-│   │   ├── DoctorsSeeder.php
-│   │   ├── HospitalsSeeder.php
-│   │   └── SampleDataSeeder.php
-│   │
-│   ├── Validators/
-│   │   ├── SchemaValidator.php      # JSON Schema validation
-│   │   └── Rules.php
-│   │
-│   └── Utils/
-│       ├── AggregationPipeline.php
-│       ├── BackupManager.php
-│       └── IndexManager.php
-│
-├── public/
-│   └── admin/
-│       ├── index.php                # Database admin panel
-│       ├── collections.php          # View collections
-│       ├── queries.php              # Run queries
-│       └── api/
-│           └── database_api.php     # REST API for DB operations
-│
-├── composer.json
-├── .env
-└── README.md
-
-
-
-
 
 
 
@@ -892,155 +512,236 @@ aetherion/
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 =======================================================================================================================================
                                                          # Python FastAPI Backend
 =======================================================================================================================================
 
 
-
-
-
-├── 📂 backend/                          
-│   ├── 📄 requirements.txt
-│   ├── 📄 Dockerfile
-│   ├── 📄 alembic.ini
-│   ├── 📄 pyproject.toml
-│   ├── 📄 .env.example
-│   │
-│   ├── 📂 app/
-│   │   ├── 📄 __init__.py
-│   │   ├── 📄 main.py
-│   │   │
-│   │   ├── 📂 api/
-│   │   │   ├── 📄 __init__.py
-│   │   │   ├── 📄 deps.py
-│   │   │   └── 📂 v1/
-│   │   │       ├── 📄 __init__.py
-│   │   │       ├── 📄 router.py
-│   │   │       ├── 📄 auth.py
-│   │   │       ├── 📄 users.py
-│   │   │       ├── 📄 doctors.py
-│   │   │       ├── 📄 patients.py
-│   │   │       ├── 📄 hospitals.py
-│   │   │       ├── 📄 appointments.py
-│   │   │       ├── 📄 emergency.py
-│   │   │       ├── 📄 pharmacy.py
-│   │   │       ├── 📄 blood_donors.py
-│   │   │       ├── 📄 oxygen.py
-│   │   │       ├── 📄 ai_assistant.py
-│   │   │       ├── 📄 women_health.py
-│   │   │       ├── 📄 dashboard.py
-│   │   │       ├── 📄 notifications.py
-│   │   │       └── 📄 admin.py
-│   │   │
-│   │   ├── 📂 core/
-│   │   │   ├── 📄 __init__.py
-│   │   │   ├── 📄 config.py
-│   │   │   ├── 📄 security.py
-│   │   │   ├── 📄 database.py
-│   │   │   ├── 📄 dependencies.py
-│   │   │   ├── 📄 exceptions.py
-│   │   │   ├── 📄 middleware.py
-│   │   │   └── 📄 rate_limiter.py
-│   │   │
-│   │   ├── 📂 models/
-│   │   │   ├── 📄 __init__.py
-│   │   │   ├── 📄 base.py
-│   │   │   ├── 📄 user.py
-│   │   │   ├── 📄 doctor.py
-│   │   │   ├── 📄 patient.py
-│   │   │   ├── 📄 hospital.py
-│   │   │   ├── 📄 appointment.py
-│   │   │   ├── 📄 pharmacy.py
-│   │   │   ├── 📄 emergency.py
-│   │   │   ├── 📄 blood_donor.py
-│   │   │   ├── 📄 oxygen.py
-│   │   │   ├── 📄 women_health.py
-│   │   │   ├── 📄 notification.py
-│   │   │   ├── 📄 review.py
-│   │   │   ├── 📄 transaction.py
-│   │   │   └── 📄 audit.py
-│   │   │
-│   │   ├── 📂 schemas/
-│   │   │   ├── 📄 __init__.py
-│   │   │   ├── 📄 auth.py
-│   │   │   ├── 📄 user.py
-│   │   │   ├── 📄 doctor.py
-│   │   │   ├── 📄 patient.py
-│   │   │   ├── 📄 hospital.py
-│   │   │   ├── 📄 appointment.py
-│   │   │   ├── 📄 pharmacy.py
-│   │   │   ├── 📄 emergency.py
-│   │   │   ├── 📄 blood_donor.py
-│   │   │   ├── 📄 oxygen.py
-│   │   │   ├── 📄 women_health.py
-│   │   │   └── 📄 common.py
-│   │   │
-│   │   ├── 📂 services/
-│   │   │   ├── 📄 __init__.py
-│   │   │   ├── 📄 auth_service.py
-│   │   │   ├── 📄 user_service.py
-│   │   │   ├── 📄 doctor_service.py
-│   │   │   ├── 📄 patient_service.py
-│   │   │   ├── 📄 hospital_service.py
-│   │   │   ├── 📄 appointment_service.py
-│   │   │   ├── 📄 pharmacy_service.py
-│   │   │   ├── 📄 emergency_service.py
-│   │   │   ├── 📄 ai_service.py
-│   │   │   ├── 📄 notification_service.py
-│   │   │   ├── 📄 payment_service.py
-│   │   │   ├── 📄 search_service.py
-│   │   │   ├── 📄 analytics_service.py
-│   │   │   ├── 📄 blood_donor_service.py
-│   │   │   ├── 📄 oxygen_service.py
-│   │   │   ├── 📄 women_health_service.py
-│   │   │   ├── 📄 realtime_service.py
-│   │   │   └── 📄 file_service.py
-│   │   │
-│   │   ├── 📂 repositories/
-│   │   │   ├── 📄 __init__.py
-│   │   │   ├── 📄 base.py
-│   │   │   ├── 📄 user_repo.py
-│   │   │   ├── 📄 doctor_repo.py
-│   │   │   ├── 📄 patient_repo.py
-│   │   │   ├── 📄 hospital_repo.py
-│   │   │   ├── 📄 appointment_repo.py
-│   │   │   ├── 📄 pharmacy_repo.py
-│   │   │   └── 📄 blood_donor_repo.py
-│   │   │
-│   │   ├── 📂 utils/
-│   │   │   ├── 📄 __init__.py
-│   │   │   ├── 📄 hashing.py
-│   │   │   ├── 📄 jwt.py
-│   │   │   ├── 📄 validators.py
-│   │   │   ├── 📄 pagination.py
-│   │   │   └── 📄 geolocation.py
-│   │   │
-│   │   ├── 📂 tasks/
-│   │   │   ├── 📄 __init__.py
-│   │   │   ├── 📄 celery_app.py
-│   │   │   ├── 📄 email_tasks.py
-│   │   │   └── 📄 notification_tasks.py
-│   │   │
-│   │   └── 📂 ml/
-│   │       ├── 📄 __init__.py
-│   │       ├── 📄 symptom_checker.py
-│   │       └── 📄 health_risk.py
-│   │
-│   ├── 📂 migrations/
-│   │   ├── 📄 env.py
-│   │   └── 📂 versions/
-│   │
-│   ├── 📂 tests/
-│   │   ├── 📄 conftest.py
-│   │   ├── 📄 test_auth.py
-│   │   ├── 📄 test_doctors.py
-│   │   └── 📄 test_hospitals.py
-│   │
-│   └── 📂 scripts/
-│       ├── 📄 seed_data.py
-│       └── 📄 backup.sh
+backend/
+├── 📄 requirements.txt
+├── 📄 Dockerfile
+├── 📄 docker-compose.yml
+├── 📄 alembic.ini
+├── 📄 pyproject.toml
+├── 📄 .env.example
+├── 📄 .env.test
+├── 📄 Makefile
+├── 📄 README.md
+├── 📄 pytest.ini
+├── 📄 .pre-commit-config.yaml
 │
+├── 📂 alembic/
+│   ├── 📄 env.py
+│   ├── 📄 script.py.mako
+│   └── 📂 versions/
+│       └── 📄 .gitkeep
+│
+├── 📂 app/
+│   ├── 📄 __init__.py
+│   ├── 📄 main.py
+│   └── 📂 core/
+│       ├── 📄 __init__.py
+│       ├── 📄 config.py
+│       ├── 📄 security.py
+│       ├── 📄 database.py
+│       ├── 📄 cache.py
+│       ├── 📄 celery_app.py
+│       ├── 📄 exceptions.py
+│       ├── 📄 middleware.py
+│       ├── 📄 logging.py
+│       └── 📄 events.py
+│   │
+│   ├── 📂 api/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 deps.py
+│   │   ├── 📄 errors.py
+│   │   └── 📂 v1/
+│   │       ├── 📄 __init__.py
+│   │       ├── 📄 router.py
+│   │       ├── 📂 auth/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 users/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 doctors/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 patients/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 hospitals/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 appointments/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 pharmacy/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 emergency/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 blood_donors/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 oxygen/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 women_health/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 ai_assistant/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       ├── 📂 notifications/
+│   │       │   ├── 📄 __init__.py
+│   │       │   ├── 📄 endpoints.py
+│   │       │   ├── 📄 schemas.py
+│   │       │   └── 📄 service.py
+│   │       └── 📂 admin/
+│   │           ├── 📄 __init__.py
+│   │           ├── 📄 endpoints.py
+│   │           ├── 📄 schemas.py
+│   │           └── 📄 service.py
+│   │
+│   ├── 📂 models/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 base.py
+│   │   ├── 📄 user.py
+│   │   ├── 📄 doctor.py
+│   │   ├── 📄 patient.py
+│   │   ├── 📄 hospital.py
+│   │   ├── 📄 appointment.py
+│   │   ├── 📄 pharmacy.py
+│   │   ├── 📄 emergency.py
+│   │   ├── 📄 blood_donor.py
+│   │   ├── 📄 oxygen.py
+│   │   ├── 📄 women_health.py
+│   │   ├── 📄 notification.py
+│   │   ├── 📄 review.py
+│   │   └── 📄 payment.py
+│   │
+│   ├── 📂 repositories/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 base.py
+│   │   ├── 📄 user_repository.py
+│   │   ├── 📄 doctor_repository.py
+│   │   ├── 📄 patient_repository.py
+│   │   ├── 📄 hospital_repository.py
+│   │   ├── 📄 appointment_repository.py
+│   │   ├── 📄 pharmacy_repository.py
+│   │   └── 📄 blood_donor_repository.py
+│   │
+│   ├── 📂 services/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 auth_service.py
+│   │   ├── 📄 user_service.py
+│   │   ├── 📄 doctor_service.py
+│   │   ├── 📄 patient_service.py
+│   │   ├── 📄 hospital_service.py
+│   │   ├── 📄 appointment_service.py
+│   │   ├── 📄 pharmacy_service.py
+│   │   ├── 📄 emergency_service.py
+│   │   ├── 📄 notification_service.py
+│   │   ├── 📄 payment_service.py
+│   │   ├── 📄 ai_service.py
+│   │   └── 📄 realtime_service.py
+│   │
+│   ├── 📂 integrations/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 firebase.py
+│   │   ├── 📄 google_maps.py
+│   │   ├── 📄 twilio.py
+│   │   ├── 📄 sendgrid.py
+│   │   ├── 📄 cloudinary.py
+│   │   └── 📄 redis.py
+│   │
+│   ├── 📂 utils/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 security.py
+│   │   ├── 📄 validators.py
+│   │   ├── 📄 pagination.py
+│   │   ├── 📄 geolocation.py
+│   │   ├── 📄 date_utils.py
+│   │   └── 📄 file_utils.py
+│   │
+│   ├── 📂 tasks/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 email_tasks.py
+│   │   ├── 📄 notification_tasks.py
+│   │   ├── 📄 reminder_tasks.py
+│   │   └── 📄 report_tasks.py
+│   │
+│   └── 📂 middleware/
+│       ├── 📄 __init__.py
+│       ├── 📄 auth.py
+│       ├── 📄 rate_limiter.py
+│       ├── 📄 cors.py
+│       └── 📄 logging.py
+│
+├── 📂 tests/
+│   ├── 📄 __init__.py
+│   ├── 📄 conftest.py
+│   ├── 📂 unit/
+│   │   ├── 📄 test_auth_service.py
+│   │   ├── 📄 test_user_service.py
+│   │   └── 📄 test_validators.py
+│   ├── 📂 integration/
+│   │   ├── 📄 test_auth_endpoints.py
+│   │   ├── 📄 test_user_endpoints.py
+│   │   └── 📄 test_database.py
+│   └── 📂 fixtures/
+│       ├── 📄 user_fixtures.py
+│       └── 📄 data_fixtures.py
+│
+├── 📂 scripts/
+│   ├── 📄 seed_data.py
+│   ├── 📄 backup.sh
+│   └── 📄 init_db.py
+│
+└── 📂 docs/
+    ├── 📄 API_GUIDE.md
+    ├── 📄 SETUP.md
+    └── 📄 DEPLOYMENT.md
+
+
+
 ===============================================================================================================================================
                                                                   # MySQL Database (99 Tables)
 ===============================================================================================================================================
