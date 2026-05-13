@@ -614,6 +614,11 @@ Contributing
 
 Contributions are welcome.
 
+
+
+
+
+
 fork → create branch → commit → push → pull request
 License
 
@@ -622,3 +627,491 @@ This project is licensed under the MIT License.
 Author
 
 Developed using FastAPI and Python.
+
+
+
+
+
+
+
+
+
+
+```
+aetherion/
+│
+├── 📄 README.md
+├── 📄 .gitignore
+├── 📄 docker-compose.yml
+├── 📄 .env.example
+├── 📄 Makefile
+├── 📄 LICENSE
+│
+├── 📂 frontend/                          # React + TypeScript Frontend
+│   ├── 📄 package.json
+│   ├── 📄 tsconfig.json
+│   ├── 📄 vite.config.ts
+│   ├── 📄 tailwind.config.js
+│   ├── 📄 index.html
+│   ├── 📄 .env.example
+│   │
+│   ├── 📂 public/
+│   │   ├── 🖼️ favicon.ico
+│   │   ├── 🖼️ logo.svg
+│   │   ├── 🖼️ og-image.png
+│   │   ├── 📄 manifest.json
+│   │   └── 📂 icons/
+│   │       ├── icon-72x72.png
+│   │       ├── icon-96x96.png
+│   │       └── icon-512x512.png
+│   │
+│   └── 📂 src/
+│       ├── 📄 App.tsx
+│       ├── 📄 main.tsx
+│       ├── 📄 vite-env.d.ts
+│       │
+│       ├── 📂 assets/
+│       │   ├── 📂 images/
+│       │   │   ├── hero-bg.png
+│       │   │   ├── doctor-placeholder.png
+│       │   │   └── hospital-placeholder.png
+│       │   └── 📂 fonts/
+│       │
+│       ├── 📂 config/
+│       │   ├── 📄 constants.ts
+│       │   ├── 📄 routes.ts
+│       │   ├── 📄 navigation.ts
+│       │   └── 📄 api.config.ts
+│       │
+│       ├── 📂 types/
+│       │   ├── 📄 index.ts
+│       │   ├── 📄 user.ts
+│       │   ├── 📄 doctor.ts
+│       │   ├── 📄 patient.ts
+│       │   ├── 📄 hospital.ts
+│       │   ├── 📄 appointment.ts
+│       │   ├── 📄 pharmacy.ts
+│       │   ├── 📄 emergency.ts
+│       │   ├── 📄 bloodDonor.ts
+│       │   └── 📄 oxygen.ts
+│       │
+│       ├── 📂 components/
+│       │   ├── 📂 ui/                      # Shadcn UI components
+│       │   │   ├── Button.tsx
+│       │   │   ├── Card.tsx
+│       │   │   ├── Modal.tsx
+│       │   │   ├── Badge.tsx
+│       │   │   ├── Input.tsx
+│       │   │   ├── Select.tsx
+│       │   │   ├── Table.tsx
+│       │   │   ├── Tabs.tsx
+│       │   │   ├── Avatar.tsx
+│       │   │   ├── Dropdown.tsx
+│       │   │   ├── Loader.tsx
+│       │   │   ├── Skeleton.tsx
+│       │   │   ├── Toast.tsx
+│       │   │   ├── Tooltip.tsx
+│       │   │   └── ScrollArea.tsx
+│       │   │
+│       │   ├── 📂 layout/
+│       │   │   ├── Navbar.tsx
+│       │   │   ├── Sidebar.tsx
+│       │   │   ├── Footer.tsx
+│       │   │   ├── DashboardLayout.tsx
+│       │   │   ├── MobileNav.tsx
+│       │   │   └── TopBar.tsx
+│       │   │
+│       │   ├── 📂 common/
+│       │   │   ├── SearchBar.tsx
+│       │   │   ├── NotificationBell.tsx
+│       │   │   ├── UserAvatar.tsx
+│       │   │   ├── BreadCrumb.tsx
+│       │   │   ├── EmptyState.tsx
+│       │   │   ├── ErrorBoundary.tsx
+│       │   │   ├── LoadingScreen.tsx
+│       │   │   ├── Pagination.tsx
+│       │   │   └── FileUpload.tsx
+│       │   │
+│       │   ├── 📂 auth/
+│       │   │   ├── LoginForm.tsx
+│       │   │   ├── RegisterForm.tsx
+│       │   │   ├── RoleSelector.tsx
+│       │   │   ├── OTPVerification.tsx
+│       │   │   ├── ForgotPassword.tsx
+│       │   │   └── TwoFactorAuth.tsx
+│       │   │
+│       │   ├── 📂 dashboard/
+│       │   │   ├── StatCard.tsx
+│       │   │   ├── ActivityChart.tsx
+│       │   │   ├── RecentAppointments.tsx
+│       │   │   ├── ResourceStatus.tsx
+│       │   │   ├── RevenueChart.tsx
+│       │   │   ├── PatientFlowChart.tsx
+│       │   │   └── LiveFeed.tsx
+│       │   │
+│       │   ├── 📂 doctor/
+│       │   │   ├── DoctorCard.tsx
+│       │   │   ├── DoctorProfile.tsx
+│       │   │   ├── DoctorSchedule.tsx
+│       │   │   ├── DoctorRanking.tsx
+│       │   │   ├── DoctorComparison.tsx
+│       │   │   ├── DoctorAvailability.tsx
+│       │   │   └── DoctorReviews.tsx
+│       │   │
+│       │   ├── 📂 patient/
+│       │   │   ├── PatientProfile.tsx
+│       │   │   ├── MedicalHistory.tsx
+│       │   │   ├── MedicineTracker.tsx
+│       │   │   ├── VaccinationTracker.tsx
+│       │   │   ├── HealthTimeline.tsx
+│       │   │   └── ReportViewer.tsx
+│       │   │
+│       │   ├── 📂 hospital/
+│       │   │   ├── HospitalCard.tsx
+│       │   │   ├── BedAvailability.tsx
+│       │   │   ├── ICUTracker.tsx
+│       │   │   ├── EmergencyServices.tsx
+│       │   │   ├── HospitalRating.tsx
+│       │   │   └── DepartmentList.tsx
+│       │   │
+│       │   ├── 📂 emergency/
+│       │   │   ├── BloodDonorCard.tsx
+│       │   │   ├── AmbulanceTracker.tsx
+│       │   │   ├── OxygenLocator.tsx
+│       │   │   ├── EmergencyRequest.tsx
+│       │   │   ├── SOSButton.tsx
+│       │   │   └── NearbyHelp.tsx
+│       │   │
+│       │   ├── 📂 appointment/
+│       │   │   ├── BookingForm.tsx
+│       │   │   ├── AppointmentCalendar.tsx
+│       │   │   ├── AppointmentList.tsx
+│       │   │   ├── VideoConsultation.tsx
+│       │   │   └── AppointmentStatus.tsx
+│       │   │
+│       │   ├── 📂 pharmacy/
+│       │   │   ├── MedicineSearch.tsx
+│       │   │   ├── PharmacyCard.tsx
+│       │   │   ├── StockIndicator.tsx
+│       │   │   ├── MedicineCompare.tsx
+│       │   │   ├── PrescriptionUpload.tsx
+│       │   │   └── OrderTracker.tsx
+│       │   │
+│       │   ├── 📂 women/
+│       │   │   ├── PregnancyTracker.tsx
+│       │   │   ├── GynecologistCard.tsx
+│       │   │   ├── VaccineSchedule.tsx
+│       │   │   ├── SpecialCare.tsx
+│       │   │   ├── MenstrualTracker.tsx
+│       │   │   └── BabyGrowthChart.tsx
+│       │   │
+│       │   └── 📂 ai-assistant/
+│       │       ├── ChatBot.tsx
+│       │       ├── SymptomChecker.tsx
+│       │       ├── HealthRecommendation.tsx
+│       │       └── MedicineReminder.tsx
+│       │
+│       ├── 📂 pages/
+│       │   ├── 📄 Home.tsx
+│       │   ├── 📄 Login.tsx
+│       │   ├── 📄 Register.tsx
+│       │   ├── 📂 dashboard/
+│       │   │   ├── PatientDashboard.tsx
+│       │   │   ├── DoctorDashboard.tsx
+│       │   │   ├── HospitalDashboard.tsx
+│       │   │   ├── PharmacyDashboard.tsx
+│       │   │   └── AdminDashboard.tsx
+│       │   ├── 📄 Doctors.tsx
+│       │   ├── 📄 DoctorProfile.tsx
+│       │   ├── 📄 Hospitals.tsx
+│       │   ├── 📄 Appointments.tsx
+│       │   ├── 📄 Emergency.tsx
+│       │   ├── 📄 Pharmacy.tsx
+│       │   ├── 📄 MedicalRecords.tsx
+│       │   ├── 📄 AIAssistant.tsx
+│       │   ├── 📄 WomenHealth.tsx
+│       │   ├── 📄 BloodDonors.tsx
+│       │   ├── 📄 OxygenNetwork.tsx
+│       │   ├── 📄 AdminPanel.tsx
+│       │   ├── 📄 Profile.tsx
+│       │   ├── 📄 Settings.tsx
+│       │   └── 📄 NotFound.tsx
+│       │
+│       ├── 📂 hooks/
+│       │   ├── 📄 useAuth.ts
+│       │   ├── 📄 useDoctor.ts
+│       │   ├── 📄 useHospital.ts
+│       │   ├── 📄 useAppointment.ts
+│       │   ├── 📄 useEmergency.ts
+│       │   ├── 📄 usePharmacy.ts
+│       │   ├── 📄 useGeolocation.ts
+│       │   ├── 📄 useWebSocket.ts
+│       │   ├── 📄 useDebounce.ts
+│       │   └── 📄 useMediaQuery.ts
+│       │
+│       ├── 📂 services/
+│       │   ├── 📄 api.ts
+│       │   ├── 📄 authService.ts
+│       │   ├── 📄 doctorService.ts
+│       │   ├── 📄 hospitalService.ts
+│       │   ├── 📄 emergencyService.ts
+│       │   ├── 📄 pharmacyService.ts
+│       │   ├── 📄 appointmentService.ts
+│       │   ├── 📄 womenHealthService.ts
+│       │   └── 📄 aiService.ts
+│       │
+│       ├── 📂 store/
+│       │   ├── 📄 index.ts
+│       │   └── 📂 slices/
+│       │       ├── authSlice.ts
+│       │       ├── doctorSlice.ts
+│       │       ├── hospitalSlice.ts
+│       │       ├── appointmentSlice.ts
+│       │       ├── emergencySlice.ts
+│       │       ├── pharmacySlice.ts
+│       │       └── uiSlice.ts
+│       │
+│       ├── 📂 utils/
+│       │   ├── 📄 constants.ts
+│       │   ├── 📄 helpers.ts
+│       │   ├── 📄 validators.ts
+│       │   ├── 📄 formatters.ts
+│       │   ├── 📄 dateUtils.ts
+│       │   └── 📄 geolocation.ts
+│       │
+│       ├── 📂 styles/
+│       │   ├── 📄 globals.css
+│       │   ├── 📄 themes.ts
+│       │   └── 📄 animations.ts
+│       │
+│       └── 📂 lib/
+│           ├── 📄 axios.ts
+│           └── 📄 firebase.ts
+│
+├── 📂 backend/                            # Python FastAPI Backend
+│   ├── 📄 requirements.txt
+│   ├── 📄 Dockerfile
+│   ├── 📄 alembic.ini
+│   ├── 📄 pyproject.toml
+│   ├── 📄 .env.example
+│   │
+│   ├── 📂 app/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 main.py
+│   │   │
+│   │   ├── 📂 api/
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 deps.py
+│   │   │   └── 📂 v1/
+│   │   │       ├── 📄 __init__.py
+│   │   │       ├── 📄 router.py
+│   │   │       ├── 📄 auth.py
+│   │   │       ├── 📄 users.py
+│   │   │       ├── 📄 doctors.py
+│   │   │       ├── 📄 patients.py
+│   │   │       ├── 📄 hospitals.py
+│   │   │       ├── 📄 appointments.py
+│   │   │       ├── 📄 emergency.py
+│   │   │       ├── 📄 pharmacy.py
+│   │   │       ├── 📄 blood_donors.py
+│   │   │       ├── 📄 oxygen.py
+│   │   │       ├── 📄 ai_assistant.py
+│   │   │       ├── 📄 women_health.py
+│   │   │       ├── 📄 dashboard.py
+│   │   │       ├── 📄 notifications.py
+│   │   │       └── 📄 admin.py
+│   │   │
+│   │   ├── 📂 core/
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 config.py
+│   │   │   ├── 📄 security.py
+│   │   │   ├── 📄 database.py
+│   │   │   ├── 📄 dependencies.py
+│   │   │   ├── 📄 exceptions.py
+│   │   │   ├── 📄 middleware.py
+│   │   │   └── 📄 rate_limiter.py
+│   │   │
+│   │   ├── 📂 models/
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 base.py
+│   │   │   ├── 📄 user.py
+│   │   │   ├── 📄 doctor.py
+│   │   │   ├── 📄 patient.py
+│   │   │   ├── 📄 hospital.py
+│   │   │   ├── 📄 appointment.py
+│   │   │   ├── 📄 pharmacy.py
+│   │   │   ├── 📄 emergency.py
+│   │   │   ├── 📄 blood_donor.py
+│   │   │   ├── 📄 oxygen.py
+│   │   │   ├── 📄 women_health.py
+│   │   │   ├── 📄 notification.py
+│   │   │   ├── 📄 review.py
+│   │   │   ├── 📄 transaction.py
+│   │   │   └── 📄 audit.py
+│   │   │
+│   │   ├── 📂 schemas/
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 auth.py
+│   │   │   ├── 📄 user.py
+│   │   │   ├── 📄 doctor.py
+│   │   │   ├── 📄 patient.py
+│   │   │   ├── 📄 hospital.py
+│   │   │   ├── 📄 appointment.py
+│   │   │   ├── 📄 pharmacy.py
+│   │   │   ├── 📄 emergency.py
+│   │   │   ├── 📄 blood_donor.py
+│   │   │   ├── 📄 oxygen.py
+│   │   │   ├── 📄 women_health.py
+│   │   │   └── 📄 common.py
+│   │   │
+│   │   ├── 📂 services/
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 auth_service.py
+│   │   │   ├── 📄 user_service.py
+│   │   │   ├── 📄 doctor_service.py
+│   │   │   ├── 📄 patient_service.py
+│   │   │   ├── 📄 hospital_service.py
+│   │   │   ├── 📄 appointment_service.py
+│   │   │   ├── 📄 pharmacy_service.py
+│   │   │   ├── 📄 emergency_service.py
+│   │   │   ├── 📄 ai_service.py
+│   │   │   ├── 📄 notification_service.py
+│   │   │   ├── 📄 payment_service.py
+│   │   │   ├── 📄 search_service.py
+│   │   │   ├── 📄 analytics_service.py
+│   │   │   ├── 📄 blood_donor_service.py
+│   │   │   ├── 📄 oxygen_service.py
+│   │   │   ├── 📄 women_health_service.py
+│   │   │   ├── 📄 realtime_service.py
+│   │   │   └── 📄 file_service.py
+│   │   │
+│   │   ├── 📂 repositories/
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 base.py
+│   │   │   ├── 📄 user_repo.py
+│   │   │   ├── 📄 doctor_repo.py
+│   │   │   ├── 📄 patient_repo.py
+│   │   │   ├── 📄 hospital_repo.py
+│   │   │   ├── 📄 appointment_repo.py
+│   │   │   ├── 📄 pharmacy_repo.py
+│   │   │   └── 📄 blood_donor_repo.py
+│   │   │
+│   │   ├── 📂 utils/
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 hashing.py
+│   │   │   ├── 📄 jwt.py
+│   │   │   ├── 📄 validators.py
+│   │   │   ├── 📄 pagination.py
+│   │   │   └── 📄 geolocation.py
+│   │   │
+│   │   ├── 📂 tasks/
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 celery_app.py
+│   │   │   ├── 📄 email_tasks.py
+│   │   │   └── 📄 notification_tasks.py
+│   │   │
+│   │   └── 📂 ml/
+│   │       ├── 📄 __init__.py
+│   │       ├── 📄 symptom_checker.py
+│   │       └── 📄 health_risk.py
+│   │
+│   ├── 📂 migrations/
+│   │   ├── 📄 env.py
+│   │   └── 📂 versions/
+│   │
+│   ├── 📂 tests/
+│   │   ├── 📄 conftest.py
+│   │   ├── 📄 test_auth.py
+│   │   ├── 📄 test_doctors.py
+│   │   └── 📄 test_hospitals.py
+│   │
+│   └── 📂 scripts/
+│       ├── 📄 seed_data.py
+│       └── 📄 backup.sh
+│
+├── 📂 database/                           # MySQL Database
+│   ├── 📄 README.md
+│   │
+│   ├── 📂 schema/
+│   │   ├── 📄 001_create_users.sql
+│   │   ├── 📄 002_create_roles.sql
+│   │   ├── 📄 003_create_user_roles.sql
+│   │   ├── 📄 004_create_patients.sql
+│   │   ├── 📄 005_create_doctors.sql
+│   │   ├── 📄 006_create_hospitals.sql
+│   │   ├── 📄 007_create_departments.sql
+│   │   ├── 📄 008_create_hospital_doctors.sql
+│   │   ├── 📄 009_create_appointments.sql
+│   │   ├── 📄 010_create_prescriptions.sql
+│   │   ├── 📄 011_create_blood_donors.sql
+│   │   ├── 📄 012_create_blood_donations.sql
+│   │   ├── 📄 013_create_blood_requests.sql
+│   │   ├── 📄 014_create_blood_stock.sql
+│   │   ├── 📄 015_create_oxygen_stock.sql
+│   │   ├── 📄 016_create_oxygen_requests.sql
+│   │   ├── 📄 017_create_pharmacies.sql
+│   │   ├── 📄 018_create_medicines.sql
+│   │   ├── 📄 019_create_pharmacy_stock.sql
+│   │   ├── 📄 020_create_medicine_orders.sql
+│   │   ├── 📄 021_create_emergency_requests.sql
+│   │   ├── 📄 022_create_ambulances.sql
+│   │   ├── 📄 023_create_medical_records.sql
+│   │   ├── 📄 024_create_reviews_ratings.sql
+│   │   ├── 📄 025_create_women_health.sql
+│   │   ├── 📄 026_create_notifications.sql
+│   │   ├── 📄 027_create_transactions.sql
+│   │   ├── 📄 028_create_audit_logs.sql
+│   │   └── 📄 029_create_indexes.sql
+│   │
+│   ├── 📂 procedures/
+│   │   ├── 📄 sp_calculate_donor_eligibility.sql
+│   │   ├── 📄 sp_book_appointment.sql
+│   │   ├── 📄 sp_update_blood_stock.sql
+│   │   ├── 📄 sp_send_emergency_alert.sql
+│   │   └── 📄 sp_generate_report.sql
+│   │
+│   ├── 📂 triggers/
+│   │   ├── 📄 trg_after_blood_donation.sql
+│   │   ├── 📄 trg_after_appointment.sql
+│   │   ├── 📄 trg_medicine_expiry_alert.sql
+│   │   └── 📄 trg_oxygen_stock_alert.sql
+│   │
+│   ├── 📂 seeds/
+│   │   ├── 📄 seed_roles.sql
+│   │   ├── 📄 seed_admin.sql
+│   │   ├── 📄 seed_blood_groups.sql
+│   │   ├── 📄 seed_departments.sql
+│   │   └── 📄 seed_specializations.sql
+│   │
+│   └── 📂 docs/
+│       ├── 📄 ER_DIAGRAM.md
+│       ├── 📄 SCHEMA_DOCUMENTATION.md
+│       └── 📄 API_MAPPING.md
+│
+├── 📂 docs/                               # Project Documentation
+│   ├── 📄 PROJECT_OVERVIEW.md
+│   ├── 📄 ARCHITECTURE.md
+│   ├── 📄 API_DOCUMENTATION.md
+│   ├── 📄 SETUP_GUIDE.md
+│   ├── 📄 CONTRIBUTING.md
+│   ├── 📄 DEPLOYMENT.md
+│   └── 📄 CHANGELOG.md
+│
+└── 📂 deployment/
+    ├── 📄 nginx.conf
+    ├── 📄 docker-compose.prod.yml
+    └── 📂 scripts/
+        ├── 📄 deploy.sh
+        └── 📄 backup.sh
+
+
+
+
+```
+
+
+
+
+
+
+
