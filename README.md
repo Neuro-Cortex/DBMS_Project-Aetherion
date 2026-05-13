@@ -638,6 +638,8 @@ Developed using FastAPI and Python.
 
 
 ```
+
+
 aetherion/
 │
 ├── 📄 README.md
@@ -672,9 +674,6 @@ aetherion/
 │       │
 │       ├── 📂 assets/
 │       │   ├── 📂 images/
-│       │   │   ├── hero-bg.png
-│       │   │   ├── doctor-placeholder.png
-│       │   │   └── hospital-placeholder.png
 │       │   └── 📂 fonts/
 │       │
 │       ├── 📂 config/
@@ -696,7 +695,7 @@ aetherion/
 │       │   └── 📄 oxygen.ts
 │       │
 │       ├── 📂 components/
-│       │   ├── 📂 ui/                      # Shadcn UI components
+│       │   ├── 📂 ui/
 │       │   │   ├── Button.tsx
 │       │   │   ├── Card.tsx
 │       │   │   ├── Modal.tsx
@@ -887,8 +886,21 @@ aetherion/
 │       └── 📂 lib/
 │           ├── 📄 axios.ts
 │           └── 📄 firebase.ts
-│
-├── 📂 backend/                            # Python FastAPI Backend
+│                   
+
+
+
+
+
+=======================================================================================================================================
+                                                         # Python FastAPI Backend
+=======================================================================================================================================
+
+
+
+
+
+├── 📂 backend/                          
 │   ├── 📄 requirements.txt
 │   ├── 📄 Dockerfile
 │   ├── 📄 alembic.ini
@@ -1029,59 +1041,149 @@ aetherion/
 │       ├── 📄 seed_data.py
 │       └── 📄 backup.sh
 │
-├── 📂 database/                           # MySQL Database
+===============================================================================================================================================
+                                                                  # MySQL Database (99 Tables)
+===============================================================================================================================================
+
+
+
+├── 📂 database/                           
 │   ├── 📄 README.md
+│   ├── 📄 master_schema.sql               # ALL 99 tables in ONE file
 │   │
-│   ├── 📂 schema/
-│   │   ├── 📄 001_create_users.sql
-│   │   ├── 📄 002_create_roles.sql
-│   │   ├── 📄 003_create_user_roles.sql
-│   │   ├── 📄 004_create_patients.sql
-│   │   ├── 📄 005_create_doctors.sql
-│   │   ├── 📄 006_create_hospitals.sql
-│   │   ├── 📄 007_create_departments.sql
-│   │   ├── 📄 008_create_hospital_doctors.sql
-│   │   ├── 📄 009_create_appointments.sql
-│   │   ├── 📄 010_create_prescriptions.sql
-│   │   ├── 📄 011_create_blood_donors.sql
-│   │   ├── 📄 012_create_blood_donations.sql
-│   │   ├── 📄 013_create_blood_requests.sql
-│   │   ├── 📄 014_create_blood_stock.sql
-│   │   ├── 📄 015_create_oxygen_stock.sql
-│   │   ├── 📄 016_create_oxygen_requests.sql
-│   │   ├── 📄 017_create_pharmacies.sql
-│   │   ├── 📄 018_create_medicines.sql
-│   │   ├── 📄 019_create_pharmacy_stock.sql
-│   │   ├── 📄 020_create_medicine_orders.sql
-│   │   ├── 📄 021_create_emergency_requests.sql
-│   │   ├── 📄 022_create_ambulances.sql
-│   │   ├── 📄 023_create_medical_records.sql
-│   │   ├── 📄 024_create_reviews_ratings.sql
-│   │   ├── 📄 025_create_women_health.sql
-│   │   ├── 📄 026_create_notifications.sql
-│   │   ├── 📄 027_create_transactions.sql
-│   │   ├── 📄 028_create_audit_logs.sql
-│   │   └── 📄 029_create_indexes.sql
+│   ├── 📂 schema/                         # Individual table files (99 files)
+│   │   ├── 📄 001_core_users.sql
+│   │   ├── 📄 002_core_roles.sql
+│   │   ├── 📄 003_core_user_roles.sql
+│   │   ├── 📄 004_core_sessions.sql
+│   │   ├── 📄 005_core_otp_codes.sql
+│   │   ├── 📄 006_core_refresh_tokens.sql
+│   │   ├── 📄 007_core_password_resets.sql
+│   │   ├── 📄 008_core_activity_logs.sql
+│   │   ├── 📄 009_patient_profiles.sql
+│   │   ├── 📄 010_patient_vitals.sql
+│   │   ├── 📄 011_patient_allergies.sql
+│   │   ├── 📄 012_patient_chronic_diseases.sql
+│   │   ├── 📄 013_patient_medications.sql
+│   │   ├── 📄 014_patient_family_history.sql
+│   │   ├── 📄 015_patient_lifestyle.sql
+│   │   ├── 📄 016_patient_immunizations.sql
+│   │   ├── 📄 017_patient_health_metrics.sql
+│   │   ├── 📄 018_doctor_profiles.sql
+│   │   ├── 📄 019_doctor_specializations.sql
+│   │   ├── 📄 020_doctor_qualifications.sql
+│   │   ├── 📄 021_doctor_experience.sql
+│   │   ├── 📄 022_doctor_schedules.sql
+│   │   ├── 📄 023_doctor_availability_exceptions.sql
+│   │   ├── 📄 024_doctor_consultation_fees.sql
+│   │   ├── 📄 025_doctor_languages.sql
+│   │   ├── 📄 026_doctor_awards.sql
+│   │   ├── 📄 027_doctor_publications.sql
+│   │   ├── 📄 028_hospital_profiles.sql
+│   │   ├── 📄 029_hospital_departments.sql
+│   │   ├── 📄 030_hospital_beds.sql
+│   │   ├── 📄 031_hospital_icu_beds.sql
+│   │   ├── 📄 032_hospital_emergency_services.sql
+│   │   ├── 📄 033_hospital_ambulances.sql
+│   │   ├── 📄 034_hospital_facilities.sql
+│   │   ├── 📄 035_hospital_accreditations.sql
+│   │   ├── 📄 036_hospital_insurance_partners.sql
+│   │   ├── 📄 037_hospital_visiting_hours.sql
+│   │   ├── 📄 038_hospital_admins.sql
+│   │   ├── 📄 039_hospital_doctor_affiliations.sql
+│   │   ├── 📄 040_appointments.sql
+│   │   ├── 📄 041_appointment_vitals.sql
+│   │   ├── 📄 042_appointment_notes.sql
+│   │   ├── 📄 043_prescriptions.sql
+│   │   ├── 📄 044_prescription_medicines.sql
+│   │   ├── 📄 045_prescription_tests.sql
+│   │   ├── 📄 046_medical_records.sql
+│   │   ├── 📄 047_lab_reports.sql
+│   │   ├── 📄 048_imaging_reports.sql
+│   │   ├── 📄 049_surgery_records.sql
+│   │   ├── 📄 050_discharge_summaries.sql
+│   │   ├── 📄 051_blood_donors.sql
+│   │   ├── 📄 052_blood_donations.sql
+│   │   ├── 📄 053_blood_requests.sql
+│   │   ├── 📄 054_blood_stock.sql
+│   │   ├── 📄 055_blood_camps.sql
+│   │   ├── 📄 056_blood_donor_rewards.sql
+│   │   ├── 📄 057_oxygen_stock.sql
+│   │   ├── 📄 058_oxygen_requests.sql
+│   │   ├── 📄 059_oxygen_suppliers.sql
+│   │   ├── 📄 060_oxygen_cylinder_tracking.sql
+│   │   ├── 📄 061_pharmacies.sql
+│   │   ├── 📄 062_pharmacy_staff.sql
+│   │   ├── 📄 063_medicines.sql
+│   │   ├── 📄 064_medicine_categories.sql
+│   │   ├── 📄 065_medicine_manufacturers.sql
+│   │   ├── 📄 066_pharmacy_inventory.sql
+│   │   ├── 📄 067_medicine_orders.sql
+│   │   ├── 📄 068_medicine_order_items.sql
+│   │   ├── 📄 069_medicine_deliveries.sql
+│   │   ├── 📄 070_medicine_price_comparison.sql
+│   │   ├── 📄 071_emergency_requests.sql
+│   │   ├── 📄 072_emergency_contacts.sql
+│   │   ├── 📄 073_emergency_volunteers.sql
+│   │   ├── 📄 074_emergency_ambulance_requests.sql
+│   │   ├── 📄 075_emergency_sos_alerts.sql
+│   │   ├── 📄 076_women_health_profiles.sql
+│   │   ├── 📄 077_pregnancy_tracking.sql
+│   │   ├── 📄 078_pregnancy_appointments.sql
+│   │   ├── 📄 079_baby_vaccine_schedule.sql
+│   │   ├── 📄 080_menstrual_cycle_tracking.sql
+│   │   ├── 📄 081_gynecologist_consultations.sql
+│   │   ├── 📄 082_child_growth_records.sql
+│   │   ├── 📄 083_notifications.sql
+│   │   ├── 📄 084_notification_templates.sql
+│   │   ├── 📄 085_push_notification_tokens.sql
+│   │   ├── 📄 086_reviews_ratings.sql
+│   │   ├── 📄 087_doctor_reviews.sql
+│   │   ├── 📄 088_hospital_reviews.sql
+│   │   ├── 📄 089_medicine_reviews.sql
+│   │   ├── 📄 090_payment_transactions.sql
+│   │   ├── 📄 091_payment_methods.sql
+│   │   ├── 📄 092_insurance_claims.sql
+│   │   ├── 📄 093_health_blogs.sql
+│   │   ├── 📄 094_health_tips.sql
+│   │   ├── 📄 095_ai_chat_history.sql
+│   │   ├── 📄 096_ai_symptom_checks.sql
+│   │   ├── 📄 097_system_settings.sql
+│   │   ├── 📄 098_feedback_support.sql
+│   │   └── 📄 099_audit_trails.sql
 │   │
 │   ├── 📂 procedures/
 │   │   ├── 📄 sp_calculate_donor_eligibility.sql
 │   │   ├── 📄 sp_book_appointment.sql
 │   │   ├── 📄 sp_update_blood_stock.sql
 │   │   ├── 📄 sp_send_emergency_alert.sql
-│   │   └── 📄 sp_generate_report.sql
+│   │   ├── 📄 sp_generate_report.sql
+│   │   ├── 📄 sp_process_payment.sql
+│   │   ├── 📄 sp_check_medicine_expiry.sql
+│   │   └── 📄 sp_calculate_hospital_rating.sql
 │   │
 │   ├── 📂 triggers/
 │   │   ├── 📄 trg_after_blood_donation.sql
 │   │   ├── 📄 trg_after_appointment.sql
 │   │   ├── 📄 trg_medicine_expiry_alert.sql
-│   │   └── 📄 trg_oxygen_stock_alert.sql
+│   │   ├── 📄 trg_oxygen_stock_alert.sql
+│   │   ├── 📄 trg_after_prescription.sql
+│   │   └── 📄 trg_after_user_registration.sql
+│   │
+│   ├── 📂 views/
+│   │   ├── 📄 vw_doctor_availability.sql
+│   │   ├── 📄 vw_blood_stock_summary.sql
+│   │   ├── 📄 vw_hospital_bed_status.sql
+│   │   ├── 📄 vw_patient_appointment_history.sql
+│   │   └── 📄 vw_revenue_analytics.sql
 │   │
 │   ├── 📂 seeds/
 │   │   ├── 📄 seed_roles.sql
 │   │   ├── 📄 seed_admin.sql
 │   │   ├── 📄 seed_blood_groups.sql
 │   │   ├── 📄 seed_departments.sql
-│   │   └── 📄 seed_specializations.sql
+│   │   ├── 📄 seed_specializations.sql
+│   │   └── 📄 seed_medicine_categories.sql
 │   │
 │   └── 📂 docs/
 │       ├── 📄 ER_DIAGRAM.md
