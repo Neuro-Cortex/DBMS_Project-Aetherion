@@ -594,6 +594,482 @@ The system will display:
 
 
 
+---
+
+
+frontend/
+│
+├── public/                       # Static assets served directly
+│   ├── favicon.ico              # Browser tab icon
+│   ├── index.html               # Main HTML entry point
+│   ├── robots.txt               # SEO crawler directives
+│   └── manifest.json            # PWA configuration for mobile install
+│
+├── src/
+│   │
+│   ├── app/                     # Core application setup
+│   │   ├── store.ts             # Redux store configuration (slices, middleware, devtools)
+│   │   ├── providers/           # Context providers wrapper
+│   │   │   ├── index.tsx        # Combines all providers (Redux, Theme, Socket, Auth)
+│   │   │   ├── ReduxProvider.tsx # Wraps app with Redux store
+│   │   │   ├── SocketProvider.tsx # WebSocket connection provider
+│   │   │   └── ThemeProvider.tsx  # Dark/light mode provider
+│   │   └── routes/              # Route configuration
+│   │       ├── index.tsx        # Main router setup with protected routes
+│   │       ├── PublicRoutes.tsx # Routes accessible without authentication
+│   │       ├── PrivateRoutes.tsx # Routes requiring JWT token
+│   │       └── RoleBasedRoutes.tsx # Routes restricted by user role (ADMIN/DOCTOR/PATIENT)
+│   │
+│   ├── assets/                  # Static resources
+│   │   ├── images/              # PNG, JPG, SVG images
+│   │   │   ├── logo/            # Brand logos (main, dark, light variants)
+│   │   │   ├── icons/           # Feature icons (blood, ambulance, pharmacy)
+│   │   │   └── illustrations/   # Empty states, error pages, onboarding
+│   │   ├── fonts/               # Custom font files (if not using system fonts)
+│   │   └── animations/          # Lottie JSON animations for loading states
+│   │
+│   ├── components/              # Reusable UI components
+│   │   ├── ui/                  # Primitive components (shadcn/ui style)
+│   │   │   ├── Button.tsx       # Reusable button with variants (primary, secondary, danger)
+│   │   │   ├── Card.tsx         # Card container with header, body, footer slots
+│   │   │   ├── Modal.tsx        # Dialog component with backdrop and focus trap
+│   │   │   ├── Input.tsx        # Form input with validation styles
+│   │   │   ├── Select.tsx       # Dropdown select with search
+│   │   │   ├── Toast.tsx        # Notification toast component
+│   │   │   ├── Spinner.tsx      # Loading indicator
+│   │   │   └── Avatar.tsx       # User profile image with fallback initials
+│   │   │
+│   │   ├── forms/               # Form components with validation
+│   │   │   ├── LoginForm.tsx    # Email/password + OTP form
+│   │   │   ├── RegisterForm.tsx # Multi-step registration (role selection)
+│   │   │   ├── AppointmentForm.tsx # Book appointment with doctor selection
+│   │   │   ├── BloodRequestForm.tsx # Emergency blood request form
+│   │   │   └── PrescriptionForm.tsx # Doctor's prescription creation form
+│   │   │
+│   │   ├── cards/               # Information display cards
+│   │   │   ├── DoctorCard.tsx   # Displays doctor info, rating, book button
+│   │   │   ├── HospitalCard.tsx # Shows beds, ICU, oxygen availability
+│   │   │   ├── BloodDonorCard.tsx # Donor info with contact and location
+│   │   │   ├── MedicineCard.tsx  # Medicine details, price, add to cart
+│   │   │   └── AppointmentCard.tsx # Upcoming appointment summary
+│   │   │
+│   │   ├── charts/             # Data visualization components
+│   │   │   ├── BloodStockChart.tsx # Bar chart showing blood group stock levels
+│   │   │   ├── HospitalLoadChart.tsx # ICU bed occupancy over time
+│   │   │   ├── EmergencyTrends.tsx # Emergency request patterns
+│   │   │   └── RevenueChart.tsx    # Doctor/pharmacy earnings analytics
+│   │   │
+│   │   ├── modals/             # Modal dialogs
+│   │   │   ├── ConfirmModal.tsx # Yes/No confirmation dialog
+│   │   │   ├── VideoCallModal.tsx # WebRTC video consultation popup
+│   │   │   ├── PrescriptionModal.tsx # View prescription details
+│   │   │   └── ReportModal.tsx    # Upload/view medical reports
+│   │   │
+│   │   ├── tables/             # Data tables with sorting/pagination
+│   │   │   ├── DataTable.tsx   # Generic table with TanStack Table
+│   │   │   ├── AppointmentsTable.tsx # List of appointments with actions
+│   │   │   ├── PatientsTable.tsx    # Doctor's patient list
+│   │   │   └── OrdersTable.tsx      # Pharmacy orders list
+│   │   │
+│   │   └── layouts/            # Layout components
+│   │       ├── Header.tsx      # Navigation bar with user menu
+│   │       ├── Sidebar.tsx     # Collapsible sidebar with role-based menu items
+│   │       ├── Footer.tsx      # Copyright, links, contact info
+│   │       └── DashboardLayout.tsx # Wrapper for authenticated pages
+│   │
+│   ├── features/               # Feature-based modules (domain logic)
+│   │   │
+│   │   ├── auth/               # Authentication feature
+│   │   │   ├── authSlice.ts    # Redux slice for auth state (user, token, role)
+│   │   │   ├── authAPI.ts      # RTK Query endpoints (login, register, verify)
+│   │   │   ├── types.ts        # User, LoginResponse, RegisterData types
+│   │   │   └── hooks.ts        # useAuth, useLogin custom hooks
+│   │   │
+│   │   ├── users/              # User profile management
+│   │   │   ├── userSlice.ts    # User data state management
+│   │   │   ├── userAPI.ts      # Fetch/update user profile
+│   │   │   ├── Profile.tsx     # User profile component
+│   │   │   └── Settings.tsx    # Account settings (password, notifications)
+│   │   │
+│   │   ├── doctors/            # Doctor management
+│   │   │   ├── doctorSlice.ts  # Selected doctor, search filters
+│   │   │   ├── doctorAPI.ts    # Fetch doctors by specialty, location
+│   │   │   ├── DoctorList.tsx  # Searchable, filterable doctor grid
+│   │   │   ├── DoctorProfile.tsx # Detailed doctor view with schedule
+│   │   │   └── ReviewSystem.tsx  # Rate and review doctors
+│   │   │
+│   │   ├── hospitals/          # Hospital management
+│   │   │   ├── hospitalSlice.ts # Hospital filters (beds, ICU, oxygen)
+│   │   │   ├── hospitalAPI.ts   # Fetch nearby hospitals, bed availability
+│   │   │   ├── HospitalList.tsx # Map view + list view
+│   │   │   ├── HospitalDashboard.tsx # Hospital admin panel
+│   │   │   └── ICUManager.tsx   # Real-time ICU bed tracking
+│   │   │
+│   │   ├── blood/              # Blood donation system
+│   │   │   ├── bloodSlice.ts   # Blood requests, donor filters
+│   │   │   ├── bloodAPI.ts     # Request blood, find donors
+│   │   │   ├── DonorRegistration.tsx # Register as blood donor
+│   │   │   ├── BloodRequest.tsx # Create emergency blood request
+│   │   │   ├── DonorSearch.tsx   # Filter donors by blood group, location
+│   │   │   └── DonationHistory.tsx # Track past donations, eligibility
+│   │   │
+│   │   ├── pharmacy/           # Pharmacy management
+│   │   │   ├── pharmacySlice.ts # Cart, orders, medicine filters
+│   │   │   ├── pharmacyAPI.ts   # Search medicines, place orders
+│   │   │   ├── MedicineSearch.tsx # Search with autocomplete
+│   │   │   ├── MedicineDetails.tsx # Full info, alternatives, side effects
+│   │   │   ├── Cart.tsx         # Shopping cart with prescriptions
+│   │   │   ├── Checkout.tsx     # Delivery address, payment
+│   │   │   └── OrderTracking.tsx # Real-time delivery status
+│   │   │
+│   │   ├── ambulance/          # Emergency ambulance service
+│   │   │   ├── ambulanceSlice.ts # Ambulance request state
+│   │   │   ├── ambulanceAPI.ts   # Request ambulance, track
+│   │   │   ├── SOSButton.tsx    # One-click emergency button
+│   │   │   ├── AmbulanceTracker.tsx # Live location tracking
+│   │   │   └── EmergencyContacts.tsx # Saved emergency numbers
+│   │   │
+│   │   ├── oxygen/             # Oxygen cylinder tracking
+│   │   │   ├── oxygenSlice.ts   # Oxygen availability filters
+│   │   │   ├── oxygenAPI.ts     # Check oxygen stock by hospital
+│   │   │   ├── OxygenStatus.tsx # Live oxygen availability map
+│   │   │   └── OxygenRequest.tsx # Request emergency oxygen
+│   │   │
+│   │   ├── appointments/       # Appointment booking
+│   │   │   ├── appointmentSlice.ts # Selected time slot, doctor
+│   │   │   ├── appointmentAPI.ts # Book, cancel, reschedule
+│   │   │   ├── BookingForm.tsx   # Date/time picker with available slots
+│   │   │   ├── VideoConsultation.tsx # WebRTC video call component
+│   │   │   └── PrescriptionView.tsx # Download/view prescription PDF
+│   │   │
+│   │   ├── women-care/         # Women's health section
+│   │   │   ├── womenSlice.ts    # Pregnancy tracking, cycle data
+│   │   │   ├── womenAPI.ts      # Save pregnancy records, vaccine tracking
+│   │   │   ├── CycleTracker.tsx # Menstrual cycle calendar
+│   │   │   ├── PregnancyTracker.tsx # Trimester tracking, appointments
+│   │   │   ├── VaccineReminder.tsx # Baby vaccine schedule
+│   │   │   └── GynecologistList.tsx # Find women specialists
+│   │   │
+│   │   ├── ai-health/          # AI-powered features
+│   │   │   ├── aiSlice.ts       # AI predictions state
+│   │   │   ├── aiAPI.ts         # Symptom check, medicine recommendations
+│   │   │   ├── SymptomChecker.tsx # Interactive symptom selection
+│   │   │   ├── Chatbot.tsx      # AI health assistant chat interface
+│   │   │   ├── DrugInteraction.tsx # Check medicine combinations
+│   │   │   └── RecoveryPredictor.tsx # Shows recovery timeline
+│   │   │
+│   │   ├── notifications/      # Real-time notifications
+│   │   │   ├── notificationSlice.ts # Unread count, notification list
+│   │   │   ├── notificationAPI.ts # Mark read, clear all
+│   │   │   ├── NotificationBell.tsx # Icon with badge, dropdown
+│   │   │   └── NotificationList.tsx # List with filters (emergency, appointments)
+│   │   │
+│   │   ├── analytics/          # Dashboard analytics
+│   │   │   ├── analyticsSlice.ts # Date range, filters
+│   │   │   ├── analyticsAPI.ts   # Fetch metrics, trends
+│   │   │   ├── AdminDashboard.tsx # System-wide analytics
+│   │   │   ├── DoctorStats.tsx   # Appointments, earnings, ratings
+│   │   │   └── HospitalMetrics.tsx # Bed occupancy, blood usage
+│   │   │
+│   │   └── emergency/          # Emergency response system
+│   │       ├── emergencySlice.ts # Active emergencies, SOS state
+│   │       ├── emergencyAPI.ts   # Trigger SOS, get nearest hospital
+│   │       ├── SOSPage.tsx       # Full-screen emergency interface
+│   │       ├── EmergencyMap.tsx  # Shows nearby hospitals, ambulances
+│   │       └── FamilyAlert.tsx   # Notify emergency contacts
+│   │
+│   ├── hooks/                  # Custom React hooks
+│   │   ├── useAuth.ts         # Access auth state and methods
+│   │   ├── useSocket.ts       # WebSocket connection management
+│   │   ├── useLocation.ts     # Get user location with fallback
+│   │   ├── useNotification.ts # Show toast/push notifications
+│   │   ├── useDebounce.ts     # Delay search input
+│   │   └── useRoleCheck.ts    # Check if user has specific role
+│   │
+│   ├── services/              # External service integrations
+│   │   ├── api/               # API client configuration
+│   │   │   ├── axiosInstance.ts # Configured axios with interceptors
+│   │   │   ├── endpoints.ts   # All API endpoint constants
+│   │   │   └── errorHandler.ts # Global error handling
+│   │   │
+│   │   ├── websocket/         # WebSocket setup
+│   │   │   ├── socket.ts      # Socket.io client initialization
+│   │   │   ├── handlers.ts    # Event listeners (new message, emergency)
+│   │   │   └── emitter.ts     # Send events (typing, join room)
+│   │   │
+│   │   ├── maps/              # Google Maps integration
+│   │   │   ├── MapLoader.ts   # Load Google Maps API script
+│   │   │   ├── HospitalMap.tsx # Show hospitals on map
+│   │   │   ├── AmbulanceTracker.tsx # Live ambulance location
+│   │   │   └── DistanceCalculator.ts # Get distance & ETA
+│   │   │
+│   │   └── firebase/          # Firebase services (optional)
+│   │       ├── config.ts      # Firebase initialization
+│   │       ├── auth.ts        # Google, Facebook OAuth
+│   │       └── storage.ts     # Upload medical reports
+│   │
+│   ├── pages/                 # Full page components (routes)
+│   │   ├── public/            # Public pages (no auth required)
+│   │   │   ├── Home.tsx       # Landing page with hero, features
+│   │   │   ├── About.tsx      # About the platform
+│   │   │   ├── Doctors.tsx    # Browse doctors without login
+│   │   │   ├── Hospitals.tsx  # Browse hospitals
+│   │   │   ├── Blood.tsx      # Blood donation info
+│   │   │   └── Pharmacy.tsx   # Browse medicines
+│   │   │
+│   │   ├── auth/              # Authentication pages
+│   │   │   ├── Login.tsx      # Login form with role selection
+│   │   │   ├── Register.tsx   # Multi-step registration
+│   │   │   ├── OTPVerify.tsx  # Email/phone verification
+│   │   │   ├── ForgotPassword.tsx # Reset password flow
+│   │   │   └── RoleSelect.tsx # Choose account type after signup
+│   │   │
+│   │   ├── dashboard/         # Role-based dashboards
+│   │   │   ├── patient/       # Patient dashboard
+│   │   │   │   ├── Dashboard.tsx # Overview: appointments, health timeline
+│   │   │   │   ├── Appointments.tsx # My appointments list
+│   │   │   │   ├── HealthRecords.tsx # Medical history, reports
+│   │   │   │   ├── Prescriptions.tsx # All prescriptions
+│   │   │   │   └── Settings.tsx   # Profile, notification settings
+│   │   │   │
+│   │   │   ├── doctor/        # Doctor dashboard
+│   │   │   │   ├── Dashboard.tsx # Today's appointments, earnings
+│   │   │   │   ├── Patients.tsx  # Assigned patient list
+│   │   │   │   ├── Schedule.tsx  # Set available time slots
+│   │   │   │   ├── Prescriptions.tsx # Create/manage prescriptions
+│   │   │   │   └── Earnings.tsx   # Consultation fee analytics
+│   │   │   │
+│   │   │   ├── hospital/      # Hospital admin dashboard
+│   │   │   │   ├── Dashboard.tsx # Beds, ICU, oxygen stats
+│   │   │   │   ├── Doctors.tsx   # Manage affiliated doctors
+│   │   │   │   ├── BloodStock.tsx # Update blood inventory
+│   │   │   │   ├── Oxygen.tsx     # Manage oxygen cylinders
+│   │   │   │   └── Ambulances.tsx # Fleet management
+│   │   │   │
+│   │   │   ├── pharmacy/      # Pharmacy dashboard
+│   │   │   │   ├── Dashboard.tsx # Orders, stock alerts
+│   │   │   │   ├── Inventory.tsx # Medicine stock management
+│   │   │   │   ├── Orders.tsx    # Incoming orders
+│   │   │   │   ├── Delivery.tsx  # Assign delivery partners
+│   │   │   │   └── Analytics.tsx # Sales reports
+│   │   │   │
+│   │   │   └── admin/         # Super admin dashboard
+│   │   │       ├── Dashboard.tsx # Platform-wide analytics
+│   │   │       ├── Users.tsx     # Manage all users, roles
+│   │   │       ├── Verifications.tsx # Approve doctors, hospitals
+│   │   │       ├── Analytics.tsx    # Blood, emergency, revenue stats
+│   │   │       └── Settings.tsx     # System configuration
+│   │   │
+│   │   └── errors/            # Error pages
+│   │       ├── 404.tsx        # Page not found
+│   │       ├── 403.tsx        # Forbidden (role insufficient)
+│   │       └── 500.tsx        # Server error
+│   │
+│   ├── layouts/               # Layout wrappers
+│   │   ├── PublicLayout.tsx   # Header + Footer for public pages
+│   │   ├── DashboardLayout.tsx # Sidebar + Header for authenticated
+│   │   ├── AuthLayout.tsx     # Centered form layout
+│   │   └── EmergencyLayout.tsx # Full-screen emergency view
+│   │
+│   ├── utils/                 # Utility functions
+│   │   ├── formatters.ts     # Date, currency, phone formatter
+│   │   ├── validators.ts     # Email, phone, blood group validation
+│   │   ├── helpers.ts        # Debounce, throttle, localStorage helpers
+│   │   ├── bloodCalculator.ts # Next donation date calculator
+│   │   └── errorLogger.ts    # Sentry or error tracking integration
+│   │
+│   ├── types/                 # TypeScript type definitions
+│   │   ├── user.types.ts     # User, Doctor, Patient interfaces
+│   │   ├── api.types.ts      # API request/response types
+│   │   ├── blood.types.ts    # Blood group, donation types
+│   │   └── emergency.types.ts # SOS, ambulance types
+│   │
+│   ├── constants/             # App constants
+│   │   ├── roles.ts          # User roles: ADMIN, DOCTOR, PATIENT etc.
+│   │   ├── bloodGroups.ts    # A+, A-, B+, B-, O+, O-, AB+, AB-
+│   │   ├── specialties.ts    # Doctor specialties list
+│   │   ├── apiEndpoints.ts   # All backend API URLs
+│   │   └── config.ts         # App config (app name, version)
+│   │
+│   ├── lib/                   # Third-party library configs
+│   │   ├── react-query.ts    # React Query client setup
+│   │   ├── axios.ts          # Axios interceptors
+│   │   └── i18n.ts           # Internationalization setup
+│   │
+│   ├── styles/                # Global styles
+│   │   ├── globals.css       # Tailwind imports, base styles
+│   │   ├── themes.ts         # Dark/light theme configuration
+│   │   └── animations.css    # Keyframes for animations
+│   │
+│   ├── i18n/                  # Internationalization
+│   │   ├── en/               # English translations
+│   │   ├── bn/               # Bengali translations
+│   │   └── index.ts          # i18n initialization
+│   │
+│   └── main.tsx              # React entry point (renders App)
+│
+├── .env                      # Environment variables (API_URL, MAPS_API_KEY)
+├── .env.example              # Template for environment variables
+├── .eslintrc.json           # ESLint rules for code quality
+├── .prettierrc              # Code formatting rules
+├── index.html               # HTML entry point
+├── package.json             # Dependencies: React, Redux, Tailwind, Socket.io
+├── tsconfig.json            # TypeScript configuration
+├── tsconfig.node.json       # Node-specific TS config
+├── vite.config.ts           # Vite build configuration
+└── tailwind.config.js       # Tailwind CSS customization
+
+
+
+
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
