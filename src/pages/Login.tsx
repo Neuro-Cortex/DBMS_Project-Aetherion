@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useDispatch } from 'react-redux';
-import { login } from '../components/slices/slices/authSlice';
+import { setUser } from '../components/slices/slices/authSlice';
+import type { User } from '../components/slices/slices/authSlice';
 import toast from 'react-hot-toast';
 import {
   Eye, EyeOff, Mail, Lock, ArrowRight, Fingerprint,
@@ -289,30 +290,42 @@ const Login: React.FC = () => {
       // Simulate API call with realistic delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Mock login - in production this would be an API call
-      dispatch(
-        login({
-          id: '1',
-          email: data.email,
-          fullName: 'John Doe',
-          primaryRole: 'patient',
-          roles: ['patient'],
-        })
+      const isHospitalLogin =
+        data.email.toLowerCase().includes('hospital') || data.email === 'hospital@aetherion.com';
+
+      const user: User = isHospitalLogin
+        ? {
+            id: 'hospital-1',
+            name: 'City General Hospital',
+            email: data.email,
+            phone: '+1 (555) 999-8888',
+            role: 'hospital',
+          }
+        : {
+            id: '1',
+            name: 'John Doe',
+            email: data.email,
+            phone: '+1 (555) 000-0000',
+            role: 'patient',
+          };
+
+      dispatch(setUser(user));
+
+      toast.success(
+        isHospitalLogin ? 'Welcome, Hospital Admin!' : 'Welcome back! Login successful.',
+        {
+          icon: '🎉',
+          style: {
+            borderRadius: '12px',
+            background: '#1a1a2e',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.1)',
+          },
+        }
       );
 
-      toast.success('Welcome back! Login successful.', {
-        icon: '🎉',
-        style: {
-          borderRadius: '12px',
-          background: '#1a1a2e',
-          color: '#fff',
-          border: '1px solid rgba(255,255,255,0.1)',
-        },
-      });
-
-      // Navigate after successful login
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate(isHospitalLogin ? '/hospital/dashboard' : '/dashboard');
       }, 500);
     } catch (err) {
       setError('Invalid email or password. Please try again.');

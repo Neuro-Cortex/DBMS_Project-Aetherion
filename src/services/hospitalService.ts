@@ -1,5 +1,282 @@
 // src/services/hospitalService.ts
+// src/services/hospitalService.ts
 
+import {
+  Hospital, HospitalDoctor, BloodDonor, BloodRequest,
+  Ambulance, EmergencyAnnouncement, Department,
+  ICUBed, HospitalDashboardData, OxygenStock
+} from '../types/hospital';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+class HospitalService {
+  private token: string = '';
+
+  setToken(token: string) {
+    this.token = token;
+  }
+
+  private getHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.token}`
+    };
+  }
+
+  // Hospital Profile
+  async getHospitalProfile(): Promise<Hospital> {
+    const response = await fetch(`${API_BASE_URL}/hospital/profile`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async updateHospitalProfile(data: Partial<Hospital>): Promise<Hospital> {
+    const response = await fetch(`${API_BASE_URL}/hospital/profile`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  }
+
+  // Dashboard
+  async getDashboardData(): Promise<HospitalDashboardData> {
+    const response = await fetch(`${API_BASE_URL}/hospital/dashboard`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  // Doctor Management
+  async getDoctors(): Promise<HospitalDoctor[]> {
+    const response = await fetch(`${API_BASE_URL}/hospital/doctors`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async addDoctor(data: Partial<HospitalDoctor>): Promise<HospitalDoctor> {
+    const response = await fetch(`${API_BASE_URL}/hospital/doctors`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  }
+
+  async updateDoctor(id: string, data: Partial<HospitalDoctor>): Promise<HospitalDoctor> {
+    const response = await fetch(`${API_BASE_URL}/hospital/doctors/${id}`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  }
+
+  async removeDoctor(id: string): Promise<void> {
+    await fetch(`${API_BASE_URL}/hospital/doctors/${id}`, {
+      method: 'DELETE',
+      headers: this.getHeaders()
+    });
+  }
+
+  // Department Management
+  async getDepartments(): Promise<Department[]> {
+    const response = await fetch(`${API_BASE_URL}/hospital/departments`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async addDepartment(data: Partial<Department>): Promise<Department> {
+    const response = await fetch(`${API_BASE_URL}/hospital/departments`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  }
+
+  async updateDepartment(id: string, data: Partial<Department>): Promise<Department> {
+    const response = await fetch(`${API_BASE_URL}/hospital/departments/${id}`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  }
+
+  // Blood Bank Management
+  async getBloodStock(): Promise<BloodStock[]> {
+    const response = await fetch(`${API_BASE_URL}/hospital/blood-stock`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async updateBloodStock(data: Partial<BloodStock>): Promise<void> {
+    await fetch(`${API_BASE_URL}/hospital/blood-stock`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data)
+    });
+  }
+
+  // Blood Donor Management
+  async getBloodDonors(): Promise<BloodDonor[]> {
+    const response = await fetch(`${API_BASE_URL}/hospital/blood-donors`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async approveBloodDonor(id: string): Promise<void> {
+    await fetch(`${API_BASE_URL}/hospital/blood-donors/${id}/approve`, {
+      method: 'POST',
+      headers: this.getHeaders()
+    });
+  }
+
+  async rejectBloodDonor(id: string, reason: string): Promise<void> {
+    await fetch(`${API_BASE_URL}/hospital/blood-donors/${id}/reject`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ reason })
+    });
+  }
+
+  // Blood Request Tracking
+  async getBloodRequests(): Promise<BloodRequest[]> {
+    const response = await fetch(`${API_BASE_URL}/hospital/blood-requests`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async processBloodRequest(id: string, status: string): Promise<void> {
+    await fetch(`${API_BASE_URL}/hospital/blood-requests/${id}/process`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ status })
+    });
+  }
+
+  // Ambulance Management
+  async getAmbulances(): Promise<Ambulance[]> {
+    const response = await fetch(`${API_BASE_URL}/hospital/ambulances`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async addAmbulance(data: Partial<Ambulance>): Promise<Ambulance> {
+    const response = await fetch(`${API_BASE_URL}/hospital/ambulances`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  }
+
+  async updateAmbulanceStatus(id: string, status: string): Promise<void> {
+    await fetch(`${API_BASE_URL}/hospital/ambulances/${id}/status`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ status })
+    });
+  }
+
+  async getAmbulanceRequests(): Promise<AmbulanceRequest[]> {
+    const response = await fetch(`${API_BASE_URL}/hospital/ambulance-requests`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async dispatchAmbulance(requestId: string, ambulanceId: string): Promise<void> {
+    await fetch(`${API_BASE_URL}/hospital/ambulance-requests/${requestId}/dispatch`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ ambulanceId })
+    });
+  }
+
+  // ICU Management
+  async getICUBeds(): Promise<ICUBed[]> {
+    const response = await fetch(`${API_BASE_URL}/hospital/icu-beds`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async updateICUBedStatus(id: string, status: string): Promise<void> {
+    await fetch(`${API_BASE_URL}/hospital/icu-beds/${id}/status`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ status })
+    });
+  }
+
+  // Oxygen Management
+  async getOxygenStock(): Promise<OxygenStock> {
+    const response = await fetch(`${API_BASE_URL}/hospital/oxygen-stock`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async updateOxygenStock(data: Partial<OxygenStock>): Promise<void> {
+    await fetch(`${API_BASE_URL}/hospital/oxygen-stock`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data)
+    });
+  }
+
+  // Emergency Announcements
+  async getAnnouncements(): Promise<EmergencyAnnouncement[]> {
+    const response = await fetch(`${API_BASE_URL}/hospital/announcements`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async createAnnouncement(data: Partial<EmergencyAnnouncement>): Promise<EmergencyAnnouncement> {
+    const response = await fetch(`${API_BASE_URL}/hospital/announcements`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  }
+
+  async deleteAnnouncement(id: string): Promise<void> {
+    await fetch(`${API_BASE_URL}/hospital/announcements/${id}`, {
+      method: 'DELETE',
+      headers: this.getHeaders()
+    });
+  }
+
+  // Analytics
+  async getAnalytics(period: string): Promise<HospitalAnalytics> {
+    const response = await fetch(`${API_BASE_URL}/hospital/analytics?period=${period}`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  // ICU Network
+  async getNearbyICUBeds(lat: number, lng: number, radius: number): Promise<ICUBed[]> {
+    const response = await fetch(
+      `${API_BASE_URL}/hospital/icu-network?lat=${lat}&lng=${lng}&radius=${radius}`,
+      { headers: this.getHeaders() }
+    );
+    return response.json();
+  }
+}
+
+export const hospitalService = new HospitalService();
 import api, { simulateDelay } from './api';
 
 // ============================================

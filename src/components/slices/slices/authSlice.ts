@@ -9,7 +9,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
-  role: 'patient' | 'doctor' | 'admin';
+  role: 'patient' | 'doctor' | 'admin' | 'hospital';
   avatar?: string;
   token?: string;
 }

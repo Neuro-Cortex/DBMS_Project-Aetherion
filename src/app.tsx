@@ -28,7 +28,18 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 // ============================================
 // COMMON
 // ============================================
+// App.tsx
+import React from 'react';
+import { OxygenDashboard } from './components/oxygen/OxygenDashboard';
 
+function App() {
+  return (
+    <OxygenDashboard 
+      onNavigate={(page) => console.log('Navigate to:', page)}
+      googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''}
+    />
+  );
+}
 import LoadingScreen from '@/components/common/LoadingScreen';
 
 // ============================================
@@ -187,7 +198,7 @@ import Dashboard from '../pages/Dashboard';
 
 const PatientDashboard = lazy(() => import('@/pages/dashboard/PatientDashboard'));
 const DoctorDashboard = lazy(() => import('@/pages/dashboard/DoctorDashboard'));
-const HospitalDashboard = lazy(() => import('@/pages/dashboard/HospitalDashboard'));
+const HospitalAdminPanel = lazy(() => import('@/pages/hospital/HospitalAdminPanel'));
 const PharmacyDashboard = lazy(() => import('@/pages/dashboard/PharmacyDashboard'));
 const AdminDashboard = lazy(() => import('@/pages/dashboard/AdminDashboard'));
 
@@ -238,7 +249,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" replace />;
   }
 
-  const role = user?.primaryRole;
+  const role =
+    (user as { primaryRole?: string; role?: string } | null)?.primaryRole ??
+    (user as { role?: string } | null)?.role;
 
   if (allowedRoles?.length && role && !allowedRoles.includes(role)) {
     return <Navigate to="/dashboard" replace />;
@@ -254,10 +267,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 const DashboardRouter: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const role = user?.primaryRole;
+  const role =
+    (user as { primaryRole?: string; role?: string } | null)?.primaryRole ??
+    (user as { role?: string } | null)?.role;
 
   if (role === 'doctor') return <DoctorDashboard />;
-  if (role === 'hospital_admin') return <HospitalDashboard />;
+  if (role === 'hospital' || role === 'hospital_admin' || role === 'hospital_authority') {
+    return <Navigate to="/hospital/dashboard" replace />;
+  }
   if (role === 'pharmacy_admin') return <PharmacyDashboard />;
   if (role === 'admin') return <AdminDashboard />;
 
@@ -290,6 +307,16 @@ const AppRoutes: React.FC = () => {
         <Route
           path="/register"
           element={isAuthenticated ? <Navigate to="/dashboard" /> : <Register />}
+        />
+
+        {/* HOSPITAL ADMIN (standalone layout) */}
+        <Route
+          path="/hospital/*"
+          element={
+            <ProtectedRoute allowedRoles={['hospital', 'hospital_admin', 'hospital_authority']}>
+              <HospitalAdminPanel />
+            </ProtectedRoute>
+          }
         />
 
         {/* DASHBOARD WRAPPER */}
@@ -340,7 +367,9 @@ const AppRoutes: React.FC = () => {
 const LayoutWrapper: React.FC = () => {
   const location = useLocation();
 
-  const hideLayout = ['/login', '/register'].includes(location.pathname);
+  const hideLayout =
+    ['/login', '/register'].includes(location.pathname) ||
+    location.pathname.startsWith('/hospital');
 
   return (
     <div className="min-h-screen flex flex-col bg-[#050508] text-white">

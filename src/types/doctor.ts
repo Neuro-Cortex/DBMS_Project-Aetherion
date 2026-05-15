@@ -1,152 +1,337 @@
 // src/types/doctor.ts
 
-// ============================================
-// DOCTOR TYPES (Completely self-contained)
-// ============================================
+export interface Doctor {
+  id: string;
+  email: string;
+  password?: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: 'male' | 'female' | 'other';
 
-// Base types (redefined locally)
-export type Gender = 'male' | 'female' | 'other' | 'prefer-not-to-say';
+  // Professional Info
+  specialization: string;
+  subSpecializations: string[];
+  qualifications: Qualification[];
+  experience: number; // years
+  licenseNumber: string;
+  medicalCouncil: string;
+
+  // Hospital Info
+  hospitalName: string;
+  hospitalAddress: Address;
+  department: string;
+  designation: string;
+
+  // Consultation
+  consultationFee: number;
+  followUpFee: number;
+  videoConsultationFee: number;
+  consultationDuration: number; // minutes
+  languages: string[];
+  consultationModes: ('in-person' | 'video' | 'phone')[];
+
+  // Availability
+  availabilitySchedule: WeeklySchedule;
+  isOnline: boolean;
+  isAvailable: boolean;
+  maxPatientsPerDay: number;
+
+  // Stats
+  rating: number;
+  reviewCount: number;
+  totalPatients: number;
+  totalConsultations: number;
+  successRate: number;
+  experience_years: number;
+
+  // Profile
+  about: string;
+  profileImage: string;
+  coverImage: string;
+  achievements: string[];
+  awards: Award[];
+  publications: Publication[];
+  memberships: string[];
+
+  // Contact
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  isActive: boolean;
+  joinedDate: string;
+
+  // Settings
+  notificationsEnabled: boolean;
+  smsAlertsEnabled: boolean;
+  emailAlertsEnabled: boolean;
+
+  address: string;
+  education: Education[];
+  status: 'online' | 'offline' | 'busy';
+}
+
+export interface Qualification {
+  degree: string;
+  institution: string;
+  year: number;
+  country: string;
+}
+
+export interface Education {
+  degree: string;
+  institution: string;
+  year: number;
+}
+
+export interface Award {
+  title: string;
+  organization: string;
+  year: number;
+  description?: string;
+}
+
+export interface Publication {
+  title: string;
+  journal: string;
+  year: number;
+  doi?: string;
+  citations?: number;
+}
 
 export interface Address {
-  street?: string;
+  street: string;
   city: string;
   state: string;
-  zipCode?: string;
+  zipCode: string;
   country: string;
   coordinates?: {
-    lat: number;
-    lng: number;
+    latitude: number;
+    longitude: number;
   };
 }
 
-export interface User {
+export interface WeeklySchedule {
+  monday: DaySchedule;
+  tuesday: DaySchedule;
+  wednesday: DaySchedule;
+  thursday: DaySchedule;
+  friday: DaySchedule;
+  saturday: DaySchedule;
+  sunday: DaySchedule;
+}
+
+export interface DaySchedule {
+  isAvailable: boolean;
+  slots: TimeSlot[];
+}
+
+export interface TimeSlot {
+  startTime: string;
+  endTime: string;
+  maxPatients: number;
+  currentPatients: number;
+  isAvailable: boolean;
+}
+
+export interface Patient {
   id: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
+  dateOfBirth: string;
+  bloodGroup: BloodGroup;
+  gender: string;
+  lastVisit: string;
+  totalVisits: number;
+  upcomingAppointment?: Appointment;
+  medicalHistory: PatientMedicalHistory;
+  currentMedications: Medication[];
+  allergies: string[];
+  notes?: string;
+}
+
+export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
+
+export interface PatientMedicalHistory {
+  conditions: MedicalCondition[];
+  surgeries: Surgery[];
+  familyHistory: string[];
+}
+
+export interface MedicalCondition {
   name: string;
-  firstName?: string;
-  lastName?: string;
-  role: 'patient' | 'doctor' | 'admin' | 'staff';
-  gender?: Gender;
-  avatar?: string;
-  dateOfBirth?: string;
-  address?: Address;
-  isVerified: boolean;
-  isActive: boolean;
+  diagnosedDate: string;
+  status: 'active' | 'resolved' | 'managed';
+  notes?: string;
+}
+
+export interface Surgery {
+  name: string;
+  date: string;
+  hospital: string;
+  notes?: string;
+}
+
+export interface Medication {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+  startDate: string;
+  endDate?: string;
+  prescribedBy: string;
+}
+
+export interface Appointment {
+  id: string;
+  patientId: string;
+  patientName: string;
+  patientPhone: string;
+  patientEmail: string;
+  date: string;
+  time: string;
+  duration: number;
+  type: 'in-person' | 'video' | 'phone';
+  status: 'scheduled' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled' | 'no-show';
+  reason: string;
+  symptoms?: string[];
+  isEmergency: boolean;
+  isFirstVisit: boolean;
+  notes?: string;
+  prescriptionId?: string;
+  followUpDate?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-// ============================================
-// DOCTOR SPECIFIC TYPES
-// ============================================
-export type DoctorStatus = 'available' | 'busy' | 'offline' | 'on-leave';
-
-export type DoctorVerificationStatus = 'verified' | 'pending' | 'rejected';
-
-export interface DoctorQualification {
-  degree: string;
-  institution: string;
-  year: number;
-  certificate?: string;
-}
-
-export interface TimeSlot {
-  time: string;
-  isAvailable: boolean;
-  appointmentId?: string;
-}
-
-export interface DaySchedule {
-  day: string;
-  isAvailable: boolean;
-  slots: TimeSlot[];
-  breakStart?: string;
-  breakEnd?: string;
-}
-
-export interface DoctorReview {
+export interface Prescription {
   id: string;
   patientId: string;
   patientName: string;
-  patientAvatar?: string;
-  rating: number;
-  comment: string;
+  doctorId: string;
+  doctorName: string;
+  appointmentId: string;
   date: string;
-  helpful: number;
-  verified: boolean;
-  response?: {
-    text: string;
-    date: string;
+  diagnosis: string;
+  symptoms: string[];
+  medications: PrescribedMedication[];
+  tests: PrescribedTest[];
+  advice: string;
+  followUpDate?: string;
+  validUntil: string;
+  isDigital: boolean;
+  digitalSignature?: string;
+  status: 'active' | 'completed' | 'expired';
+}
+
+export interface PrescribedMedication {
+  name: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  timing: 'before-food' | 'after-food' | 'with-food' | 'empty-stomach';
+  quantity: number;
+  refills: number;
+  instructions?: string;
+}
+
+export interface PrescribedTest {
+  name: string;
+  type: string;
+  instructions?: string;
+  isUrgent: boolean;
+}
+
+export interface BloodRequest {
+  id: string;
+  patientId: string;
+  patientName: string;
+  bloodGroup: BloodGroup;
+  units: number;
+  hospital: string;
+  urgency: 'normal' | 'urgent' | 'emergency';
+  status: 'pending' | 'approved' | 'rejected' | 'fulfilled';
+  requestDate: string;
+  requiredDate: string;
+  reason: string;
+  approvedBy?: string;
+  approvalDate?: string;
+}
+
+export interface VideoConsultation {
+  id: string;
+  appointmentId: string;
+  doctorId: string;
+  patientId: string;
+  patientName: string;
+  date: string;
+  startTime: string;
+  endTime?: string;
+  status: 'scheduled' | 'waiting' | 'in-progress' | 'completed' | 'missed';
+  roomId: string;
+  recordingUrl?: string;
+  notes?: string;
+}
+
+export interface DoctorDashboardData {
+  todayAppointments: Appointment[];
+  upcomingAppointments: Appointment[];
+  emergencyRequests: BloodRequest[];
+  pendingPrescriptions: Prescription[];
+  videoConsultations: VideoConsultation[];
+  recentPatients: Patient[];
+  earnings: EarningsData;
+  stats: DoctorStats;
+  activities: Activity[];
+  notifications: DoctorNotification[];
+}
+
+export interface EarningsData {
+  today: number;
+  thisWeek: number;
+  thisMonth: number;
+  total: number;
+  breakdown: {
+    consultations: number;
+    videoConsultations: number;
+    followUps: number;
+  };
+  chartData: {
+    labels: string[];
+    values: number[];
   };
 }
 
-// ============================================
-// CORE DOCTOR INTERFACE
-// ============================================
-export interface Doctor extends User {
-  role: 'doctor';
-  specialty: string;
-  subSpecialties: string[];
-  qualifications: DoctorQualification[];
-  medicalLicenseNumber: string;
-  experience: number;
-  rating: number;
-  reviewsCount: number;
-  consultationFee: number;
-  followUpFee?: number;
-  availableFor: ('in-person' | 'video' | 'phone')[];
-  languages: string[];
-  hospitalId: string;
-  hospitalName: string;
-  status: DoctorStatus;
-  verificationStatus: DoctorVerificationStatus;
-  bio?: string;
-  awards?: string[];
-  publications?: number;
-  schedule?: DaySchedule[];
-  nextAvailableSlot?: string;
-  image?: string;
-  waitingTime?: string;
-  insuranceAccepted?: string[];
+export interface DoctorStats {
+  totalPatients: number;
+  todayPatients: number;
+  completedAppointments: number;
+  cancelledAppointments: number;
+  averageRating: number;
+  totalReviews: number;
+  prescriptionCount: number;
+  videoConsultCount: number;
 }
 
-// ============================================
-// DOCTOR FILTERS
-// ============================================
-export interface DoctorFilters {
-  searchQuery?: string;
-  specialty?: string;
-  subSpecialty?: string;
-  minRating?: number;
-  maxFee?: number;
-  minExperience?: number;
-  availableFor?: 'in-person' | 'video' | 'phone';
-  location?: string;
-  hospitalId?: string;
-  gender?: Gender;
-  language?: string;
-  status?: DoctorStatus;
-  sortBy?: 'rating' | 'experience' | 'fee' | 'reviews' | 'name';
-  sortOrder?: 'asc' | 'desc';
-  page?: number;
-  limit?: number;
+export interface Activity {
+  id: string;
+  type: 'appointment' | 'prescription' | 'consultation' | 'review' | 'emergency';
+  description: string;
+  patientName?: string;
+  time: string;
+  status: 'completed' | 'pending' | 'cancelled';
 }
 
-// ============================================
-// DOCTOR STATE
-// ============================================
-export interface DoctorState {
-  doctors: Doctor[];
-  filteredDoctors: Doctor[];
-  selectedDoctor: Doctor | null;
-  filters: DoctorFilters;
-  specialties: string[];
-  schedule: DaySchedule[];
-  reviews: DoctorReview[];
-  isLoading: boolean;
-  error: string | null;
-  totalCount: number;
-  currentPage: number;
-  totalPages: number;
+export interface DoctorNotification {
+  id: string;
+  type: 'appointment' | 'emergency' | 'prescription' | 'review' | 'system';
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  actionUrl?: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
 }

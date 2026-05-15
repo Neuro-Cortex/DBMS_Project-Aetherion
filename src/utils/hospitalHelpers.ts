@@ -1,5 +1,5 @@
 // src/utils/hospitalHelpers.ts
-import type { Hospital, BedSummary, BedInfo } from '@/types/hospital';
+import type { HospitalListItem, BedSummary, BedInfo } from '@/types/hospital';
 
 // ============================================
 // Get bed summary regardless of format
@@ -32,53 +32,53 @@ export function getBedSummary(hospital: Hospital): BedSummary {
 // ============================================
 // Boolean helpers
 // ============================================
-export function hasEmergency(hospital: Hospital): boolean {
+export function hasEmergency(hospital: HospitalListItem): boolean {
   return !!(hospital.emergencyAvailable ?? hospital.emergency ?? false);
 }
 
-export function hasAmbulance(hospital: Hospital): boolean {
+export function hasAmbulance(hospital: HospitalListItem): boolean {
   return !!(hospital.ambulanceAvailable ?? hospital.ambulance ?? false);
 }
 
-export function hasBloodBank(hospital: Hospital): boolean {
+export function hasBloodBank(hospital: HospitalListItem): boolean {
   return !!(hospital.bloodBankAvailable ?? hospital.bloodBank ?? false);
 }
 
-export function hasOxygen(hospital: Hospital): boolean {
+export function hasOxygen(hospital: HospitalListItem): boolean {
   return !!(hospital.oxygenAvailable ?? hospital.oxygen ?? false);
 }
 
-export function isVerified(hospital: Hospital): boolean {
+export function isVerified(hospital: HospitalListItem): boolean {
   return !!(hospital.isVerified ?? hospital.verified ?? false);
 }
 
-export function isPremium(hospital: Hospital): boolean {
+export function isPremium(hospital: HospitalListItem): boolean {
   return !!(hospital.isPremium ?? hospital.premium ?? false);
 }
 
 // ============================================
 // Location helpers
 // ============================================
-export function getCity(hospital: Hospital): string {
+export function getCity(hospital: HospitalListItem): string {
   return hospital.location?.city ?? hospital.address?.city ?? 'Unknown';
 }
 
-export function getState(hospital: Hospital): string {
+export function getState(hospital: HospitalListItem): string {
   return hospital.location?.state ?? hospital.address?.state ?? '';
 }
 
-export function getPhone(hospital: Hospital): string {
+export function getPhone(hospital: HospitalListItem): string {
   return hospital.contact?.phone ?? '';
 }
 
-export function getEmergencyPhone(hospital: Hospital): string {
+export function getEmergencyPhone(hospital: HospitalListItem): string {
   return hospital.contact?.emergencyPhone ?? '';
 }
 
-export function getEmail(hospital: Hospital): string {
+export function getEmail(hospital: HospitalListItem): string {
   return hospital.contact?.email ?? '';
 }
 
-export function getEstablished(hospital: Hospital): number {
+export function getEstablished(hospital: HospitalListItem): number {
   return hospital.establishedYear ?? hospital.established ?? 0;
 }

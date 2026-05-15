@@ -1,7 +1,7 @@
 // src/data/hospitals.ts
-import type { Hospital } from '@/types/hospital';
+import type { HospitalListItem } from '@/types/hospital';
 
-export const hospitalsData: Hospital[] = [
+export const hospitalsData: HospitalListItem[] = [
   // ============================================
   // NEW YORK (1-10)
   // ============================================

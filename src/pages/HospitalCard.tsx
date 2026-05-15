@@ -7,7 +7,7 @@ import {
   Heart, ChevronRight, Building2, Users,
   Navigation, BadgeCheck, Wifi, Car, ChevronDown, Truck
 } from 'lucide-react';
-import type { Hospital, HospitalCardProps } from '@/types/hospital';
+import type { HospitalListItem, HospitalCardProps } from '@/types/hospital';
 import {
   getBedSummary, hasEmergency, hasAmbulance, hasBloodBank,
   hasOxygen, isVerified, isPremium, getCity, getState,

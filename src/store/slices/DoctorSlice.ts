@@ -11,7 +11,7 @@ import {
   DoctorStats,
   PatientReport,
   TimeSlot,
-} from '../../types/doctor';
+} from '../doctor';
 
 interface DoctorState {
   profile: DoctorProfile | null;

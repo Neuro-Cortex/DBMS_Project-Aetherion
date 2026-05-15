@@ -8,7 +8,7 @@ import { HospitalCard } from '@/pages/HospitalCard';
 import { BedAvailability } from 'src/pages/BedAvailability';
 import { Modal } from '@/components/ui/Modal';
 import { hospitalsData } from 'src/data/hospital';
-import type { Hospital } from '@/types/hospital';
+import type { HospitalListItem } from '@/types/hospital';
 
 // ============================================
 // MOCK BEDS DATA (for modal)
@@ -66,7 +66,7 @@ export const Hospitals: React.FC = () => {
     sortBy: 'rating',
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
+  const [selectedHospital, setSelectedHospital] = useState<HospitalListItem | null>(null);
   const [showBedModal, setShowBedModal] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -118,7 +118,7 @@ export const Hospitals: React.FC = () => {
     setCurrentPage(1);
   }, []);
 
-  const handleViewBeds = useCallback((hospital: Hospital) => {
+  const handleViewBeds = useCallback((hospital: HospitalListItem) => {
     setSelectedHospital(hospital);
     setShowBedModal(true);
   }, []);
