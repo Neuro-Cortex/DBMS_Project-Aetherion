@@ -271,6 +271,14 @@ The system will display:
 
 
 
+
+
+
+
+
+
+
+
 # 4. Smart Hospital Authority Panel
 commmunication 
 ## Features
@@ -337,6 +345,20 @@ The system will show:
 
 ---
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 5. Smart Blood Donation System
 only clint >> Narmal User << can share blood with anyoother 
 ## Features
@@ -374,6 +396,20 @@ commmunication
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 6. Oxygen Network System
 
 A smart oxygen emergency support system.
@@ -396,6 +432,15 @@ A smart oxygen emergency support system.
 * Nearest oxygen support center
 
 ---
+
+
+
+
+
+===============================================================
+
+
+
 
 # 7. Smart Admin Panel
 commmunication 
@@ -423,8 +468,6 @@ commmunication
 * Feedback Management
 * Emergency Monitoring
 
----
-
 ## Admin Dashboard Features
 
 * System analytics
@@ -436,6 +479,8 @@ commmunication
 
 ---
 
+
+===================================================================================================
 # 8. Women Extra Caring Section
 
 A dedicated healthcare support system for women.
