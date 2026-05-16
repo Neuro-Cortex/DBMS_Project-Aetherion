@@ -437,7 +437,6 @@ A smart oxygen emergency support system.
 
 
 
-===============================================================
 
 
 
@@ -480,7 +479,25 @@ commmunication
 ---
 
 
-===================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 8. Women Extra Caring Section
 
 A dedicated healthcare support system for women.
@@ -499,6 +516,30 @@ A dedicated healthcare support system for women.
 * Emergency Pregnancy Support
 
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # 9. Smart Pharmacy Management System
 A modern pharmacy support system connected with hospitals and clients.
@@ -585,6 +626,18 @@ The system will display:
 
 ---
 
+
+
+
+
+
+
+
+
+
+===================================================================================================
+
+===================================================================================================
 # 10. AI & Smart Automation Features
 
 ## AI Features
@@ -597,7 +650,56 @@ The system will display:
 * Recovery Prediction System
 * AI Emergency Support Chatbot
 
----
+
+```
+
+
+src/
+├── components/
+│   └── ai/
+│       ├── AIAssistant.tsx           (Main Chat Interface)
+│       ├── AIChatBox.tsx             (Chat Messages)
+│       ├── AIInputBox.tsx            (Message Input)
+│       ├── AIVoiceButton.tsx         (Voice Input)
+│       ├── AIResponseCard.tsx        (AI Response Display)
+│       ├── AIUserContext.tsx         (User Info Display)
+│       ├── AISuggestionChips.tsx     (Quick Suggestions)
+│       ├── AIMemoryPanel.tsx         (Memory View)
+│       └── AIDataCard.tsx            (SQL Data Display)
+├── services/
+│   └── aiService.ts                  (AI API Calls)
+├── hooks/
+│   └── useAIAssistant.ts            (AI Hook)
+└── types/
+    └── aiAssistant.ts               (AI Types)
+```
+
+
+===================================================================================================
+
+===================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # 11. Security System
 
