@@ -13,9 +13,9 @@ import {
   Eye, EyeOff, Volume2, Mic, Radio, Tv, Cast, Airplay,
   Layers, Grid, Layout, Columns, Split, PanelTop, PanelBottom
 } from 'lucide-react';
-import { GlassmorphicCard } from '@/components/ui/GlassmorphicCard';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { GlassmorphicCard } from 'src/ui/GlassmorphicCard';
+import { Button } from 'src/ui/Button';
+import { Badge } from 'src/ui/Badge';
 
 // ============================================
 // CONSTANTS

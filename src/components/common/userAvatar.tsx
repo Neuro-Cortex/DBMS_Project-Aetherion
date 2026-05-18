@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, Phone, MapPin, Calendar, Settings, LogOut, X, CheckCircle, Star } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { Badge } from '../ui/Badge';
+import { Badge } from 'src/ui/Badge';
 
 // ============================================
 // SIMPLE AVATAR COMPONENT

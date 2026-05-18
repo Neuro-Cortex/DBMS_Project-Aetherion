@@ -1,7 +1,7 @@
 // src/components/layout/DashboardLayout.tsx
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   Activity, Calendar, Users, Building2, Stethoscope,
   Pill, Baby, FileText, Sparkles
@@ -149,7 +149,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {/* Content Area */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
             className="bg-white/[0.015] backdrop-blur-sm rounded-2xl border border-white/[0.06] p-6 mb-8">
-            {children}
+            {children ?? <Outlet />}
           </motion.div>
         </div>
 

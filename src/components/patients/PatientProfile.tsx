@@ -28,7 +28,7 @@ import { Avatar } from '../../ui/Avatar';
 import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
 import { GlassmorphicCard } from '../../ui/GlassmorphicCard';
-import { Tabs } from '../../ui/Tabs';
+import { Tabs } from 'src/ui/Tab';
 
 // ============================================
 // TYPES & INTERFACES
@@ -363,7 +363,7 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
       {/* Tabs Content */}
       <GlassmorphicCard variant={variant} className="p-0 overflow-hidden">
         <Tabs
-          tabs={tabs}
+          tab={tabs}
           defaultTab="personal"
           onChange={setActiveTab}
           variant="glass"
@@ -643,3 +643,5 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
     </motion.div>
   );
 };
+
+export default PatientProfile;

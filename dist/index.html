@@ -1,0 +1,251 @@
+<!-- ============================================
+     AETHERION HEALTH — ENTRY POINT
+     Premium Healthcare Platform
+     ============================================ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- ============================================
+         BASIC META TAGS
+         ============================================ -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- ============================================
+         FAVICON & APP ICONS
+         ============================================ -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    
+    <!-- <link rel="manifest" href="/manifest.json" /> -->
+
+    <!-- ============================================
+         SEO META TAGS
+         ============================================ -->
+    <title>Aetherion Health — AI-Powered Healthcare Platform</title>
+    <meta name="description" content="Experience next-generation healthcare with real-time AI diagnostics, instant emergency response, telemedicine, smart pharmacy, and seamless appointment management — all in one platform." />
+    <meta name="keywords" content="healthcare, AI diagnostics, emergency, telemedicine, doctor appointment, smart pharmacy, hospital management, patient care, medical AI" />
+    <meta name="author" content="Aetherion Health Team" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#0a0a1a" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- ============================================
+         OPEN GRAPH (Facebook, WhatsApp, LinkedIn, Discord)
+         ============================================ -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Aetherion Health" />
+    <meta property="og:title" content="Aetherion Health — AI-Powered Healthcare Platform" />
+    <meta property="og:description" content="Your health, powered by AI. Real-time diagnostics, emergency response, telemedicine, and smart pharmacy — all in one intelligent platform." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://aetherion-health.com" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- ============================================
+         TWITTER CARD
+         ============================================ -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@aetherionhealth" />
+    <meta name="twitter:creator" content="@aetherionhealth" />
+    <meta name="twitter:title" content="Aetherion Health — AI-Powered Healthcare" />
+    <meta name="twitter:description" content="Your health, powered by AI. Real-time diagnostics, emergency response, telemedicine, and smart pharmacy." />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <!-- ============================================
+         GOOGLE FONTS — INTER (Primary) + JETBRAINS MONO (Code)
+         ============================================ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link 
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" 
+      rel="stylesheet" 
+    />
+
+    <!-- ============================================
+         GLOBAL STYLESHEET — Loaded as stylesheet, NOT preload
+         ============================================ -->
+
+    <!-- ============================================
+         INLINE CRITICAL CSS (Prevents Flash of Unstyled Content)
+         ============================================ -->
+    <style>
+      /* ---- CRITICAL RESET ---- */
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #0a0a1a;
+        color: #ffffff;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        isolation: isolate;
+      }
+
+      /* ---- FOCUS VISIBLE (Accessibility) ---- */
+      :focus-visible {
+        outline: 2px solid #06b6d4;
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+
+      /* ---- SELECTION ---- */
+      ::-moz-selection {
+        background: rgba(6, 182, 212, 0.3);
+        color: #ffffff;
+      }
+      ::selection {
+        background: rgba(6, 182, 212, 0.3);
+        color: #ffffff;
+      }
+
+      /* ---- IMAGES ---- */
+      img, video, svg {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      /* ---- SCROLLBAR (Fallback for non-custom) ---- */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #1e293b;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #06b6d4, #a855f7);
+        border-radius: 10px;
+      }
+
+      /* ============================================
+         APP LOADER (Shown until React mounts)
+         ============================================ */
+      .app-loader {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: #0a0a1a;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .app-loader .logo-pulse {
+        width: 56px;
+        height: 56px;
+        position: relative;
+      }
+
+      .app-loader .logo-pulse::before {
+        content: '';
+        position: absolute;
+        inset: -8px;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, #06b6d4, #a855f7, #ec4899, #06b6d4);
+        animation: logo-spin 2s linear infinite;
+      }
+
+      .app-loader .logo-pulse::after {
+        content: '';
+        position: absolute;
+        inset: 2px;
+        border-radius: 50%;
+        background: #0a0a1a;
+      }
+
+      .app-loader .spinner-text {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        animation: pulse-text 2s ease-in-out infinite;
+      }
+
+      @keyframes logo-spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      @keyframes pulse-text {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+      }
+
+      /* ---- Reduced Motion ---- */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-COLLEqZp.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/redux-DabiTOow.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-ovDfzkmd.js">
+    <link rel="modulepreload" crossorigin href="/assets/motion-wmL3MpUL.js">
+    <link rel="modulepreload" crossorigin href="/assets/icons-ebbOAvDu.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CEONtLNV.css">
+  </head>
+
+  <body>
+    <!-- ============================================
+         ROOT ELEMENT — React mounts here
+         ============================================ -->
+    <div id="root">
+      <!-- Loading spinner — removed automatically when React hydrates -->
+      <div class="app-loader">
+        <div class="logo-pulse"></div>
+        <p class="spinner-text">Aetherion</p>
+      </div>
+    </div>
+
+    <!-- ============================================
+         REACT ENTRY POINT
+         ============================================ -->
+
+    <!-- ============================================
+         NOSCRIPT FALLBACK
+         ============================================ -->
+    <noscript>
+      <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #0a0a1a; color: #fff; font-family: 'Inter', sans-serif; text-align: center; padding: 20px;">
+        <div>
+          <h1 style="font-size: 2rem; margin-bottom: 1rem;">JavaScript Required</h1>
+          <p style="color: rgba(255,255,255,0.6);">Please enable JavaScript to experience Aetherion Health.</p>
+        </div>
+      </div>
+    </noscript>
+  </body>
+</html>

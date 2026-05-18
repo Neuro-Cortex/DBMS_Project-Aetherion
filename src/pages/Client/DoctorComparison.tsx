@@ -1,7 +1,7 @@
 // src/pages/client/DoctorComparison.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ClientSidebar from '../../components/client/ClientSidebar';
+import ClientSidebar from 'src/components/client/clientSidebar';
 import {
   Stethoscope, Star, DollarSign, MapPin, Clock,
   Award, GraduationCap, Search, Filter, ChevronRight,
@@ -308,6 +308,14 @@ const ClientDoctorComparison: React.FC = () => {
                 ].map((row, i) => (
                   <tr key={i} className="border-b border-white/[0.02]">
                     <td className="py-3 text-white/50">{row.label}</td>
+
+
+
+
+
+
+
+
                     {comparedDoctors.map(d => (
                       <td key={d.id} className="py-3 text-center text-white">
                         {row.isBoolean ? (
@@ -316,7 +324,11 @@ const ClientDoctorComparison: React.FC = () => {
                           ) : (
                             <XCircle className="w-5 h-5 text-red-400 mx-auto" />
                           )
-                        ) : (
+                        ) :
+                        
+                        
+                        
+                        (
                           <span className={row.key === 'consultationFee' ? 'text-emerald-400 font-medium' : ''}>
                             {row.prefix || ''}{d[row.key as keyof Doctor]}{row.suffix || ''}
                           </span>
@@ -327,6 +339,25 @@ const ClientDoctorComparison: React.FC = () => {
                 ))}
               </tbody>
             </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             {/* Book Button */}
             <div className="mt-6 text-center">

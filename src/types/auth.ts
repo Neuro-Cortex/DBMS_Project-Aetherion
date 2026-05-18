@@ -1,15 +1,21 @@
 // src/types/auth.ts
-export type AccountRole = 
+export type AccountRole =
   | 'normal_user'
+  | 'client'
   | 'doctor'
+  | 'hospital'
+  | 'hospital_admin'
   | 'hospital_authority'
   | 'blood_donor'
   | 'pharmacy'
-  | 'admin_applicant';
+  | 'pharmacy_admin'
+  | 'admin'
+  | 'admin_applicant'
+  | 'emergency_volunteer';
 
-export type Gender = 'male' | 'female';
+export type Gender = 'male' | 'female' | 'other';
 
-export type ProfileUpgrade = 
+export type ProfileUpgrade =
   | 'client_patient'
   | 'blood_donor'
   | 'pharmacy_user'
@@ -19,8 +25,11 @@ export interface UserProfile {
   id: string;
   email: string;
   fullName: string;
+  name?: string;
+  phone?: string;
   gender: Gender;
   primaryRole: AccountRole;
+  role?: AccountRole;
   roles: AccountRole[];
   upgrades: ProfileUpgrade[];
   isAdminApproved: boolean;
@@ -79,54 +88,9 @@ export interface HospitalAddress {
   country: string;
 }
 
-
-// src/types/auth.ts
-export type AccountRole = 
-  | 'normal_user'
-  | 'doctor'
-  | 'hospital_authority'
-  | 'blood_donor'
-  | 'pharmacy'
-  | 'admin_applicant';
-
-
-  // ✅ All 4 upgrades defined
-ProfileUpgrade = 'client_patient' | 'blood_donor' | 'pharmacy_user' | 'emergency_volunteer'
-
-// ✅ Upgrade UI with features displayed
-- Client/Patient Profile (Full healthcare access)
-- Blood Donor Profile (Donation tracking)
-- Pharmacy User (Medicine ordering)
-- Emergency Volunteer (Crisis response)
-
-  // ✅ All 6 types defined
-AccountRole = 'normal_user' | 'doctor' | 'hospital_authority' | 'blood_donor' | 'pharmacy' | 'admin_applicant'
-
-// ✅ All displayed with icons, badges, and descriptions
-- Normal User / Client (Flexible badge)
-- Doctor (Professional badge)
-- Hospital Authority (Institution badge)
-- Blood Donor (Lifesaver badge)
-- Pharmacy (Business badge)
-- Apply for Admin Access (Advanced badge)
-
-export type Gender = 'male' | 'female';
-
-export type ProfileUpgrade = 
-  | 'client_patient'
-  | 'blood_donor'
-  | 'pharmacy_user'
-  | 'emergency_volunteer';
-
-export interface UserProfile {
-  id: string;
-  email: string;
-  fullName: string;
-  gender: Gender;
-  primaryRole: AccountRole;
-  roles: AccountRole[];
-  upgrades: ProfileUpgrade[];
-  isAdminApproved: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+/*
+Legacy design notes preserved:
+- Profile upgrades: Client/Patient, Blood Donor, Pharmacy User, Emergency Volunteer.
+- Account roles: Normal User, Doctor, Hospital Authority, Blood Donor, Pharmacy, Admin Applicant.
+- Registration UI displays icons, badges, and descriptions for all role choices.
+*/

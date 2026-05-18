@@ -197,333 +197,336 @@ const DoctorProfile: React.FC = () => {
 };
 
 export default DoctorProfile;
-
-
-============================================
-// TYPES
+// 
+// /*
+// Legacy prop-driven DoctorProfile variant preserved below for reference.
+// It was pasted after the active page component and caused duplicate exports.
 // ============================================
-export interface Doctor {
-  id: string;
-  name: string;
-  title: string;
-  specialty: string;
-  avatar?: string;
-  rating: number;
-  reviewCount: number;
-  experience: number;
-  price: number;
-  location: string;
-  hospital: string;
-  availableSlots: number;
-  nextAvailable: string;
-  verified: boolean;
-  premium?: boolean;
-  languages: string[];
-  services: string[];
-  education: string[];
-  achievements: string[];
-}
-
-export interface DoctorProfileProps {
-  doctor: Doctor;
-  onBookAppointment?: () => void;
-  onContact?: (method: 'call' | 'video' | 'message') => void;
-  onShare?: () => void;
-  onPrint?: () => void;
-  className?: string;
-}
-
-interface Review {
-  id: string;
-  patient: { name: string; avatar?: string };
-  rating: number;
-  date: string;
-  comment: string;
-  helpful: number;
-}
-
-// ============================================
-// MOCK REVIEWS
-// ============================================
-const mockReviews: Review[] = [
-  { id: '1', patient: { name: 'Sarah Johnson' }, rating: 5, date: '2024-01-15', comment: 'Exceptional care! Dr. explained my condition in detail and provided a comprehensive treatment plan. Highly recommended.', helpful: 24 },
-  { id: '2', patient: { name: 'Mike Chen' }, rating: 5, date: '2024-01-10', comment: 'Very professional and caring. The staff was also very helpful. Great experience overall.', helpful: 18 },
-  { id: '3', patient: { name: 'Emily Davis' }, rating: 4, date: '2024-01-05', comment: 'Good experience overall. Waiting time was a bit long but the consultation was thorough and informative.', helpful: 12 },
-  { id: '4', patient: { name: 'Robert Wilson' }, rating: 5, date: '2024-01-02', comment: 'Dr. saved my life! Incredible cardiologist with amazing bedside manner.', helpful: 35 },
-];
-
-// ============================================
-// MAIN COMPONENT
-// ============================================
-export const DoctorProfile: React.FC<DoctorProfileProps> = ({
-  doctor,
-  onBookAppointment,
-  onContact,
-  onShare,
-  onPrint,
-  className = '',
-}) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'experience' | 'reviews' | 'availability'>('overview');
-  const [showAllReviews, setShowAllReviews] = useState(false);
-
-  const tabs = [
-    { id: 'overview' as const, label: 'Overview', icon: User },
-    { id: 'experience' as const, label: 'Experience', icon: Briefcase },
-    { id: 'reviews' as const, label: 'Reviews', icon: Star },
-    { id: 'availability' as const, label: 'Availability', icon: Calendar },
-  ];
-
-  const displayedReviews = showAllReviews ? mockReviews : mockReviews.slice(0, 3);
-
-  return (
-    <div className={`max-w-6xl mx-auto p-6 space-y-6 ${className}`}>
-
-      {/* ============================================ */}
-      {/* HEADER CARD */}
-      {/* ============================================ */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-white/[0.015] backdrop-blur-sm rounded-2xl border border-white/[0.06] p-6 md:p-8">
-        
-        <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* LEFT — Doctor Info */}
-          <div className="flex-1">
-            <div className="flex items-start gap-5 mb-6">
-              {/* Avatar */}
-              <div className="relative shrink-0">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-3xl shadow-xl">
-                  {doctor.name.charAt(0)}
-                </div>
-                {doctor.verified && (
-                  <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-cyan-500 rounded-full flex items-center justify-center border-2 border-[#050508]">
-                    <Shield className="w-3.5 h-3.5 text-white" />
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">{doctor.name}</h1>
-                <p className="text-white/50 text-sm mb-2">{doctor.title}</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="info" size="xs">{doctor.specialty}</Badge>
-                  {doctor.premium && <Badge variant="warning" size="xs">PREMIUM</Badge>}
-                  <span className="flex items-center gap-1 text-white/30 text-xs"><MapPin className="w-3 h-3" />{doctor.location}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              {[
-                { label: 'Rating', value: doctor.rating, icon: Star, color: 'text-amber-400', suffix: `/5` },
-                { label: 'Reviews', value: doctor.reviewCount, icon: Users, color: 'text-blue-400', suffix: '+' },
-                { label: 'Experience', value: doctor.experience, icon: Award, color: 'text-purple-400', suffix: ' yrs' },
-                { label: 'Price', value: `$${doctor.price}`, icon: DollarSign, color: 'text-emerald-400', suffix: '' },
-              ].map((stat, i) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={i} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] text-center">
-                    <Icon className={`w-5 h-5 mx-auto mb-1.5 ${stat.color}`} />
-                    <p className="text-lg font-bold text-white">{stat.value}<span className="text-sm font-normal text-white/40">{stat.suffix}</span></p>
-                    <p className="text-white/30 text-[10px]">{stat.label}</p>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3">
-              <Button variant="gradient" size="sm" onClick={onBookAppointment} className="gap-2">
-                <Calendar className="w-4 h-4" /> Book Appointment
-              </Button>
-              <Button variant="glass" size="sm" onClick={() => onContact?.('call')} className="gap-2">
-                <Phone className="w-4 h-4" /> Call
-              </Button>
-              <Button variant="glass" size="sm" onClick={() => onContact?.('video')} className="gap-2">
-                <Video className="w-4 h-4" /> Video
-              </Button>
-              <Button variant="glass" size="sm" onClick={() => onContact?.('message')} className="gap-2">
-                <MessageSquare className="w-4 h-4" /> Message
-              </Button>
-              <Button variant="glass" size="sm" onClick={onShare} className="gap-2">
-                <Share2 className="w-4 h-4" /> Share
-              </Button>
-            </div>
-          </div>
-
-          {/* RIGHT — Quick Info Cards */}
-          <div className="lg:w-72 space-y-4">
-            {/* Availability */}
-            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-              <h3 className="text-white font-semibold text-sm mb-3">Next Available</h3>
-              <p className="text-xl font-bold text-cyan-400 mb-2">{doctor.nextAvailable}</p>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-white/40 text-xs">Available Slots</span>
-                <Badge variant={doctor.availableSlots > 0 ? 'success' : 'danger'} size="xs">{doctor.availableSlots} slots</Badge>
-              </div>
-            </div>
-
-            {/* Languages */}
-            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-              <h3 className="text-white font-semibold text-sm mb-3">Languages</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {doctor.languages.map((lang) => (
-                  <span key={lang} className="px-2 py-0.5 rounded-md bg-white/[0.03] text-white/50 text-[10px] border border-white/[0.04]">{lang}</span>
-                ))}
-              </div>
-            </div>
-
-            {/* Hospital */}
-            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-              <h3 className="text-white font-semibold text-sm mb-3">Hospital</h3>
-              <p className="text-white/50 text-xs">{doctor.hospital}</p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* ============================================ */}
-      {/* TAB NAVIGATION */}
-      {/* ============================================ */}
-      <div className="flex items-center gap-1 bg-white/[0.02] rounded-xl p-1 w-fit">
-        {tabs.map(tab => {
-          const Icon = tab.icon;
-          return (
-            <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id ? 'bg-white/[0.08] text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}>
-              <Icon className="w-4 h-4" />{tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ============================================ */}
-      {/* TAB CONTENT */}
-      {/* ============================================ */}
-      <div className="bg-white/[0.015] rounded-2xl border border-white/[0.06] p-6">
-        
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-white font-semibold text-lg mb-3">About</h3>
-              <p className="text-white/50 text-sm leading-relaxed">
-                Dr. {doctor.name.split(' ').slice(-1)[0]} is a highly skilled {doctor.specialty.toLowerCase()} with over {doctor.experience} years of experience. 
-                Board-certified and dedicated to providing exceptional patient care through evidence-based medicine and compassionate approach.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold text-lg mb-3">Services</h3>
-              <div className="flex flex-wrap gap-2">
-                {doctor.services.map((service) => (
-                  <span key={service} className="px-3 py-1.5 rounded-lg bg-white/[0.03] text-white/50 text-xs border border-white/[0.04]">{service}</span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold text-lg mb-3">Achievements</h3>
-              <div className="space-y-2">
-                {doctor.achievements.map((achievement) => (
-                  <div key={achievement} className="flex items-center gap-2 text-white/40 text-sm">
-                    <Award className="w-4 h-4 text-amber-400 shrink-0" />{achievement}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'experience' && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-white font-semibold text-lg mb-3">Education</h3>
-              <div className="space-y-3">
-                {doctor.education.map((edu) => (
-                  <div key={edu} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02]">
-                    <BookOpen className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span className="text-white/60 text-sm">{edu}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold text-lg mb-3">Languages</h3>
-              <div className="flex flex-wrap gap-2">
-                {doctor.languages.map((lang) => (
-                  <span key={lang} className="px-3 py-1.5 rounded-lg bg-white/[0.03] text-white/50 text-xs border border-white/[0.04] flex items-center gap-1.5">
-                    <Globe className="w-3 h-3" />{lang}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'reviews' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-white font-semibold text-lg">Patient Reviews ({mockReviews.length})</h3>
-              <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
-                <span className="text-white font-bold text-lg">{doctor.rating}</span>
-                <span className="text-white/30 text-sm">({doctor.reviewCount} reviews)</span>
-              </div>
-            </div>
-            {displayedReviews.map((review) => (
-              <div key={review.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
-                      {review.patient.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-white text-sm font-medium">{review.patient.name}</p>
-                      <p className="text-white/25 text-[10px]">{review.date}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? 'text-amber-400 fill-amber-400' : 'text-white/10'}`} />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-white/50 text-sm">{review.comment}</p>
-                <div className="flex items-center gap-3 mt-3">
-                  <button type="button" className="flex items-center gap-1 text-white/30 text-xs hover:text-white/50 transition-colors">
-                    <ThumbsUp className="w-3 h-3" /> Helpful ({review.helpful})
-                  </button>
-                </div>
-              </div>
-            ))}
-            {mockReviews.length > 3 && (
-              <button type="button" onClick={() => setShowAllReviews(!showAllReviews)}
-                className="w-full py-2 text-white/40 text-xs hover:text-white/70 transition-colors">
-                {showAllReviews ? 'Show less' : `Show all ${mockReviews.length} reviews`}
-              </button>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'availability' && (
-          <div className="space-y-4">
-            <h3 className="text-white font-semibold text-lg mb-3">Availability</h3>
-            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-white/50 text-sm">Next Available</span>
-                <span className="text-cyan-400 font-bold">{doctor.nextAvailable}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-white/50 text-sm">Available Slots Today</span>
-                <Badge variant={doctor.availableSlots > 0 ? 'success' : 'danger'} size="xs">{doctor.availableSlots}</Badge>
-              </div>
-            </div>
-            <Button variant="gradient" size="sm" onClick={onBookAppointment} className="w-full gap-2">
-              <Calendar className="w-4 h-4" /> Book Appointment
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default DoctorProfile;
+// // TYPES
+// // ============================================
+// export interface Doctor {
+//   id: string;
+//   name: string;
+//   title: string;
+//   specialty: string;
+//   avatar?: string;
+//   rating: number;
+//   reviewCount: number;
+//   experience: number;
+//   price: number;
+//   location: string;
+//   hospital: string;
+//   availableSlots: number;
+//   nextAvailable: string;
+//   verified: boolean;
+//   premium?: boolean;
+//   languages: string[];
+//   services: string[];
+//   education: string[];
+//   achievements: string[];
+// }
+// 
+// export interface DoctorProfileProps {
+//   doctor: Doctor;
+//   onBookAppointment?: () => void;
+//   onContact?: (method: 'call' | 'video' | 'message') => void;
+//   onShare?: () => void;
+//   onPrint?: () => void;
+//   className?: string;
+// }
+// 
+// interface Review {
+//   id: string;
+//   patient: { name: string; avatar?: string };
+//   rating: number;
+//   date: string;
+//   comment: string;
+//   helpful: number;
+// }
+// 
+// // ============================================
+// // MOCK REVIEWS
+// // ============================================
+// const mockReviews: Review[] = [
+//   { id: '1', patient: { name: 'Sarah Johnson' }, rating: 5, date: '2024-01-15', comment: 'Exceptional care! Dr. explained my condition in detail and provided a comprehensive treatment plan. Highly recommended.', helpful: 24 },
+//   { id: '2', patient: { name: 'Mike Chen' }, rating: 5, date: '2024-01-10', comment: 'Very professional and caring. The staff was also very helpful. Great experience overall.', helpful: 18 },
+//   { id: '3', patient: { name: 'Emily Davis' }, rating: 4, date: '2024-01-05', comment: 'Good experience overall. Waiting time was a bit long but the consultation was thorough and informative.', helpful: 12 },
+//   { id: '4', patient: { name: 'Robert Wilson' }, rating: 5, date: '2024-01-02', comment: 'Dr. saved my life! Incredible cardiologist with amazing bedside manner.', helpful: 35 },
+// ];
+// 
+// // ============================================
+// // MAIN COMPONENT
+// // ============================================
+// export const DoctorProfile: React.FC<DoctorProfileProps> = ({
+//   doctor,
+//   onBookAppointment,
+//   onContact,
+//   onShare,
+//   onPrint,
+//   className = '',
+// }) => {
+//   const [activeTab, setActiveTab] = useState<'overview' | 'experience' | 'reviews' | 'availability'>('overview');
+//   const [showAllReviews, setShowAllReviews] = useState(false);
+// 
+//   const tabs = [
+//     { id: 'overview' as const, label: 'Overview', icon: User },
+//     { id: 'experience' as const, label: 'Experience', icon: Briefcase },
+//     { id: 'reviews' as const, label: 'Reviews', icon: Star },
+//     { id: 'availability' as const, label: 'Availability', icon: Calendar },
+//   ];
+// 
+//   const displayedReviews = showAllReviews ? mockReviews : mockReviews.slice(0, 3);
+// 
+//   return (
+//     <div className={`max-w-6xl mx-auto p-6 space-y-6 ${className}`}>
+// 
+//       {/* ============================================ */}
+//       {/* HEADER CARD */}
+//       {/* ============================================ */}
+//       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+//         className="bg-white/[0.015] backdrop-blur-sm rounded-2xl border border-white/[0.06] p-6 md:p-8">
+//         
+//         <div className="flex flex-col lg:flex-row gap-8">
+//           
+//           {/* LEFT — Doctor Info */}
+//           <div className="flex-1">
+//             <div className="flex items-start gap-5 mb-6">
+//               {/* Avatar */}
+//               <div className="relative shrink-0">
+//                 <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-3xl shadow-xl">
+//                   {doctor.name.charAt(0)}
+//                 </div>
+//                 {doctor.verified && (
+//                   <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-cyan-500 rounded-full flex items-center justify-center border-2 border-[#050508]">
+//                     <Shield className="w-3.5 h-3.5 text-white" />
+//                   </div>
+//                 )}
+//               </div>
+// 
+//               <div>
+//                 <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">{doctor.name}</h1>
+//                 <p className="text-white/50 text-sm mb-2">{doctor.title}</p>
+//                 <div className="flex flex-wrap items-center gap-2">
+//                   <Badge variant="info" size="xs">{doctor.specialty}</Badge>
+//                   {doctor.premium && <Badge variant="warning" size="xs">PREMIUM</Badge>}
+//                   <span className="flex items-center gap-1 text-white/30 text-xs"><MapPin className="w-3 h-3" />{doctor.location}</span>
+//                 </div>
+//               </div>
+//             </div>
+// 
+//             {/* Quick Stats */}
+//             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+//               {[
+//                 { label: 'Rating', value: doctor.rating, icon: Star, color: 'text-amber-400', suffix: `/5` },
+//                 { label: 'Reviews', value: doctor.reviewCount, icon: Users, color: 'text-blue-400', suffix: '+' },
+//                 { label: 'Experience', value: doctor.experience, icon: Award, color: 'text-purple-400', suffix: ' yrs' },
+//                 { label: 'Price', value: `$${doctor.price}`, icon: DollarSign, color: 'text-emerald-400', suffix: '' },
+//               ].map((stat, i) => {
+//                 const Icon = stat.icon;
+//                 return (
+//                   <div key={i} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] text-center">
+//                     <Icon className={`w-5 h-5 mx-auto mb-1.5 ${stat.color}`} />
+//                     <p className="text-lg font-bold text-white">{stat.value}<span className="text-sm font-normal text-white/40">{stat.suffix}</span></p>
+//                     <p className="text-white/30 text-[10px]">{stat.label}</p>
+//                   </div>
+//                 );
+//               })}
+//             </div>
+// 
+//             {/* Action Buttons */}
+//             <div className="flex flex-wrap gap-3">
+//               <Button variant="gradient" size="sm" onClick={onBookAppointment} className="gap-2">
+//                 <Calendar className="w-4 h-4" /> Book Appointment
+//               </Button>
+//               <Button variant="glass" size="sm" onClick={() => onContact?.('call')} className="gap-2">
+//                 <Phone className="w-4 h-4" /> Call
+//               </Button>
+//               <Button variant="glass" size="sm" onClick={() => onContact?.('video')} className="gap-2">
+//                 <Video className="w-4 h-4" /> Video
+//               </Button>
+//               <Button variant="glass" size="sm" onClick={() => onContact?.('message')} className="gap-2">
+//                 <MessageSquare className="w-4 h-4" /> Message
+//               </Button>
+//               <Button variant="glass" size="sm" onClick={onShare} className="gap-2">
+//                 <Share2 className="w-4 h-4" /> Share
+//               </Button>
+//             </div>
+//           </div>
+// 
+//           {/* RIGHT — Quick Info Cards */}
+//           <div className="lg:w-72 space-y-4">
+//             {/* Availability */}
+//             <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+//               <h3 className="text-white font-semibold text-sm mb-3">Next Available</h3>
+//               <p className="text-xl font-bold text-cyan-400 mb-2">{doctor.nextAvailable}</p>
+//               <div className="flex items-center justify-between mb-3">
+//                 <span className="text-white/40 text-xs">Available Slots</span>
+//                 <Badge variant={doctor.availableSlots > 0 ? 'success' : 'danger'} size="xs">{doctor.availableSlots} slots</Badge>
+//               </div>
+//             </div>
+// 
+//             {/* Languages */}
+//             <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+//               <h3 className="text-white font-semibold text-sm mb-3">Languages</h3>
+//               <div className="flex flex-wrap gap-1.5">
+//                 {doctor.languages.map((lang) => (
+//                   <span key={lang} className="px-2 py-0.5 rounded-md bg-white/[0.03] text-white/50 text-[10px] border border-white/[0.04]">{lang}</span>
+//                 ))}
+//               </div>
+//             </div>
+// 
+//             {/* Hospital */}
+//             <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+//               <h3 className="text-white font-semibold text-sm mb-3">Hospital</h3>
+//               <p className="text-white/50 text-xs">{doctor.hospital}</p>
+//             </div>
+//           </div>
+//         </div>
+//       </motion.div>
+// 
+//       {/* ============================================ */}
+//       {/* TAB NAVIGATION */}
+//       {/* ============================================ */}
+//       <div className="flex items-center gap-1 bg-white/[0.02] rounded-xl p-1 w-fit">
+//         {tabs.map(tab => {
+//           const Icon = tab.icon;
+//           return (
+//             <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
+//               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id ? 'bg-white/[0.08] text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}>
+//               <Icon className="w-4 h-4" />{tab.label}
+//             </button>
+//           );
+//         })}
+//       </div>
+// 
+//       {/* ============================================ */}
+//       {/* TAB CONTENT */}
+//       {/* ============================================ */}
+//       <div className="bg-white/[0.015] rounded-2xl border border-white/[0.06] p-6">
+//         
+//         {activeTab === 'overview' && (
+//           <div className="space-y-6">
+//             <div>
+//               <h3 className="text-white font-semibold text-lg mb-3">About</h3>
+//               <p className="text-white/50 text-sm leading-relaxed">
+//                 Dr. {doctor.name.split(' ').slice(-1)[0]} is a highly skilled {doctor.specialty.toLowerCase()} with over {doctor.experience} years of experience. 
+//                 Board-certified and dedicated to providing exceptional patient care through evidence-based medicine and compassionate approach.
+//               </p>
+//             </div>
+//             <div>
+//               <h3 className="text-white font-semibold text-lg mb-3">Services</h3>
+//               <div className="flex flex-wrap gap-2">
+//                 {doctor.services.map((service) => (
+//                   <span key={service} className="px-3 py-1.5 rounded-lg bg-white/[0.03] text-white/50 text-xs border border-white/[0.04]">{service}</span>
+//                 ))}
+//               </div>
+//             </div>
+//             <div>
+//               <h3 className="text-white font-semibold text-lg mb-3">Achievements</h3>
+//               <div className="space-y-2">
+//                 {doctor.achievements.map((achievement) => (
+//                   <div key={achievement} className="flex items-center gap-2 text-white/40 text-sm">
+//                     <Award className="w-4 h-4 text-amber-400 shrink-0" />{achievement}
+//                   </div>
+//                 ))}
+//               </div>
+//             </div>
+//           </div>
+//         )}
+// 
+//         {activeTab === 'experience' && (
+//           <div className="space-y-6">
+//             <div>
+//               <h3 className="text-white font-semibold text-lg mb-3">Education</h3>
+//               <div className="space-y-3">
+//                 {doctor.education.map((edu) => (
+//                   <div key={edu} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02]">
+//                     <BookOpen className="w-4 h-4 text-cyan-400 shrink-0" />
+//                     <span className="text-white/60 text-sm">{edu}</span>
+//                   </div>
+//                 ))}
+//               </div>
+//             </div>
+//             <div>
+//               <h3 className="text-white font-semibold text-lg mb-3">Languages</h3>
+//               <div className="flex flex-wrap gap-2">
+//                 {doctor.languages.map((lang) => (
+//                   <span key={lang} className="px-3 py-1.5 rounded-lg bg-white/[0.03] text-white/50 text-xs border border-white/[0.04] flex items-center gap-1.5">
+//                     <Globe className="w-3 h-3" />{lang}
+//                   </span>
+//                 ))}
+//               </div>
+//             </div>
+//           </div>
+//         )}
+// 
+//         {activeTab === 'reviews' && (
+//           <div className="space-y-4">
+//             <div className="flex items-center justify-between">
+//               <h3 className="text-white font-semibold text-lg">Patient Reviews ({mockReviews.length})</h3>
+//               <div className="flex items-center gap-2">
+//                 <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+//                 <span className="text-white font-bold text-lg">{doctor.rating}</span>
+//                 <span className="text-white/30 text-sm">({doctor.reviewCount} reviews)</span>
+//               </div>
+//             </div>
+//             {displayedReviews.map((review) => (
+//               <div key={review.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+//                 <div className="flex items-center justify-between mb-2">
+//                   <div className="flex items-center gap-3">
+//                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+//                       {review.patient.name.charAt(0)}
+//                     </div>
+//                     <div>
+//                       <p className="text-white text-sm font-medium">{review.patient.name}</p>
+//                       <p className="text-white/25 text-[10px]">{review.date}</p>
+//                     </div>
+//                   </div>
+//                   <div className="flex items-center gap-0.5">
+//                     {Array.from({ length: 5 }).map((_, i) => (
+//                       <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? 'text-amber-400 fill-amber-400' : 'text-white/10'}`} />
+//                     ))}
+//                   </div>
+//                 </div>
+//                 <p className="text-white/50 text-sm">{review.comment}</p>
+//                 <div className="flex items-center gap-3 mt-3">
+//                   <button type="button" className="flex items-center gap-1 text-white/30 text-xs hover:text-white/50 transition-colors">
+//                     <ThumbsUp className="w-3 h-3" /> Helpful ({review.helpful})
+//                   </button>
+//                 </div>
+//               </div>
+//             ))}
+//             {mockReviews.length > 3 && (
+//               <button type="button" onClick={() => setShowAllReviews(!showAllReviews)}
+//                 className="w-full py-2 text-white/40 text-xs hover:text-white/70 transition-colors">
+//                 {showAllReviews ? 'Show less' : `Show all ${mockReviews.length} reviews`}
+//               </button>
+//             )}
+//           </div>
+//         )}
+// 
+//         {activeTab === 'availability' && (
+//           <div className="space-y-4">
+//             <h3 className="text-white font-semibold text-lg mb-3">Availability</h3>
+//             <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+//               <div className="flex items-center justify-between mb-4">
+//                 <span className="text-white/50 text-sm">Next Available</span>
+//                 <span className="text-cyan-400 font-bold">{doctor.nextAvailable}</span>
+//               </div>
+//               <div className="flex items-center justify-between">
+//                 <span className="text-white/50 text-sm">Available Slots Today</span>
+//                 <Badge variant={doctor.availableSlots > 0 ? 'success' : 'danger'} size="xs">{doctor.availableSlots}</Badge>
+//               </div>
+//             </div>
+//             <Button variant="gradient" size="sm" onClick={onBookAppointment} className="w-full gap-2">
+//               <Calendar className="w-4 h-4" /> Book Appointment
+//             </Button>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+// 
+// export default DoctorProfile;
+// */

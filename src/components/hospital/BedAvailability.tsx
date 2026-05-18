@@ -1,251 +1,577 @@
 // src/components/hospital/BedAvailability.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Bed, Activity, Heart, Baby, Users, TrendingUp,
-  AlertTriangle, CheckCircle, RefreshCw, Shield
+  Bed, Activity, TrendingUp, TrendingDown, Clock, AlertTriangle,
+  CheckCircle2, Minus, Plus, Users, Heart, Shield, Zap,
+  ChevronRight, RefreshCw, Wifi, WifiOff, Calendar, Info
 } from 'lucide-react';
-import { GlassmorphicCard } from '@/components/ui/GlassmorphicCard';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 
 // ============================================
 // TYPES
 // ============================================
-export interface BedData {
+
+interface BedType {
+  id: string;
   type: string;
+  icon: React.ElementType;
   total: number;
   occupied: number;
   available: number;
   price: number;
   features: string[];
+  color: string;
+  priority: 'critical' | 'high' | 'normal' | 'low';
 }
 
-export interface BedAvailabilityProps {
-  beds: BedData[];
-  hospitalId: string;
-  hospitalName?: string;
-  realTime?: boolean;
-  updateInterval?: number;
-  onBedBooking?: (type: string, count: number) => void;
-  onAlert?: (message: string) => void;
-  className?: string;
+interface BedStats {
+  totalBeds: number;
+  totalOccupied: number;
+  totalAvailable: number;
+  occupancyRate: number;
+  lastUpdated: Date;
 }
 
 // ============================================
-// BED TYPE CONFIG
+// MOCK DATA
 // ============================================
-const bedTypeConfig: Record<string, { icon: React.ElementType; color: string; label: string; description: string }> = {
-  general: { icon: Bed, color: 'blue', label: 'General Beds', description: 'Standard inpatient care' },
-  icu: { icon: Activity, color: 'red', label: 'ICU Beds', description: 'Critical care with monitoring' },
-  pediatric: { icon: Baby, color: 'pink', label: 'Pediatric Beds', description: 'Specialized for children' },
-  maternity: { icon: Heart, color: 'purple', label: 'Maternity Beds', description: 'Labor and delivery care' },
-  emergency: { icon: Users, color: 'amber', label: 'Emergency Beds', description: '24/7 emergency care' },
-  isolation: { icon: Shield, color: 'emerald', label: 'Isolation Beds', description: 'Infectious disease control' },
-  cardiac: { icon: Heart, color: 'rose', label: 'Cardiac Beds', description: 'Heart care unit' },
+
+const initialBeds: BedType[] = [
+  {
+    id: 'icu',
+    type: 'Intensive Care Unit',
+    icon: Heart,
+    total: 50,
+    occupied: 45,
+    available: 5,
+    price: 2500,
+    features: ['Ventilator Support', 'Cardiac Monitor', '24/7 Specialist', 'Isolation Ready'],
+    color: 'from-red-500 to-rose-600',
+    priority: 'critical',
+  },
+  {
+    id: 'emergency',
+    type: 'Emergency Ward',
+    icon: Zap,
+    total: 30,
+    occupied: 22,
+    available: 8,
+    price: 1800,
+    features: ['Trauma Care', 'Rapid Response', 'Lab Access', 'Pharmacy Nearby'],
+    color: 'from-orange-500 to-amber-600',
+    priority: 'critical',
+  },
+  {
+    id: 'cardiac',
+    type: 'Cardiac Care',
+    icon: Activity,
+    total: 25,
+    occupied: 18,
+    available: 7,
+    price: 2000,
+    features: ['ECG Monitoring', 'Echo Lab', 'Cardiologist 24/7', 'Cath Lab Access'],
+    color: 'from-pink-500 to-rose-600',
+    priority: 'high',
+  },
+  {
+    id: 'maternity',
+    type: 'Maternity Ward',
+    icon: Users,
+    total: 20,
+    occupied: 14,
+    available: 6,
+    price: 1500,
+    features: ['Delivery Suite', 'NICU Access', 'Lactation Support', 'Family Room'],
+    color: 'from-purple-500 to-violet-600',
+    priority: 'high',
+  },
+  {
+    id: 'pediatric',
+    type: 'Pediatric Ward',
+    icon: Heart,
+    total: 25,
+    occupied: 15,
+    available: 10,
+    price: 1200,
+    features: ['Child-Friendly', 'Play Area', 'Parent Accommodation', 'Pediatric Specialist'],
+    color: 'from-blue-500 to-cyan-600',
+    priority: 'normal',
+  },
+  {
+    id: 'general',
+    type: 'General Ward',
+    icon: Bed,
+    total: 150,
+    occupied: 110,
+    available: 40,
+    price: 800,
+    features: ['Attached Bathroom', 'TV', 'WiFi', 'Room Service'],
+    color: 'from-emerald-500 to-teal-600',
+    priority: 'low',
+  },
+];
+
+// ============================================
+// SUB-COMPONENTS
+// ============================================
+
+// Status Indicator
+const StatusBadge: React.FC<{ available: number; total: number }> = ({ available, total }) => {
+  const percentage = (available / total) * 100;
+  
+  if (percentage <= 10) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-medium">
+        <AlertTriangle className="w-3 h-3" />
+        Critical
+      </span>
+    );
+  }
+  if (percentage <= 25) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-medium">
+        <TrendingDown className="w-3 h-3" />
+        Limited
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-medium">
+      <CheckCircle2 className="w-3 h-3" />
+      Available
+    </span>
+  );
 };
+
+// Progress Bar
+const ProgressBar: React.FC<{
+  value: number;
+  max: number;
+  color: string;
+  showLabel?: boolean;
+}> = ({ value, max, color, showLabel = true }) => {
+  const percentage = Math.round((value / max) * 100);
+  
+  return (
+    <div className="space-y-1.5">
+      {showLabel && (
+        <div className="flex justify-between items-center">
+          <span className="text-white/40 text-xs font-medium">{value} of {max} beds</span>
+          <span className="text-white/30 text-[10px] font-mono">{percentage}%</span>
+        </div>
+      )}
+      <div className="h-2 bg-white/[0.04] rounded-full overflow-hidden">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className={`h-full bg-gradient-to-r ${color} rounded-full relative`}
+        >
+          {/* Shine effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 animate-shimmer" />
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+// Live Indicator
+const LiveIndicator: React.FC<{ isLive: boolean; lastUpdated: Date }> = ({ isLive, lastUpdated }) => (
+  <div className="flex items-center gap-2">
+    <span className="relative flex h-2 w-2">
+      {isLive && (
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+      )}
+      <span className={`relative inline-flex rounded-full h-2 w-2 ${isLive ? 'bg-emerald-400' : 'bg-red-400'}`} />
+    </span>
+    <span className="text-white/30 text-xs">
+      {isLive ? 'Live' : 'Offline'} • Updated {lastUpdated.toLocaleTimeString()}
+    </span>
+  </div>
+);
 
 // ============================================
 // MAIN COMPONENT
 // ============================================
-export const BedAvailability: React.FC<BedAvailabilityProps> = ({
-  beds: initialBeds,
-  hospitalId,
-  hospitalName = '',
-  realTime = false,
-  updateInterval = 5000,
-  onBedBooking,
-  onAlert,
-  className = '',
-}) => {
-  const [beds, setBeds] = useState<BedData[]>(initialBeds);
-  const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [bookingCount, setBookingCount] = useState(1);
-  const [alerts, setAlerts] = useState<string[]>([]);
 
-  // Real-time updates
+export const BedAvailability: React.FC<{
+  beds?: BedType[];
+  hospitalId?: string;
+  hospitalName?: string;
+  realTime?: boolean;
+  compact?: boolean;
+}> = ({
+  beds: initialBedData,
+  hospitalId,
+  hospitalName = 'Selected Hospital',
+  realTime = true,
+  compact = false,
+}) => {
+  // State
+  const [beds, setBeds] = useState<BedType[]>(initialBedData || initialBeds);
+  const [isLive, setIsLive] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [selectedBed, setSelectedBed] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Calculate overall stats
+  const stats: BedStats = useMemo(() => {
+    const totalBeds = beds.reduce((sum, bed) => sum + bed.total, 0);
+    const totalOccupied = beds.reduce((sum, bed) => sum + bed.occupied, 0);
+    const totalAvailable = beds.reduce((sum, bed) => sum + bed.available, 0);
+    return {
+      totalBeds,
+      totalOccupied,
+      totalAvailable,
+      occupancyRate: Math.round((totalOccupied / totalBeds) * 100),
+      lastUpdated,
+    };
+  }, [beds, lastUpdated]);
+
+  // Real-time simulation
   useEffect(() => {
     if (!realTime) return;
+
     const interval = setInterval(() => {
-      setBeds(prev => prev.map(bed => {
-        const change = Math.random() > 0.7 ? (Math.random() > 0.5 ? 1 : -1) : 0;
-        const newOccupied = Math.max(0, Math.min(bed.total, bed.occupied + change));
-        const newAvailable = bed.total - newOccupied;
-        if (newAvailable < 3 && !alerts.includes(bed.type)) {
-          const config = bedTypeConfig[bed.type] || { label: bed.type };
-          const alert = `${config.label} critically low! Only ${newAvailable} beds left`;
-          setAlerts(prev => [...prev, alert]);
-          onAlert?.(alert);
-        }
-        return { ...bed, occupied: newOccupied, available: newAvailable };
-      }));
-    }, updateInterval);
+      setBeds(prev =>
+        prev.map(bed => {
+          const change = Math.floor(Math.random() * 3) - 1; // -1, 0, or +1
+          const newOccupied = Math.max(0, Math.min(bed.total, bed.occupied + change));
+          return {
+            ...bed,
+            occupied: newOccupied,
+            available: bed.total - newOccupied,
+          };
+        })
+      );
+      setLastUpdated(new Date());
+    }, 10000);
+
     return () => clearInterval(interval);
-  }, [realTime, updateInterval, alerts, onAlert]);
+  }, [realTime]);
 
-  // Clear alerts after 30 seconds
+  // Simulate connection loss
   useEffect(() => {
-    if (alerts.length === 0) return;
-    const timer = setTimeout(() => setAlerts([]), 30000);
-    return () => clearTimeout(timer);
-  }, [alerts]);
+    if (!realTime) return;
+    
+    const connectionCheck = setInterval(() => {
+      setIsLive(Math.random() > 0.15);
+    }, 30000);
 
-  const handleBooking = (type: string) => {
-    onBedBooking?.(type, bookingCount);
-    setSelectedType(null);
-    setBookingCount(1);
+    return () => clearInterval(connectionCheck);
+  }, [realTime]);
+
+  // Refresh handler
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setLastUpdated(new Date());
+      setIsRefreshing(false);
+    }, 1500);
   };
 
-  const totalBeds = beds.reduce((acc, bed) => acc + bed.total, 0);
-  const totalAvailable = beds.reduce((acc, bed) => acc + bed.available, 0);
-  const overallUtilization = totalBeds > 0 ? Math.round(((totalBeds - totalAvailable) / totalBeds) * 100) : 0;
+  // Get occupancy color
+  const getOccupancyColor = (rate: number) => {
+    if (rate > 85) return 'text-red-400';
+    if (rate > 70) return 'text-amber-400';
+    return 'text-emerald-400';
+  };
 
-  // Mini stat cards data
-  const statCards = [
-    { label: 'Total Beds', value: totalBeds, icon: Bed, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-    { label: 'Available', value: totalAvailable, icon: CheckCircle, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { label: 'Utilization', value: `${overallUtilization}%`, icon: TrendingUp, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-    { label: 'ICU Available', value: beds.find(b => b.type === 'icu')?.available || 0, icon: Activity, color: 'text-red-400', bg: 'bg-red-500/10' },
-  ];
+  // Format currency
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className={`space-y-6 ${className}`}>
-
+    <div className={`space-y-6 ${compact ? '' : 'p-6'}`}>
+      {/* ============================================ */}
       {/* HEADER */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+      {/* ============================================ */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-[-0.02em]">Bed Availability</h2>
-          <p className="text-white/35 text-sm mt-1">{hospitalName || `Hospital #${hospitalId}`} • Real-time bed tracking</p>
+          <h2 className="text-xl md:text-2xl font-bold text-white tracking-[-0.01em]">
+            Bed Availability
+          </h2>
+          {hospitalName && (
+            <p className="text-white/40 text-sm mt-0.5">{hospitalName}</p>
+          )}
         </div>
+
         <div className="flex items-center gap-3">
-          <Badge variant={realTime ? 'success' : 'info'} size="xs" className="gap-1">
-            <span className={`w-1.5 h-1.5 rounded-full ${realTime ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`} />
-            {realTime ? 'Live' : 'Static'}
-          </Badge>
-          <Button variant="glass" size="sm" onClick={() => setBeds([...beds])} className="gap-2">
-            <RefreshCw className="w-4 h-4" /> Refresh
-          </Button>
+          {/* View Toggle */}
+          {!compact && (
+            <div className="flex bg-white/[0.03] rounded-lg border border-white/[0.06] p-0.5">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  viewMode === 'grid' ? 'bg-white/[0.08] text-white' : 'text-white/40 hover:text-white/70'
+                }`}
+              >
+                Grid
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  viewMode === 'list' ? 'bg-white/[0.08] text-white' : 'text-white/40 hover:text-white/70'
+                }`}
+              >
+                List
+              </button>
+            </div>
+          )}
+
+          {/* Refresh */}
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="p-2 bg-white/[0.03] hover:bg-white/[0.06] rounded-lg border border-white/[0.06] transition-all disabled:opacity-50"
+            aria-label="Refresh data"
+          >
+            <RefreshCw className={`w-4 h-4 text-white/50 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
+
+          {/* Live Status */}
+          <LiveIndicator isLive={isLive} lastUpdated={lastUpdated} />
         </div>
       </div>
 
-      {/* ALERTS */}
-      <AnimatePresence>
-        {alerts.length > 0 && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-2 overflow-hidden">
-            {alerts.map((alert, i) => (
-              <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-                className="flex items-center justify-between p-4 rounded-xl bg-red-500/10 border border-red-500/20">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-5 h-5 text-red-400" />
-                  <p className="text-white text-sm font-medium">{alert}</p>
-                </div>
-                <button type="button" onClick={() => setAlerts(prev => prev.filter(a => a !== alert))} className="text-white/40 hover:text-white/70 text-xs transition-colors">Dismiss</button>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* STATS */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {statCards.map((stat, i) => {
+      {/* ============================================ */}
+      {/* OVERVIEW STATS */}
+      {/* ============================================ */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          {
+            label: 'Total Beds',
+            value: stats.totalBeds,
+            icon: Bed,
+            color: 'text-blue-400',
+            bg: 'bg-blue-500/10',
+          },
+          {
+            label: 'Available Now',
+            value: stats.totalAvailable,
+            icon: CheckCircle2,
+            color: 'text-emerald-400',
+            bg: 'bg-emerald-500/10',
+          },
+          {
+            label: 'Currently Occupied',
+            value: stats.totalOccupied,
+            icon: Users,
+            color: 'text-amber-400',
+            bg: 'bg-amber-500/10',
+          },
+          {
+            label: 'Occupancy Rate',
+            value: `${stats.occupancyRate}%`,
+            icon: Activity,
+            color: getOccupancyColor(stats.occupancyRate),
+            bg: 'bg-purple-500/10',
+          },
+        ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-              whileHover={{ y: -2 }} className={`${stat.bg} rounded-xl border border-white/[0.06] p-4 text-center hover:border-white/[0.15] transition-all`}>
-              <Icon className={`w-5 h-5 mx-auto mb-2 ${stat.color}`} />
-              <div className="text-xl font-bold text-white">{stat.value}</div>
-              <div className="text-white/35 text-[11px] font-medium">{stat.label}</div>
+            <motion.div
+              key={`stat-${idx}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className={`${stat.bg} backdrop-blur-sm rounded-xl p-4 border border-white/[0.06]`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <Icon className={`w-4 h-4 ${stat.color}`} />
+              </div>
+              <div className="text-xl md:text-2xl font-bold text-white tracking-tight">
+                {stat.value}
+              </div>
+              <div className="text-white/30 text-xs mt-0.5">{stat.label}</div>
             </motion.div>
           );
         })}
       </div>
 
+      {/* ============================================ */}
+      {/* OCCUPANCY BAR */}
+      {/* ============================================ */}
+      <div className="bg-white/[0.015] backdrop-blur-sm rounded-xl p-5 border border-white/[0.06]">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-white/50 text-sm font-medium">Overall Occupancy</span>
+          <span className={`text-sm font-bold ${getOccupancyColor(stats.occupancyRate)}`}>
+            {stats.occupancyRate}%
+          </span>
+        </div>
+        <div className="h-3 bg-white/[0.04] rounded-full overflow-hidden flex">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${stats.occupancyRate}%` }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 rounded-full relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0 animate-shimmer" />
+          </motion.div>
+          <div
+            className="h-full bg-white/[0.03] rounded-r-full"
+            style={{ width: `${100 - stats.occupancyRate}%` }}
+          />
+        </div>
+        <div className="flex justify-between mt-2">
+          <span className="text-white/25 text-[10px]">
+            {stats.totalOccupied} occupied
+          </span>
+          <span className="text-white/25 text-[10px]">
+            {stats.totalAvailable} available
+          </span>
+        </div>
+      </div>
+
+      {/* ============================================ */}
       {/* BED TYPE CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {beds.map((bed, index) => {
-          const config = bedTypeConfig[bed.type] || bedTypeConfig.general;
-          const Icon = config.icon;
-          const utilization = bed.total > 0 ? Math.round(((bed.total - bed.available) / bed.total) * 100) : 0;
-          const isCritical = bed.available < 3;
+      {/* ============================================ */}
+      <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3'}>
+        {beds.map((bed, idx) => {
+          const Icon = bed.icon;
+          const percentage = Math.round((bed.available / bed.total) * 100);
+          const isSelected = selectedBed === bed.id;
 
           return (
-            <motion.div key={bed.type} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.08 }}
-              whileHover={{ y: -3 }} onClick={() => setSelectedType(bed.type)}
-              className={`relative bg-white/[0.015] rounded-2xl border p-5 cursor-pointer transition-all duration-300 ${isCritical ? 'border-red-500/30 bg-red-500/[0.02]' : 'border-white/[0.06] hover:border-white/[0.12]'}`}>
-              
-              {isCritical && (
-                <div className="absolute top-3 right-3">
-                  <Badge variant="danger" size="xs" className="animate-pulse gap-1"><AlertTriangle className="w-3 h-3" />Critical</Badge>
+            <motion.div
+              key={bed.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.08 }}
+              whileHover={{ y: -2 }}
+              onClick={() => setSelectedBed(isSelected ? null : bed.id)}
+              className={`cursor-pointer bg-white/[0.015] backdrop-blur-sm rounded-xl border transition-all duration-300 ${
+                isSelected
+                  ? 'border-white/20 bg-white/[0.03]'
+                  : 'border-white/[0.06] hover:border-white/[0.12]'
+              } overflow-hidden`}
+            >
+              {/* Card Header */}
+              <div className="p-4 md:p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${bed.color} bg-opacity-20 flex items-center justify-center`}>
+                      <Icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-white font-semibold text-sm md:text-base">
+                        {bed.type}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <StatusBadge available={bed.available} total={bed.total} />
+                        <span className="text-white/20 text-[10px]">
+                          {formatPrice(bed.price)}/day
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className={`w-4 h-4 text-white/20 transition-transform duration-300 ${isSelected ? 'rotate-90' : ''}`} />
                 </div>
-              )}
 
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-10 h-10 rounded-xl bg-${config.color}-500/10 border border-white/[0.08] flex items-center justify-center`}>
-                  <Icon className={`w-5 h-5 text-${config.color}-400`} />
+                {/* Bed Count */}
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex-1">
+                    <ProgressBar value={bed.available} max={bed.total} color={bed.color} showLabel={false} />
+                  </div>
                 </div>
-                <Badge variant={bed.available > 5 ? 'success' : bed.available > 0 ? 'warning' : 'danger'} size="xs">{bed.available} free</Badge>
+
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/30">
+                    <span className="text-emerald-400 font-semibold">{bed.available}</span> available
+                  </span>
+                  <span className="text-white/30">
+                    <span className="text-white/50 font-semibold">{bed.occupied}</span> occupied
+                  </span>
+                </div>
+
+                {/* Expanded Details */}
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-4 pt-4 border-t border-white/[0.06] space-y-3">
+                        {/* Features */}
+                        <div>
+                          <p className="text-white/30 text-[10px] uppercase tracking-wider mb-2">Features</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {bed.features.map((feature, i) => (
+                              <span
+                                key={i}
+                                className="px-2 py-1 rounded-md bg-white/[0.03] border border-white/[0.06] text-white/50 text-[10px]"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Quick Stats */}
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="text-center p-2 bg-white/[0.02] rounded-lg">
+                            <div className="text-white text-sm font-bold">{bed.total}</div>
+                            <div className="text-white/30 text-[10px]">Total</div>
+                          </div>
+                          <div className="text-center p-2 bg-white/[0.02] rounded-lg">
+                            <div className="text-amber-400 text-sm font-bold">{bed.occupied}</div>
+                            <div className="text-white/30 text-[10px]">Occupied</div>
+                          </div>
+                          <div className="text-center p-2 bg-white/[0.02] rounded-lg">
+                            <div className="text-emerald-400 text-sm font-bold">{bed.available}</div>
+                            <div className="text-white/30 text-[10px]">Available</div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              <h3 className="text-white font-semibold text-sm mb-1">{config.label}</h3>
-              <p className="text-white/35 text-xs mb-4">{config.description}</p>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span className="text-white/50">Available</span>
-                  <span className="text-white font-bold">{bed.available}/{bed.total}</span>
-                </div>
-                <div className="h-2 bg-white/[0.04] rounded-full overflow-hidden">
-                  <motion.div initial={{ width: 0 }} animate={{ width: `${utilization}%` }} transition={{ duration: 0.8, delay: index * 0.1 }}
-                    className={`h-full rounded-full ${utilization > 85 ? 'bg-gradient-to-r from-red-500 to-rose-500' : utilization > 60 ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-emerald-500 to-teal-500'}`} />
-                </div>
-                <div className="flex justify-between text-[10px] text-white/30">
-                  <span>Utilization</span><span>{utilization}%</span>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-white/[0.04] flex items-center justify-between">
-                <span className="text-emerald-400 text-sm font-bold">${bed.price}/day</span>
-                <div className="flex flex-wrap gap-1">
-                  {bed.features.slice(0, 2).map((f, i) => (
-                    <span key={i} className="px-1.5 py-0.5 rounded-md bg-white/[0.03] text-white/30 text-[10px] border border-white/[0.04]">{f}</span>
-                  ))}
-                </div>
-              </div>
+              {/* Bottom Indicator */}
+              <div className={`h-0.5 bg-gradient-to-r ${bed.color}`} style={{ width: `${percentage}%` }} />
             </motion.div>
           );
         })}
       </div>
 
-      {/* BOOKING MODAL */}
-      <AnimatePresence>
-        {selectedType && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setSelectedType(null)} />
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative z-10 w-full max-w-md bg-[#0a0a10] border border-white/[0.08] rounded-2xl shadow-2xl p-6">
-              <h3 className="text-white font-semibold text-lg mb-4">
-                Book {bedTypeConfig[selectedType]?.label || selectedType}
-              </h3>
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04] mb-4">
-                <p className="text-white/50 text-xs mb-2">Available: <span className="text-white font-bold">{beds.find(b => b.type === selectedType)?.available || 0}</span></p>
-                <p className="text-white/50 text-xs">Price: <span className="text-emerald-400 font-bold">${beds.find(b => b.type === selectedType)?.price || 0}/day</span></p>
-              </div>
-              <div className="mb-4">
-                <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Number of beds</label>
-                <input type="number" min={1} max={beds.find(b => b.type === selectedType)?.available || 1} value={bookingCount}
-                  onChange={(e) => setBookingCount(Math.max(1, Number(e.target.value)))}
-                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-white/20" />
-              </div>
-              <div className="flex gap-3">
-                <Button variant="glass" size="sm" onClick={() => setSelectedType(null)} className="flex-1 justify-center">Cancel</Button>
-                <Button variant="gradient" size="sm" onClick={() => handleBooking(selectedType)} className="flex-1 justify-center">Confirm Booking</Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {/* ============================================ */}
+      {/* LEGEND */}
+      {/* ============================================ */}
+      <div className="flex flex-wrap gap-4 pt-2">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-red-500" />
+          <span className="text-white/30 text-xs">Critical (&lt;10%)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-amber-500" />
+          <span className="text-white/30 text-xs">Limited (&lt;25%)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-emerald-500" />
+          <span className="text-white/30 text-xs">Available (&gt;25%)</span>
+        </div>
+        <div className="flex items-center gap-2 ml-auto">
+          <Info className="w-3 h-3 text-white/20" />
+          <span className="text-white/20 text-[10px]">
+            Real-time updates every 10 seconds
+          </span>
+        </div>
+      </div>
+    </div>
   );
 };
 

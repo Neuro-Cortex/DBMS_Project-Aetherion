@@ -1,7 +1,7 @@
 // src/pages/client/NearbyDonors.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ClientSidebar from '../../components/client/ClientSidebar';
+import ClientSidebar from 'src/components/client/clientSidebar';
 import {
   Droplets, Search, MapPin, Phone, Filter,
   Clock, CheckCircle2, Star, Award, Heart,

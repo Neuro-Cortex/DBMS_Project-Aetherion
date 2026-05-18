@@ -215,3 +215,5 @@ export const DoctorVerificationComponent: React.FC = () => {
     </div>
   );
 };
+
+export default DoctorVerificationComponent;

@@ -147,10 +147,25 @@ export const VaccinationTracker: React.FC<VaccinationTrackerProps> = ({
   };
 
   const filteredVaccinations = vaccinations.filter(vacc => {
-    if (filterStatus !== 'all' && v vacc.status !== filterStatus) return false;
+    if (filterStatus !== 'all' && vacc.status !== filterStatus) return false;
     if (filterAgeGroup !== 'all' && vacc.ageGroup !== filterAgeGroup) return false;
     return true;
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const vaccinationStats = {
     total: vaccinations.length,
@@ -159,6 +174,15 @@ export const VaccinationTracker: React.FC<VaccinationTrackerProps> = ({
     overdue: vaccinations.filter(v => v.status === 'overdue').length,
     coverage: Math.round((vaccinations.filter(v => v.status === 'completed').length / vaccinations.length) * 100),
   };
+
+
+
+
+
+
+
+
+
 
   const handleAddVaccination = () => {
     if (newVaccination.name && newVaccination.disease) {
@@ -181,6 +205,17 @@ export const VaccinationTracker: React.FC<VaccinationTrackerProps> = ({
       setNewVaccination({});
     }
   };
+
+
+
+
+
+
+
+
+
+
+
 
   const generateCertificate = (vaccination: Vaccination) => {
     // Simulate certificate generation
@@ -680,3 +715,6 @@ export const VaccinationTracker: React.FC<VaccinationTrackerProps> = ({
     </div>
   );
 };
+
+
+export default VaccinationTracker;

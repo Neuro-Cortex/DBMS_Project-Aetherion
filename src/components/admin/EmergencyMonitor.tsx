@@ -23,6 +23,7 @@ export const EmergencyMonitor: React.FC = () => {
   }, [autoRefresh]);
 
   const fetchEmergencies = async () => {
+    setIsLoading(true);
     setTimeout(() => {
       const mockEmergencies: EmergencyAlert[] = [
         {
@@ -54,20 +55,6 @@ export const EmergencyMonitor: React.FC = () => {
               updatedBy: 'System'
             }
           ]
-        },
-        {
-          id: '2',
-          type: 'oxygen',
-          title: 'Oxygen Supply Critical',
-          description: 'ICU oxygen supply running low - Need immediate refill',
-          location: 'Metro Hospital',
-          coordinates: { latitude: 40.7580, longitude: -73.9855 },
-          severity: 'high',
-          status: 'responding',
-          reportedBy: 'Dr. Brown',
-          reportedDate: '2024-02-16T09:30:00',
-          responders: [],
-          updates: []
         }
       ];
       setEmergencies(mockEmergencies);
@@ -252,30 +239,5 @@ export const EmergencyMonitor: React.FC = () => {
       </div>
     </div>
   );
-
-
-
-
-
-
-
-
-
-
-<div className="bg-gradient-to-r from-red-500 to-red-600">
-  <h3>Emergency Alerts</h3>
-  {activeEmergencies.map(emergency => (
-    <EmergencyCard key={emergency.id} />
-  ))}
-</div>
-
-
-
-
-
-
-
-
-
-
-};
+}
+export default EmergencyMonitor;

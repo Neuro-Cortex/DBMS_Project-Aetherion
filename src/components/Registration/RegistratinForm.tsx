@@ -585,6 +585,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   );
 
 // ✅ Male/Female selection with visual radio buttons
+/*
 {['male', 'female'].map((gender) => (
   <label>
     <input {...register('gender')} type="radio" value={gender} />
@@ -605,6 +606,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
 {selectedRole === 'pharmacy' && (
   // Pharmacy-specific fields: pharmacy name, license, delivery
 )}
+*/
 
 
 };

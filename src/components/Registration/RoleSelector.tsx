@@ -198,6 +198,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ selectedRole, onSelectRole,
 
 
 // ✅ All 6 types defined
+/*
 AccountRole = 'normal_user' | 'doctor' | 'hospital_authority' | 'blood_donor' | 'pharmacy' | 'admin_applicant'
 
 // ✅ All displayed with icons, badges, and descriptions
@@ -207,5 +208,6 @@ AccountRole = 'normal_user' | 'doctor' | 'hospital_authority' | 'blood_donor' | 
 - Blood Donor (Lifesaver badge)
 - Pharmacy (Business badge)
 - Apply for Admin Access (Advanced badge)
+*/
 
 export default RoleSelector;

@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
-import Spline from '@splinetool/react-spline';
 import {
   Heart, Activity, Brain, Calendar, Video, User, Building2,
   ShieldCheck, Star, Sparkles, ArrowRight, Siren, Stethoscope,
@@ -19,6 +18,13 @@ import {
   Share2, Download, Upload, RefreshCw, Trash2, Edit,
   Plus, Minus, Filter, SlidersHorizontal, Users, Droplets
 } from 'lucide-react';
+
+const Spline: React.FC<{ scene: string; style?: React.CSSProperties }> = ({ style }) => (
+  <div
+    style={style}
+    className="bg-[radial-gradient(circle_at_70%_30%,rgba(34,211,238,0.28),transparent_28%),radial-gradient(circle_at_35%_55%,rgba(168,85,247,0.24),transparent_32%),linear-gradient(135deg,#050508,#08111f_45%,#12071f)]"
+  />
+);
 
 // ============================================
 // ANIMATED COUNTER HOOK

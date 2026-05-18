@@ -176,3 +176,4 @@ export const HospitalSidebar: React.FC<HospitalSidebarProps> = ({
     </aside>
   );
 };
+export default HospitalSidebar;

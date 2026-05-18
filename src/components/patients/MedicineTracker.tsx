@@ -641,3 +641,5 @@ export const MedicineTracker: React.FC<MedicineTrackerProps> = ({
     </div>
   );
 };
+
+export default MedicineTracker;

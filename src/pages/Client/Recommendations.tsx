@@ -1,7 +1,7 @@
 // src/pages/client/Recommendations.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import ClientSidebar from '../../components/client/ClientSidebar';
+import ClientSidebar from 'src/components/client/clientSidebar';
 import {
   Sparkles, Heart, UtensilsCrossed, AlertTriangle,
   TrendingUp, Clock, Pill, Apple, Brain,

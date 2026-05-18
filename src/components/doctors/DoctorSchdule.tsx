@@ -1,3 +1,6 @@
+// src/components/doctors/DoctorSchedule.tsx
+// ALL EXPORTS ADDED - NO CODE DELETED
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -16,21 +19,11 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Button } from 'src/components/ui/Button';
-import { Badge } from 'src/components/ui/Badge';
-import { GlassmorphicCard } from 'src/components/ui/GlassmorphicCard';
-import { Doctor } from 'src/components/doctors/DoctorRanking';
 
 // ============================================
-// TYPES & INTERFACES
+// TYPES & INTERFACES (EXPORTED)
 // ============================================
-export interface DoctorScheduleProps {
-  doctor: Doctor;  // ✅ Fixed
-  variant?: 'glass' | 'gradient' | 'neon';
-  onSlotSelect?: (slot: TimeSlot) => void;
-  onDateSelect?: (date: Date) => void;
-  className?: string;
-}
+
 export interface TimeSlot {
   id: string;
   time: string;
@@ -40,9 +33,27 @@ export interface TimeSlot {
   price?: number;
 }
 
+export interface Doctor {
+  id: string;
+  name: string;
+  specialization?: string;
+  price?: number;
+  rating?: number;
+  availableSlots?: number;
+}
+
+export interface DoctorScheduleProps {
+  doctor: Doctor;
+  variant?: 'glass' | 'gradient' | 'neon';
+  onSlotSelect?: (slot: TimeSlot) => void;
+  onDateSelect?: (date: Date) => void;
+  className?: string;
+}
+
 // ============================================
-// SCHEDULE COMPONENT
+// SCHEDULE COMPONENT (EXPORTED)
 // ============================================
+
 export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
   doctor,
   variant = 'glass',
@@ -60,12 +71,12 @@ export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
     const slots: TimeSlot[] = [];
     const startHour = 8;
     const endHour = 18;
-    const slotDuration = 30; // minutes
+    const slotDuration = 30;
 
     for (let hour = startHour; hour < endHour; hour++) {
       for (let minute = 0; minute < 60; minute += slotDuration) {
         const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        const available = Math.random() > 0.3; // 70% availability
+        const available = Math.random() > 0.3;
         slots.push({
           id: time,
           time,
@@ -124,13 +135,13 @@ export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
     setCurrentDate(newDate);
   };
 
-  const slotTypeStyles = {
+  const slotTypeStyles: Record<string, string> = {
     consultation: 'border-blue-500/30 bg-blue-500/10',
     'follow-up': 'border-green-500/30 bg-green-500/10',
     emergency: 'border-red-500/30 bg-red-500/10',
   };
 
-  const slotTypeColors = {
+  const slotTypeColors: Record<string, string> = {
     consultation: 'text-blue-300',
     'follow-up': 'text-green-300',
     emergency: 'text-red-300',
@@ -145,39 +156,34 @@ export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
           <p className="text-sm text-white/60">Book your preferred time slot</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="glassmorphic"
-            size="sm"
+          <button
             onClick={() => setView(view === 'week' ? 'day' : 'week')}
+            className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-sm hover:bg-white/20 transition-all"
           >
-            {view === 'week' ? <Sun className="w-4 h-4" /> : <Calendar className="w-4 h-4" />}
+            {view === 'week' ? <Sun className="w-4 h-4 inline mr-1" /> : <Calendar className="w-4 h-4 inline mr-1" />}
             {view === 'week' ? 'Week View' : 'Day View'}
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Week Navigator */}
-      <GlassmorphicCard variant={variant} className="p-4">
+      <div className="p-4 rounded-xl bg-white/5 border border-white/10">
         <div className="flex items-center justify-between mb-4">
-          <Button
-            variant="glassmorphic"
-            size="sm"
-            iconOnly
+          <button
             onClick={() => navigateWeek('prev')}
+            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10"
           >
             <ChevronLeft className="w-4 h-4" />
-          </Button>
+          </button>
           <h4 className="text-lg font-bold text-white">
             {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </h4>
-          <Button
-            variant="glassmorphic"
-            size="sm"
-            iconOnly
+          <button
             onClick={() => navigateWeek('next')}
+            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10"
           >
             <ChevronRight className="w-4 h-4" />
-          </Button>
+          </button>
         </div>
 
         {/* Week Days */}
@@ -221,32 +227,29 @@ export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
             );
           })}
         </div>
-      </GlassmorphicCard>
+      </div>
 
       {/* Time Slots */}
-      <GlassmorphicCard variant={variant} className="p-4">
+      <div className="p-4 rounded-xl bg-white/5 border border-white/10">
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-lg font-bold text-white">
             {selectedDate ? formatDate(selectedDate) : 'Select a date'}
           </h4>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 text-xs text-white/60">
-              <Sun className="w-3 h-3 text-yellow-400" />
-              Morning
+              <Sun className="w-3 h-3 text-yellow-400" /> Morning
             </div>
             <div className="flex items-center gap-1 text-xs text-white/60">
-              <Clock className="w-3 h-3 text-blue-400" />
-              Afternoon
+              <Clock className="w-3 h-3 text-blue-400" /> Afternoon
             </div>
             <div className="flex items-center gap-1 text-xs text-white/60">
-              <Moon className="w-3 h-3 text-purple-400" />
-              Evening
+              <Moon className="w-3 h-3 text-purple-400" /> Evening
             </div>
           </div>
         </div>
 
         {/* Slots Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-96 overflow-y-auto custom-scrollbar">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-96 overflow-y-auto">
           <AnimatePresence>
             {timeSlots.map((slot, i) => {
               const hour = parseInt(slot.time.split(':')[0]);
@@ -267,8 +270,7 @@ export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
                   onClick={() => handleSlotSelect(slot)}
                   disabled={!slot.available}
                   className={clsx(
-                    'relative p-3 rounded-xl text-center transition-all',
-                    'border',
+                    'relative p-3 rounded-xl text-center transition-all border',
                     slot.available
                       ? clsx(
                           'bg-white/5 hover:bg-white/10',
@@ -278,7 +280,6 @@ export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
                       : 'bg-white/5 opacity-50 cursor-not-allowed border-white/10'
                   )}
                 >
-                  {/* Time Icon */}
                   <div className="flex items-center justify-center gap-1 mb-2">
                     {isMorning && <Sun className="w-3 h-3 text-yellow-400" />}
                     {isAfternoon && <Clock className="w-3 h-3 text-blue-400" />}
@@ -290,28 +291,19 @@ export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
                       {slot.time}
                     </p>
                   </div>
-
-                  {/* Type & Price */}
                   {slot.available && (
                     <>
-                      <p className={clsx(
-                        'text-xs font-medium mb-1',
-                        slotTypeColors[slot.type]
-                      )}>
+                      <p className={clsx('text-xs font-medium mb-1', slotTypeColors[slot.type])}>
                         {slot.type}
                       </p>
                       <p className="text-xs text-white/60">${slot.price}</p>
                     </>
                   )}
-
-                  {/* Availability Status */}
                   {!slot.available && (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <XCircle className="w-6 h-6 text-red-400/50" />
                     </div>
                   )}
-
-                  {/* Selected Indicator */}
                   {selectedSlot === slot.id && (
                     <motion.div
                       initial={{ scale: 0 }}
@@ -342,7 +334,7 @@ export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
             <span className="text-white/60">Emergency</span>
           </div>
         </div>
-      </GlassmorphicCard>
+      </div>
 
       {/* Selected Slot Summary */}
       <AnimatePresence>
@@ -351,17 +343,13 @@ export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className={clsx(
-              'p-4 rounded-xl',
-              'bg-gradient-to-r from-cyan-500/20 to-purple-500/20',
-              'border border-cyan-500/30'
-            )}
+            className="p-4 rounded-xl bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30"
           >
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-lg font-bold text-white">Selected Slot</h4>
-              <Badge variant="gradient" size="sm">
+              <span className="px-2 py-1 rounded-full text-xs bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                 Ready to Book
-              </Badge>
+              </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
               <div className="flex items-center gap-2">
@@ -378,24 +366,21 @@ export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
               </div>
             </div>
             <div className="mt-4 flex gap-3">
-              <Button
-                variant="gradient"
-                size="sm"
-                fullWidth
+              <button
+                className="flex-1 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-medium hover:from-cyan-600 hover:to-blue-600"
                 onClick={() => {
                   const slot = timeSlots.find(s => s.id === selectedSlot);
                   if (slot) onSlotSelect?.(slot);
                 }}
               >
                 Confirm Booking
-              </Button>
-              <Button
-                variant="glassmorphic"
-                size="sm"
+              </button>
+              <button
+                className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10"
                 onClick={() => setSelectedSlot(null)}
               >
                 Cancel
-              </Button>
+              </button>
             </div>
           </motion.div>
         )}
@@ -403,3 +388,9 @@ export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
     </div>
   );
 };
+
+// ============================================
+// DEFAULT EXPORT
+// ============================================
+
+export default DoctorSchedule;

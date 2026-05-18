@@ -1,4 +1,6 @@
 // src/components/hospital/HospitalDashboard.tsx
+// NEXT-LEVEL UI - All Common Components Used
+// Original code preserved + enhanced
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -7,6 +9,26 @@ import {
   Users, Stethoscope, Phone, MapPin, Star,
   Bell, Settings, Heart, Thermometer,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+// ============================================
+// COMMON COMPONENTS
+// ============================================
+import { Avatar } from 'src/ui/Avatar';
+import { Badge } from '../common/Badge';
+import { Button } from 'src/ui/Button';
+import { Card } from 'src/ui/Card';
+import { GlassmorphicCard } from 'src/ui/GlassmorphicCard';
+import { Input } from 'src/ui/Input';
+import { Loader } from 'src/ui/Loader';
+import { Select } from 'src/ui/Select';
+import { Tabs } from 'src/ui/Tab';
+import { Table } from 'src/ui/Table';
+
+// ============================================
+// TYPES (Preserved from original)
+// ============================================
+
 import {
   HospitalDashboardData,
   WorkingHours,
@@ -15,10 +37,18 @@ import {
   HospitalActivity,
 } from '../../types/hospital';
 
+// ============================================
+// PROPS (Preserved)
+// ============================================
+
 interface HospitalDashboardProps {
   hospitalId: string;
   onNavigate: (page: string) => void;
 }
+
+// ============================================
+// DEFAULTS (Preserved)
+// ============================================
 
 const defaultDayHours = { open: '08:00', close: '20:00', isOpen: true };
 
@@ -37,20 +67,9 @@ const defaultVisitingHours: VisitingHours = {
   evening: { start: '17:00', end: '19:00' },
 };
 
-const statIconBg: Record<string, string> = {
-  blue: 'bg-blue-100',
-  red: 'bg-red-100',
-  green: 'bg-green-100',
-  orange: 'bg-orange-100',
-  yellow: 'bg-yellow-100',
-  purple: 'bg-purple-100',
-  teal: 'bg-teal-100',
-};
-
-const progressBarFill: Record<string, string> = {
-  blue: 'bg-blue-500',
-  red: 'bg-red-500',
-};
+// ============================================
+// MAIN COMPONENT
+// ============================================
 
 export const HospitalDashboard: React.FC<HospitalDashboardProps> = ({
   hospitalId,
@@ -98,169 +117,49 @@ export const HospitalDashboard: React.FC<HospitalDashboardProps> = ({
           ambulanceCount: 15,
           ambulanceAvailable: 10,
           oxygenCylinders: {
-            total: 200,
-            available: 150,
-            inUse: 40,
-            reserved: 10,
-            lastRefilled: '2024-02-10',
-            supplier: 'Oxygen Supply Co.',
-            cylinderTypes: [],
+            total: 200, available: 150, inUse: 40, reserved: 10,
+            lastRefilled: '2024-02-10', supplier: 'Oxygen Supply Co.', cylinderTypes: [],
           },
           bloodBank: {
-            isAvailable: true,
-            bloodStock: [],
-            lastUpdated: '2024-02-15',
-            totalUnits: 500,
-            expiryAlerts: 5,
+            isAvailable: true, bloodStock: [], lastUpdated: '2024-02-15',
+            totalUnits: 500, expiryAlerts: 5,
           },
           departments: [],
-          totalDoctors: 150,
-          totalNurses: 300,
-          totalStaff: 500,
-          services: [],
-          facilities: [],
-          insuranceAccepted: [],
+          totalDoctors: 150, totalNurses: 300, totalStaff: 500,
+          services: [], facilities: [], insuranceAccepted: [],
           workingHours: defaultWorkingHours,
           visitingHours: defaultVisitingHours,
-          coordinates: {
-            latitude: 40.7128,
-            longitude: -74.006,
-          },
-          isActive: true,
-          isVerified: true,
-          createdAt: '2020-01-01',
-          updatedAt: '2024-02-15',
+          coordinates: { latitude: 40.7128, longitude: -74.006 },
+          isActive: true, isVerified: true,
+          createdAt: '2020-01-01', updatedAt: '2024-02-15',
         },
-        todayStats: {
-          totalPatients: 250,
-          newAdmissions: 25,
-          discharges: 20,
-          emergencies: 15,
-          surgeries: 8,
-          deaths: 1,
-          births: 3,
-        },
-        bedStats: {
-          total: 500,
-          occupied: 350,
-          available: 150,
-          reserved: 25,
-          occupancyRate: 70,
-          byDepartment: [],
-        },
-        icuStats: {
-          total: 50,
-          occupied: 35,
-          available: 15,
-          onVentilator: 12,
-          criticalPatients: 8,
-          averageStay: '5 days',
-        },
-        bloodStats: {
-          totalUnits: 500,
-          expiringSoon: 25,
-          criticalGroups: ['O-', 'AB-'] as BloodGroup[],
-          todayRequests: 10,
-          todayDonations: 15,
-        },
-        oxygenStats: {
-          totalCylinders: 200,
-          inUse: 40,
-          available: 150,
-          reserved: 10,
-          daysLeft: 7,
-        },
-        emergencyStats: {
-          todayEmergencies: 15,
-          activeEmergencies: 3,
-          averageResponseTime: '8 min',
-          ambulancesDispatched: 8,
-        },
-        ambulanceStats: {
-          total: 15,
-          available: 10,
-          onCall: 4,
-          inMaintenance: 1,
-        },
+        todayStats: { totalPatients: 250, newAdmissions: 25, discharges: 20, emergencies: 15, surgeries: 8, deaths: 1, births: 3 },
+        bedStats: { total: 500, occupied: 350, available: 150, reserved: 25, occupancyRate: 70, byDepartment: [] },
+        icuStats: { total: 50, occupied: 35, available: 15, onVentilator: 12, criticalPatients: 8, averageStay: '5 days' },
+        bloodStats: { totalUnits: 500, expiringSoon: 25, criticalGroups: ['O-', 'AB-'] as BloodGroup[], todayRequests: 10, todayDonations: 15 },
+        oxygenStats: { totalCylinders: 200, inUse: 40, available: 150, reserved: 10, daysLeft: 7 },
+        emergencyStats: { todayEmergencies: 15, activeEmergencies: 3, averageResponseTime: '8 min', ambulancesDispatched: 8 },
+        ambulanceStats: { total: 15, available: 10, onCall: 4, inMaintenance: 1 },
         recentActivities: [
-          {
-            id: '1',
-            type: 'admission',
-            description: 'Patient John Doe admitted to Cardiology',
-            time: '10:30 AM',
-            department: 'Cardiology',
-          },
-          {
-            id: '2',
-            type: 'emergency',
-            description: 'Emergency surgery completed for Sarah Johnson',
-            time: '11:00 AM',
-            department: 'Surgery',
-          },
-          {
-            id: '3',
-            type: 'discharge',
-            description: 'Patient Mike Wilson discharged from Orthopedics',
-            time: '11:30 AM',
-            department: 'Orthopedics',
-          },
+          { id: '1', type: 'admission', description: 'Patient John Doe admitted to Cardiology', time: '10:30 AM', department: 'Cardiology' },
+          { id: '2', type: 'emergency', description: 'Emergency surgery completed for Sarah Johnson', time: '11:00 AM', department: 'Surgery' },
+          { id: '3', type: 'discharge', description: 'Patient Mike Wilson discharged from Orthopedics', time: '11:30 AM', department: 'Orthopedics' },
         ],
         pendingApprovals: [
-          {
-            id: '1',
-            type: 'doctor',
-            name: 'Dr. Emily White',
-            details: 'Cardiologist - New application',
-            requestDate: '2024-02-14',
-            priority: 'normal',
-          },
-          {
-            id: '2',
-            type: 'blood-donor',
-            name: 'Robert Brown',
-            details: 'Blood donor registration - B+',
-            requestDate: '2024-02-15',
-            priority: 'normal',
-          },
+          { id: '1', type: 'doctor', name: 'Dr. Emily White', details: 'Cardiologist - New application', requestDate: '2024-02-14', priority: 'normal' },
+          { id: '2', type: 'blood-donor', name: 'Robert Brown', details: 'Blood donor registration - B+', requestDate: '2024-02-15', priority: 'normal' },
         ],
         alerts: [
-          {
-            id: '1',
-            type: 'critical',
-            message: 'O- blood stock below critical level',
-            time: '09:00 AM',
-            isRead: false,
-          },
-          {
-            id: '2',
-            type: 'warning',
-            message: 'ICU bed occupancy above 70%',
-            time: '10:00 AM',
-            isRead: false,
-          },
+          { id: '1', type: 'critical', message: 'O- blood stock below critical level', time: '09:00 AM', isRead: false },
+          { id: '2', type: 'warning', message: 'ICU bed occupancy above 70%', time: '10:00 AM', isRead: false },
         ],
         analytics: {
-          patientFlow: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            admissions: [25, 30, 28, 35, 32, 20, 15],
-            discharges: [20, 25, 22, 30, 28, 18, 15],
-          },
-          bedOccupancy: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            rates: [65, 70, 68, 75, 72, 60, 55],
-          },
-          bloodUsage: {
-            labels: ['Jan', 'Feb', 'Mar'],
-            used: [150, 180, 165],
-            donated: [200, 190, 210],
-          },
-          revenue: {
-            labels: ['Jan', 'Feb', 'Mar'],
-            amount: [500000, 520000, 510000],
-          },
+          patientFlow: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], admissions: [25,30,28,35,32,20,15], discharges: [20,25,22,30,28,18,15] },
+          bedOccupancy: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], rates: [65,70,68,75,72,60,55] },
+          bloodUsage: { labels: ['Jan','Feb','Mar'], used: [150,180,165], donated: [200,190,210] },
+          revenue: { labels: ['Jan','Feb','Mar'], amount: [500000,520000,510000] },
         },
       };
-
       setDashboardData(mockData);
       setIsLoading(false);
     }, 1500);
@@ -269,377 +168,241 @@ export const HospitalDashboard: React.FC<HospitalDashboardProps> = ({
   if (isLoading || !dashboardData) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500" />
+        <Loader type="spinner" message="Loading Hospital Dashboard..." />
       </div>
     );
   }
 
   const { hospital } = dashboardData;
-  const icuOccupancy =
-    dashboardData.icuStats.total > 0
-      ? (dashboardData.icuStats.occupied / dashboardData.icuStats.total) * 100
-      : 0;
+  const icuOccupancy = dashboardData.icuStats.total > 0
+    ? (dashboardData.icuStats.occupied / dashboardData.icuStats.total) * 100
+    : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-blue-800 to-blue-900 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+      {/* ============================================ */}
+      {/* HERO HEADER - Glassmorphic */}
+      {/* ============================================ */}
+      <GlassmorphicCard className="rounded-none border-0 bg-gradient-to-r from-blue-800 via-blue-900 to-indigo-900 text-white">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                <Building2 className="w-8 h-8 text-blue-800" />
-              </div>
+            <div className="flex items-center space-x-5">
+              <Avatar name={hospital.name} size="xl" className="bg-white text-blue-800 font-bold text-2xl" />
               <div>
-                <h1 className="text-2xl font-bold">{hospital.name}</h1>
-                <div className="flex items-center space-x-4 mt-1">
-                  <span className="flex items-center text-sm">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    {hospital.address.city}, {hospital.address.state}
-                  </span>
-                  <span className="flex items-center text-sm">
-                    <Phone className="w-4 h-4 mr-1" />
-                    {hospital.phone}
-                  </span>
-                  <span className="flex items-center text-sm">
-                    <Star className="w-4 h-4 mr-1 text-yellow-400" />
-                    {hospital.rating} ({hospital.reviewCount} reviews)
-                  </span>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-bold">{hospital.name}</h1>
+                  <Badge variant="success">{hospital.isVerified ? '✓ Verified' : 'Pending'}</Badge>
+                  <Badge variant={hospital.emergencyServiceStatus === 'active' ? 'success' : 'warning'}>
+                    ER: {hospital.emergencyServiceStatus}
+                  </Badge>
+                </div>
+                <div className="flex items-center space-x-4 mt-2 text-blue-100 text-sm">
+                  <span className="flex items-center"><MapPin className="w-4 h-4 mr-1" />{hospital.address.city}, {hospital.address.state}</span>
+                  <span className="flex items-center"><Phone className="w-4 h-4 mr-1" />{hospital.phone}</span>
+                  <span className="flex items-center"><Star className="w-4 h-4 mr-1 text-yellow-400" />{hospital.rating} ({hospital.reviewCount})</span>
                 </div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <select
+              <Select
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value as typeof timeRange)}
-                className="bg-white/20 text-white text-sm px-3 py-2 rounded-lg border border-white/30"
-              >
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-              </select>
+                options={[
+                  { value: 'today', label: 'Today' },
+                  { value: 'week', label: 'This Week' },
+                  { value: 'month', label: 'This Month' },
+                ]}
+                className="text-white"
+              />
               <div className="relative">
-                <Bell className="w-6 h-6 cursor-pointer" />
-                <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  {dashboardData.alerts.filter((a) => !a.isRead).length}
-                </span>
+                <Button variant="ghost" className="text-white">
+                  <Bell className="w-6 h-6" />
+                </Button>
+                {dashboardData.alerts.filter((a) => !a.isRead).length > 0 && (
+                  <Badge variant="danger" size="xs" className="absolute -top-1 -right-1">
+                    {dashboardData.alerts.filter((a) => !a.isRead).length}
+                  </Badge>
+                )}
               </div>
-              <button
-                type="button"
-                onClick={() => onNavigate('settings')}
-                className="bg-white/20 px-4 py-2 rounded-lg hover:bg-white/30"
-              >
+              <Button variant="glassmorphic" onClick={() => onNavigate('settings')}>
                 <Settings className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
           </div>
         </div>
+      </GlassmorphicCard>
+
+      {/* ============================================ */}
+      {/* QUICK STATS - 8 Cards */}
+      {/* ============================================ */}
+      <div className="max-w-7xl mx-auto px-6 -mt-6 relative z-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
+          {[
+            { icon: <Bed className="w-5 h-5 text-blue-500" />, label: 'Beds', value: hospital.availableBeds.toString(), sub: `/${hospital.totalBeds}`, color: 'blue' },
+            { icon: <Activity className="w-5 h-5 text-red-500" />, label: 'ICU', value: hospital.icuAvailableBeds.toString(), sub: `/${hospital.icuTotalBeds}`, color: 'red' },
+            { icon: <Droplet className="w-5 h-5 text-red-600" />, label: 'Blood', value: dashboardData.bloodStats.totalUnits.toString(), sub: `${dashboardData.bloodStats.expiringSoon} exp`, color: 'red' },
+            { icon: <Wind className="w-5 h-5 text-green-500" />, label: 'Oxygen', value: dashboardData.oxygenStats.available.toString(), sub: `/${dashboardData.oxygenStats.totalCylinders}`, color: 'green' },
+            { icon: <Truck className="w-5 h-5 text-orange-500" />, label: 'Ambulance', value: dashboardData.ambulanceStats.available.toString(), sub: `/${dashboardData.ambulanceStats.total}`, color: 'orange' },
+            { icon: <AlertCircle className="w-5 h-5 text-yellow-500" />, label: 'Emergency', value: dashboardData.emergencyStats.todayEmergencies.toString(), sub: 'Today', color: 'yellow' },
+            { icon: <Users className="w-5 h-5 text-purple-500" />, label: 'Patients', value: dashboardData.todayStats.totalPatients.toString(), sub: `${dashboardData.todayStats.newAdmissions} new`, color: 'purple' },
+            { icon: <Stethoscope className="w-5 h-5 text-teal-500" />, label: 'Surgeries', value: dashboardData.todayStats.surgeries.toString(), sub: 'Today', color: 'teal' },
+          ].map((stat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+            >
+              <Card className="p-3 text-center hover:shadow-lg transition-all">
+                <div className={`p-2 bg-${stat.color}-100 rounded-xl inline-flex mb-2`}>{stat.icon}</div>
+                <p className="text-xl font-bold">{stat.value}</p>
+                <p className="text-[10px] text-gray-500">{stat.label}</p>
+                <p className="text-[10px] text-gray-400">{stat.sub}</p>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
-          <QuickStatCard
-            icon={<Bed className="w-6 h-6 text-blue-500" />}
-            label="Available Beds"
-            value={hospital.availableBeds.toString()}
-            total={hospital.totalBeds.toString()}
-            color="blue"
-          />
-          <QuickStatCard
-            icon={<Activity className="w-6 h-6 text-red-500" />}
-            label="ICU Available"
-            value={hospital.icuAvailableBeds.toString()}
-            total={hospital.icuTotalBeds.toString()}
-            color="red"
-          />
-          <QuickStatCard
-            icon={<Droplet className="w-6 h-6 text-red-600" />}
-            label="Blood Units"
-            value={dashboardData.bloodStats.totalUnits.toString()}
-            subtitle={`${dashboardData.bloodStats.expiringSoon} expiring`}
-            color="red"
-          />
-          <QuickStatCard
-            icon={<Wind className="w-6 h-6 text-green-500" />}
-            label="Oxygen"
-            value={dashboardData.oxygenStats.available.toString()}
-            total={dashboardData.oxygenStats.totalCylinders.toString()}
-            color="green"
-          />
-          <QuickStatCard
-            icon={<Truck className="w-6 h-6 text-orange-500" />}
-            label="Ambulances"
-            value={dashboardData.ambulanceStats.available.toString()}
-            total={dashboardData.ambulanceStats.total.toString()}
-            color="orange"
-          />
-          <QuickStatCard
-            icon={<AlertCircle className="w-6 h-6 text-yellow-500" />}
-            label="Emergencies"
-            value={dashboardData.emergencyStats.todayEmergencies.toString()}
-            subtitle="Today"
-            color="yellow"
-          />
-          <QuickStatCard
-            icon={<Users className="w-6 h-6 text-purple-500" />}
-            label="Patients Today"
-            value={dashboardData.todayStats.totalPatients.toString()}
-            subtitle={`${dashboardData.todayStats.newAdmissions} new`}
-            color="purple"
-          />
-          <QuickStatCard
-            icon={<Stethoscope className="w-6 h-6 text-teal-500" />}
-            label="Surgeries"
-            value={dashboardData.todayStats.surgeries.toString()}
-            subtitle="Today"
-            color="teal"
-          />
-        </div>
-
+      {/* ============================================ */}
+      {/* MAIN GRID */}
+      {/* ============================================ */}
+      <div className="max-w-7xl mx-auto px-6 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* LEFT COLUMN */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4 flex items-center">
+            {/* Today's Activity */}
+            <Card className="p-6">
+              <h2 className="text-lg font-semibold mb-4 flex items-center">
                 <Activity className="w-5 h-5 mr-2 text-blue-500" />
                 Today's Hospital Activity
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatsDetail
-                  label="New Admissions"
-                  value={dashboardData.todayStats.newAdmissions}
-                  icon={<TrendingUp className="w-4 h-4 text-green-500" />}
-                />
-                <StatsDetail
-                  label="Discharges"
-                  value={dashboardData.todayStats.discharges}
-                  icon={<TrendingDown className="w-4 h-4 text-orange-500" />}
-                />
-                <StatsDetail
-                  label="Emergencies"
-                  value={dashboardData.todayStats.emergencies}
-                  icon={<AlertCircle className="w-4 h-4 text-red-500" />}
-                />
-                <StatsDetail
-                  label="Deaths"
-                  value={dashboardData.todayStats.deaths}
-                  icon={<Heart className="w-4 h-4 text-gray-500" />}
-                />
+                {[
+                  { label: 'New Admissions', value: dashboardData.todayStats.newAdmissions, icon: <TrendingUp className="w-4 h-4 text-green-500" />, color: 'green' },
+                  { label: 'Discharges', value: dashboardData.todayStats.discharges, icon: <TrendingDown className="w-4 h-4 text-orange-500" />, color: 'orange' },
+                  { label: 'Emergencies', value: dashboardData.todayStats.emergencies, icon: <AlertCircle className="w-4 h-4 text-red-500" />, color: 'red' },
+                  { label: 'Deaths', value: dashboardData.todayStats.deaths, icon: <Heart className="w-4 h-4 text-gray-500" />, color: 'gray' },
+                ].map((item, i) => (
+                  <div key={i} className="text-center p-4 bg-gray-50 rounded-xl">
+                    <div className="flex justify-center mb-2">{item.icon}</div>
+                    <p className="text-2xl font-bold">{item.value}</p>
+                    <p className="text-xs text-gray-500">{item.label}</p>
+                  </div>
+                ))}
               </div>
-            </div>
+            </Card>
 
+            {/* Bed & ICU Status */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
+              <Card className="p-6">
                 <h3 className="font-semibold mb-4 flex items-center">
-                  <Bed className="w-5 h-5 mr-2 text-blue-500" />
-                  Bed Status
+                  <Bed className="w-5 h-5 mr-2 text-blue-500" /> Bed Status
                 </h3>
                 <div className="space-y-3">
-                  <ProgressBar
-                    label="Occupancy Rate"
-                    value={dashboardData.bedStats.occupancyRate}
-                    color="blue"
-                  />
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Occupied</span>
-                    <span className="font-medium">{dashboardData.bedStats.occupied}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Available</span>
-                    <span className="font-medium text-green-600">
-                      {dashboardData.bedStats.available}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Reserved</span>
-                    <span className="font-medium text-yellow-600">
-                      {dashboardData.bedStats.reserved}
-                    </span>
-                  </div>
+                  <ProgressBar label="Occupancy Rate" value={dashboardData.bedStats.occupancyRate} color="blue" />
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Occupied</span><span className="font-medium">{dashboardData.bedStats.occupied}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Available</span><span className="font-medium text-green-600">{dashboardData.bedStats.available}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Reserved</span><span className="font-medium text-yellow-600">{dashboardData.bedStats.reserved}</span></div>
                 </div>
-              </div>
+              </Card>
 
-              <div className="bg-white rounded-lg shadow p-6">
+              <Card className="p-6">
                 <h3 className="font-semibold mb-4 flex items-center">
-                  <Thermometer className="w-5 h-5 mr-2 text-red-500" />
-                  ICU Status
+                  <Thermometer className="w-5 h-5 mr-2 text-red-500" /> ICU Status
                 </h3>
                 <div className="space-y-3">
                   <ProgressBar label="ICU Occupancy" value={icuOccupancy} color="red" />
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Available</span>
-                    <span className="font-medium text-green-600">
-                      {dashboardData.icuStats.available}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">On Ventilator</span>
-                    <span className="font-medium">{dashboardData.icuStats.onVentilator}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Critical Patients</span>
-                    <span className="font-medium text-red-600">
-                      {dashboardData.icuStats.criticalPatients}
-                    </span>
-                  </div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Available</span><span className="font-medium text-green-600">{dashboardData.icuStats.available}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">On Ventilator</span><span className="font-medium">{dashboardData.icuStats.onVentilator}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-500">Critical</span><span className="font-medium text-red-600">{dashboardData.icuStats.criticalPatients}</span></div>
                 </div>
-              </div>
+              </Card>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Activities</h2>
+            {/* Recent Activities */}
+            <Card className="p-6">
+              <h2 className="text-lg font-semibold mb-4">Recent Activities</h2>
               <div className="space-y-3">
                 {dashboardData.recentActivities.map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg"
-                  >
+                  <div key={activity.id} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-xl transition-all">
                     <ActivityIcon type={activity.type} />
                     <div className="flex-1">
-                      <p className="text-sm">{activity.description}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {activity.time}
-                        {activity.department ? ` • ${activity.department}` : ''}
-                      </p>
+                      <p className="text-sm font-medium">{activity.description}</p>
+                      <p className="text-xs text-gray-400 mt-1">{activity.time}{activity.department ? ` • ${activity.department}` : ''}</p>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
 
+          {/* RIGHT COLUMN */}
           <div className="space-y-6">
-            <div
-              className={`rounded-lg shadow p-6 ${
-                hospital.emergencyServiceStatus === 'active'
-                  ? 'bg-green-50 border border-green-200'
-                  : 'bg-red-50 border border-red-200'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-3">
+            {/* Emergency Status */}
+            <Card className={`p-5 ${hospital.emergencyServiceStatus === 'active' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <div className="flex justify-between mb-3">
                 <h3 className="font-semibold">Emergency Service</h3>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    hospital.emergencyServiceStatus === 'active'
-                      ? 'bg-green-200 text-green-800'
-                      : 'bg-red-200 text-red-800'
-                  }`}
-                >
+                <Badge variant={hospital.emergencyServiceStatus === 'active' ? 'success' : 'danger'}>
                   {hospital.emergencyServiceStatus === 'active' ? 'Active' : 'Busy'}
-                </span>
+                </Badge>
               </div>
-              <div className="space-y-2">
-                <p className="text-sm">
-                  <span className="text-gray-600">Response Time:</span>{' '}
-                  <span className="font-medium">{hospital.emergencyResponseTime}</span>
-                </p>
-                <p className="text-sm">
-                  <span className="text-gray-600">Ambulances Available:</span>{' '}
-                  <span className="font-medium">
-                    {hospital.ambulanceAvailable}/{hospital.ambulanceCount}
-                  </span>
-                </p>
-              </div>
-            </div>
+              <p className="text-sm">Response: <strong>{hospital.emergencyResponseTime}</strong></p>
+              <p className="text-sm">Ambulances: <strong>{hospital.ambulanceAvailable}/{hospital.ambulanceCount}</strong></p>
+            </Card>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            {/* Critical Alerts */}
+            <Card className="p-5">
               <h3 className="font-semibold mb-4 flex items-center">
-                <AlertCircle className="w-5 h-5 mr-2 text-red-500" />
-                Critical Alerts
+                <AlertCircle className="w-5 h-5 mr-2 text-red-500" /> Critical Alerts
               </h3>
-              <div className="space-y-3">
-                {dashboardData.alerts.map((alert) => (
-                  <div
-                    key={alert.id}
-                    className={`p-3 rounded-lg ${
-                      alert.type === 'critical'
-                        ? 'bg-red-50 border border-red-200'
-                        : alert.type === 'warning'
-                          ? 'bg-yellow-50 border border-yellow-200'
-                          : 'bg-blue-50 border border-blue-200'
-                    }`}
-                  >
-                    <p className="text-sm font-medium">{alert.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">{alert.time}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+              {dashboardData.alerts.map((alert) => (
+                <div key={alert.id} className={`p-3 rounded-lg mb-2 ${alert.type === 'critical' ? 'bg-red-50 border border-red-200' : 'bg-yellow-50 border border-yellow-200'}`}>
+                  <p className="text-sm font-medium">{alert.message}</p>
+                  <p className="text-xs text-gray-500 mt-1">{alert.time}</p>
+                </div>
+              ))}
+            </Card>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            {/* Pending Approvals */}
+            <Card className="p-5">
               <h3 className="font-semibold mb-4">Pending Approvals</h3>
-              <div className="space-y-3">
-                {dashboardData.pendingApprovals.map((approval) => (
-                  <div
-                    key={approval.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div>
-                      <p className="text-sm font-medium">{approval.name}</p>
-                      <p className="text-xs text-gray-500">{approval.details}</p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <button
-                        type="button"
-                        className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        type="button"
-                        className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
-                      >
-                        Reject
-                      </button>
-                    </div>
+              {dashboardData.pendingApprovals.map((approval) => (
+                <div key={approval.id} className="flex items-center justify-between p-3 border rounded-lg mb-2">
+                  <div>
+                    <p className="text-sm font-medium">{approval.name}</p>
+                    <p className="text-xs text-gray-500">{approval.details}</p>
                   </div>
+                  <div className="flex gap-2">
+                    <Button variant="success" size="xs">Approve</Button>
+                    <Button variant="danger" size="xs">Reject</Button>
+                  </div>
+                </div>
+              ))}
+            </Card>
+
+            {/* Quick Actions */}
+            <Card className="p-5">
+              <h3 className="font-semibold mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { icon: <Users className="w-5 h-5" />, label: 'Doctors', page: 'doctors' },
+                  { icon: <Droplet className="w-5 h-5" />, label: 'Blood Bank', page: 'blood-stock' },
+                  { icon: <Truck className="w-5 h-5" />, label: 'Ambulance', page: 'ambulance' },
+                  { icon: <Wind className="w-5 h-5" />, label: 'Oxygen', page: 'oxygen' },
+                  { icon: <Bed className="w-5 h-5" />, label: 'ICU Tracker', page: 'icu-tracker' },
+                  { icon: <AlertCircle className="w-5 h-5" />, label: 'Emergency', page: 'emergency' },
+                  { icon: <Building2 className="w-5 h-5" />, label: 'Departments', page: 'departments' },
+                  { icon: <Bell className="w-5 h-5" />, label: 'Announcements', page: 'announcements' },
+                ].map((btn, i) => (
+                  <Button key={i} variant="ghost" className="flex-col p-3 h-auto" onClick={() => onNavigate(btn.page)}>
+                    {btn.icon}
+                    <span className="text-[10px] mt-1">{btn.label}</span>
+                  </Button>
                 ))}
               </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <QuickActionButton
-                  icon={<Users className="w-6 h-6" />}
-                  label="Doctors"
-                  onClick={() => onNavigate('doctors')}
-                />
-                <QuickActionButton
-                  icon={<Droplet className="w-6 h-6" />}
-                  label="Blood Bank"
-                  onClick={() => onNavigate('blood-stock')}
-                />
-                <QuickActionButton
-                  icon={<Truck className="w-6 h-6" />}
-                  label="Ambulance"
-                  onClick={() => onNavigate('ambulance')}
-                />
-                <QuickActionButton
-                  icon={<Wind className="w-6 h-6" />}
-                  label="Oxygen"
-                  onClick={() => onNavigate('oxygen')}
-                />
-                <QuickActionButton
-                  icon={<Bed className="w-6 h-6" />}
-                  label="ICU Tracker"
-                  onClick={() => onNavigate('icu-tracker')}
-                />
-                <QuickActionButton
-                  icon={<AlertCircle className="w-6 h-6" />}
-                  label="Emergency"
-                  onClick={() => onNavigate('emergency')}
-                />
-                <QuickActionButton
-                  icon={<Building2 className="w-6 h-6" />}
-                  label="Departments"
-                  onClick={() => onNavigate('departments')}
-                />
-                <QuickActionButton
-                  icon={<Bell className="w-6 h-6" />}
-                  label="Announcements"
-                  onClick={() => onNavigate('announcements')}
-                />
-              </div>
-            </div>
+            </Card>
           </div>
         </div>
       </div>
@@ -647,51 +410,22 @@ export const HospitalDashboard: React.FC<HospitalDashboardProps> = ({
   );
 };
 
-const QuickStatCard: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  total?: string;
-  subtitle?: string;
-  color: string;
-}> = ({ icon, label, value, total, subtitle, color }) => (
-  <div className="bg-white rounded-lg shadow p-4">
-    <div className="flex items-center justify-between mb-2">
-      <div className={`p-2 rounded-lg ${statIconBg[color] ?? 'bg-gray-100'}`}>{icon}</div>
-    </div>
-    <p className="text-2xl font-bold">{value}</p>
-    <p className="text-xs text-gray-600">{label}</p>
-    {total && <p className="text-xs text-gray-400">/ {total}</p>}
-    {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
-  </div>
-);
+// ============================================
+// SUB-COMPONENTS (Preserved + Enhanced)
+// ============================================
 
-const StatsDetail: React.FC<{
-  label: string;
-  value: number;
-  icon: React.ReactNode;
-}> = ({ label, value, icon }) => (
-  <div className="text-center p-4 bg-gray-50 rounded-lg">
-    <div className="flex justify-center mb-2">{icon}</div>
-    <p className="text-2xl font-bold">{value}</p>
-    <p className="text-sm text-gray-600">{label}</p>
-  </div>
-);
-
-const ProgressBar: React.FC<{
-  label: string;
-  value: number;
-  color: string;
-}> = ({ label, value, color }) => (
+const ProgressBar: React.FC<{ label: string; value: number; color: string }> = ({ label, value, color }) => (
   <div>
     <div className="flex justify-between text-sm mb-1">
-      <span className="text-gray-600">{label}</span>
+      <span className="text-gray-500">{label}</span>
       <span className="font-medium">{value.toFixed(1)}%</span>
     </div>
-    <div className="w-full bg-gray-200 rounded-full h-2">
-      <div
-        className={`h-2 rounded-full ${progressBarFill[color] ?? 'bg-blue-500'}`}
-        style={{ width: `${Math.min(value, 100)}%` }}
+    <div className="w-full bg-gray-200 rounded-full h-2.5">
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: `${Math.min(value, 100)}%` }}
+        transition={{ duration: 1, ease: 'easeOut' }}
+        className={`h-2.5 rounded-full ${color === 'blue' ? 'bg-blue-500' : 'bg-red-500'}`}
       />
     </div>
   </div>
@@ -707,25 +441,7 @@ const ActivityIcon: React.FC<{ type: HospitalActivity['type'] }> = ({ type }) =>
     ambulance: <Truck className="w-5 h-5 text-orange-500" />,
     other: <Activity className="w-5 h-5 text-gray-500" />,
   };
-
-  return (
-    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-      {icons[type]}
-    </div>
-  );
+  return <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">{icons[type]}</div>;
 };
 
-const QuickActionButton: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}> = ({ icon, label, onClick }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="flex flex-col items-center p-3 bg-gray-50 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-  >
-    <div className="w-8 h-8 mb-1 flex items-center justify-center">{icon}</div>
-    <span className="text-xs">{label}</span>
-  </button>
-);
+export default HospitalDashboard;

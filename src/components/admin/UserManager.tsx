@@ -398,3 +398,6 @@ const StatBox: React.FC<{ label: string; value: string; color: string }> = ({ la
     <p className="text-sm text-gray-600">{label}</p>
   </div>
 );
+
+
+export default UserManager;

@@ -2,9 +2,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useDispatch } from 'react-redux';
 import { login } from '../../store/slices/authSlice';
 import toast from 'react-hot-toast';
@@ -15,14 +12,12 @@ import {
   Chrome, Github, Twitter, ChevronRight
 } from 'lucide-react';
 
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['client', 'doctor', 'admin']),
-  rememberMe: z.boolean().optional(),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+type LoginFormData = {
+  email: string;
+  password: string;
+  role: 'client' | 'doctor' | 'admin';
+  rememberMe?: boolean;
+};
 
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -32,21 +27,24 @@ const Login: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [selectedRole, setSelectedRole] = useState<'client' | 'doctor' | 'admin'>('client');
+  const [formData, setFormData] = useState<LoginFormData>({ email: '', password: '', role: 'client' });
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof LoginFormData, string>>>({});
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '', role: 'client', rememberMe: false },
-  });
-
   const onSubmit = async (data: LoginFormData) => {
     setError('');
+    const nextErrors: Partial<Record<keyof LoginFormData, string>> = {};
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      nextErrors.email = 'Please enter a valid email address';
+    }
+    if (data.password.length < 6) {
+      nextErrors.password = 'Password must be at least 6 characters';
+    }
+    setFieldErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
     setIsLoading(true);
 
     try {
@@ -122,6 +120,11 @@ const Login: React.FC = () => {
     { id: 'admin' as const, label: 'Admin', icon: Shield, desc: 'Platform management' },
   ];
 
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSubmit({ ...formData, role: selectedRole });
+  };
+
   return (
     <div className="min-h-screen bg-[#050508] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background */}
@@ -196,21 +199,21 @@ const Login: React.FC = () => {
               )}
             </AnimatePresence>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              <input type="hidden" {...register('role')} value={selectedRole} />
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <input type="hidden" value={selectedRole} readOnly />
 
               {/* Email */}
               <div>
                 <label className="text-white/40 text-xs font-medium uppercase tracking-wider mb-2 block">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
-                  <input type="email" {...register('email')} onFocus={() => setActiveField('email')} onBlur={() => setActiveField(null)}
+                  <input type="email" value={formData.email} onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))} onFocus={() => setActiveField('email')} onBlur={() => setActiveField(null)}
                     placeholder="Enter your email"
                     className={`w-full pl-12 pr-4 py-4 bg-white/[0.03] border rounded-2xl text-white text-sm placeholder-white/20 outline-none transition-all ${
-                      errors.email ? 'border-red-500/50' : activeField === 'email' ? 'border-cyan-400/50' : 'border-white/[0.06] hover:border-white/[0.1]'
+                      fieldErrors.email ? 'border-red-500/50' : activeField === 'email' ? 'border-cyan-400/50' : 'border-white/[0.06] hover:border-white/[0.1]'
                     }`} />
                 </div>
-                {errors.email && <p className="text-red-400 text-[11px] mt-1.5">{errors.email.message}</p>}
+                {fieldErrors.email && <p className="text-red-400 text-[11px] mt-1.5">{fieldErrors.email}</p>}
               </div>
 
               {/* Password */}
@@ -221,18 +224,18 @@ const Login: React.FC = () => {
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
-                  <input type={showPassword ? 'text' : 'password'} {...register('password')}
+                  <input type={showPassword ? 'text' : 'password'} value={formData.password} onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                     onFocus={() => setActiveField('password')} onBlur={() => setActiveField(null)}
                     placeholder="Enter your password"
                     className={`w-full pl-12 pr-12 py-4 bg-white/[0.03] border rounded-2xl text-white text-sm placeholder-white/20 outline-none transition-all ${
-                      errors.password ? 'border-red-500/50' : activeField === 'password' ? 'border-cyan-400/50' : 'border-white/[0.06] hover:border-white/[0.1]'
+                      fieldErrors.password ? 'border-red-500/50' : activeField === 'password' ? 'border-cyan-400/50' : 'border-white/[0.06] hover:border-white/[0.1]'
                     }`} />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-white/[0.06] rounded-lg">
                     {showPassword ? <EyeOff className="w-4 h-4 text-white/30" /> : <Eye className="w-4 h-4 text-white/30" />}
                   </button>
                 </div>
-                {errors.password && <p className="text-red-400 text-[11px] mt-1.5">{errors.password.message}</p>}
+                {fieldErrors.password && <p className="text-red-400 text-[11px] mt-1.5">{fieldErrors.password}</p>}
               </div>
 
               {/* Submit */}

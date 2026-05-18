@@ -6,11 +6,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { PersistGate } from 'redux-persist/integration/react';
 import { Toaster } from 'react-hot-toast';
 
-import App from './App';
-import { store, persistor } from './store';
+import App from './app';
+import { store } from './store';
 
 import './styles/globals.css';
 
@@ -72,14 +71,8 @@ root.render(
     {/* Redux Store Provider */}
     <Provider store={store}>
 
-      {/* Redux Persist */}
-      <PersistGate
-        loading={<LoadingFallback />}
-        persistor={persistor}
-      >
-
-        {/* React Router */}
-        <BrowserRouter>
+      {/* React Router */}
+      <BrowserRouter>
 
           {/* Main App */}
           <App />
@@ -115,9 +108,7 @@ root.render(
             }}
           />
 
-        </BrowserRouter>
-
-      </PersistGate>
+      </BrowserRouter>
 
     </Provider>
 

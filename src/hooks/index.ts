@@ -1,17 +1,30 @@
 // src/hooks/index.ts
 
-// Hooks exports
-export { useAuth } from './useAuth.js';
-export { useDoctor } from './useDoctor.js';
-export { useHospital } from './useHospital.js';
-export { useEmergency } from './useEmergency.js';
-export { useAppointment } from './useAppointment.js';
-export { useDebounce } from './useDebounce.js';
-export { useLocalStorage } from './useLocalStorage.js';
-export { useMediaQuery, useIsMobile, useIsTablet, useIsDesktop } from './useMediaQuery.js';
+// ==============================
+// Hooks Exports
+// ==============================
 
-// Type exports
-export type { UseAuthReturn } from './useAuth.js';
-export type { UseDoctorReturn } from './useDoctor.js';
-export type { UseHospitalReturn } from './useHospital.js';
-export type { UseEmergencyReturn } from './useEmergency.js';
+export { useDebounce } from './useDebounce';
+export { useLocalStorage } from './useLocalStorage';
+export {
+  useMediaQuery,
+  useIsMobile,
+  useIsTablet,
+  useIsDesktop,
+} from './useMediaQuery';
+
+export { useAuth } from './useAuth';
+export { useDoctor } from './useDoctor';
+export { useAppointment } from './useAppointment';
+export { useEmergency } from './useEmergency';
+export { useHospital } from './useHospital';
+export { useAIAssistant } from './useAIAssistant';
+
+// ==============================
+// Type Exports
+// ==============================
+
+export type { UseAuthReturn } from './useAuth';
+export type { UseDoctorReturn } from './useDoctor';
+export type { UseHospitalReturn } from './useHospital';
+export type { UseEmergencyReturn } from './useEmergency';

@@ -1,7 +1,7 @@
 // src/pages/client/Profile.tsx
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import ClientSidebar from '../../components/client/ClientSidebar';
+import ClientSidebar from 'src/pages/Client/ClientSidebar';
 import {
   User, Mail, Phone, MapPin, Calendar, Heart,
   Droplets, Shield, Edit, Camera, Save,
