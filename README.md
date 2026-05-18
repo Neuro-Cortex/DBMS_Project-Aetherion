@@ -1,4 +1,34 @@
 ```
+
+there ar e6 types of account 
+clint 
+patient 
+doctor 
+
+pharmaecy authority 
+ FEATURES ADDED:
+Feature	Description
+🔍 Search	Search by name, generic name, category, manufacturer
+📋 Type Filter	Filter Prescription / OTC
+📦 Stock Filter	Filter Available / Low Stock / Out of Stock
+⏰ Expiry Filter	Filter Expiring Soon / Expired
+👁️ Availability Toggle	Show/Hide unavailable medicines
+📊 Medicine Stats	8 stat cards (Total, Available, Low, Out, Expiring, Expired, Rx, OTC)
+🏷️ Active Filters	See & remove applied filters
+⚠️ Low Stock Alerts	Yellow warning box
+🚫 Expired Alerts	Red warning box
+📋 Result Count	Shows filtered count vs total
+🗑️ Clear All Filters	One-click reset
+
+
+hospital authoriy 
+admin authoriy 
+
+```
+
+
+
+```
 Apnar Age Theke Je Code Chilo:
 text
 ✅ Client Panel (16 files)
