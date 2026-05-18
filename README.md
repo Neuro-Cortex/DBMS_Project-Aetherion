@@ -371,6 +371,25 @@ typescript
 Nearby Blood Donor Search COMPLETE! 🩸🗺️✅
 
 
+Dashboard       → /client/dashboard
+My Profile      → /client/profile
+Appointments    → /client/appointments
+Prescriptions   → /client/prescriptions
+Health Records  → /client/health-records
+Medical Reports → /client/reports
+Vaccine Records → /client/vaccines
+Physiotherapy   → /client/physiotherapy
+Find Doctors    → /client/doctor-comparison
+Nearby Donors   → /client/nearby-donors
+Blood Donation  → /client/blood-donation
+My Orders       → /client/orders
+Emergency       → /client/emergency
+Health Tips     → /client/recommendations
+Women Care      → /women-care
+Settings        → /settings
+Logout          → Logout action
+
+
 
 
 
