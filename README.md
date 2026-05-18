@@ -1366,6 +1366,23 @@ Project-Aetherion/
 
 
 
+```
+src/store/
+├── store.ts              (Main store)
+├── index.ts              (Export all)
+└── slices/
+    ├── authSlice.ts      (Authentication)
+    ├── clientSlice.ts    (Client/Patient)
+    ├── doctorSlice.ts    (Doctor)
+    ├── hospitalSlice.ts  (Hospital)
+    ├── pharmacySlice.ts  (Pharmacy)
+    ├── adminSlice.ts     (Admin)
+    └── uiSlice.ts        (UI State - Dark mode, sidebar, etc.)
+```
+
+
+
+
 
 
 
