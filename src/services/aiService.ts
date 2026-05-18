@@ -5,7 +5,250 @@ import api, { simulateDelay } from './api';
 // ============================================
 // TYPES & INTERFACES
 // ============================================
+// src/services/aiService.ts
 
+import { AIMessage, AIResponse, AIUserContext, AIConversation } from '../types/aiAssistant';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+class AIService {
+  private token: string = '';
+  private userId: string = '';
+
+  setToken(token: string) {
+    this.token = token;
+  }
+
+  setUserId(userId: string) {
+    this.userId = userId;
+  }
+
+  private getHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.token}`
+    };
+  }
+
+  // Send message to AI
+  async sendMessage(message: string, conversationId?: string): Promise<AIResponse> {
+    const response = await fetch(`${API_BASE_URL}/ai/chat`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        message,
+        userId: this.userId,
+        conversationId
+      })
+    });
+    return response.json();
+  }
+
+  // Get user context for AI
+  async getUserContext(): Promise<AIUserContext> {
+    const response = await fetch(`${API_BASE_URL}/ai/user-context`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  // Get conversation history
+  async getConversations(): Promise<AIConversation[]> {
+    const response = await fetch(`${API_BASE_URL}/ai/conversations`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  // Get specific conversation
+  async getConversation(id: string): Promise<AIConversation> {
+    const response = await fetch(`${API_BASE_URL}/ai/conversations/${id}`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  // Voice to text
+  async speechToText(audioBlob: Blob): Promise<string> {
+    const formData = new FormData();
+    formData.append('audio', audioBlob);
+    
+    const response = await fetch(`${API_BASE_URL}/ai/speech-to-text`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${this.token}` },
+      body: formData
+    });
+    const data = await response.json();
+    return data.text;
+  }
+
+  // Text to speech
+  async textToSpeech(text: string): Promise<string> {
+    const response = await fetch(`${API_BASE_URL}/ai/text-to-speech`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ text })
+    });
+    const data = await response.json();
+    return data.audioUrl;
+  }
+
+  // Get suggestions
+  async getSuggestions(): Promise<string[]> {
+    const response = await fetch(`${API_BASE_URL}/ai/suggestions`, {
+      headers: this.getHeaders()
+    });
+    const data = await response.json();
+    return data.suggestions;
+  }
+
+  // Get AI memory about user
+  async getMemory(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/ai/memory`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  // Clear conversation
+  async clearConversation(id: string): Promise<void> {
+    await fetch(`${API_BASE_URL}/ai/conversations/${id}`, {
+      method: 'DELETE',
+      headers: this.getHeaders()
+    });
+  }
+
+  // Health specific queries
+  async getHealthInfo(query: string): Promise<AIResponse> {
+    const response = await fetch(`${API_BASE_URL}/ai/health`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ query })
+    });
+    return response.json();
+  }
+
+  // Database query through AI
+  async queryDatabase(question: string): Promise<AIResponse> {
+    const response = await fetch(`${API_BASE_URL}/ai/database-query`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ question, userId: this.userId })
+    });
+    return response.json();
+  }
+}
+
+// src/services/aiService.ts
+
+import { AIMessage, AIResponse, AIUserContext, AIConversation } from '../types/aiAssistant';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+class AIService {
+  private token: string = '';
+  private userId: string = '';
+
+  setToken(token: string) {
+    this.token = token;
+  }
+
+  setUserId(userId: string) {
+    this.userId = userId;
+  }
+
+  private getHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.token}`
+    };
+  }
+
+  async sendMessage(message: string, conversationId?: string): Promise<AIResponse> {
+    const response = await fetch(`${API_BASE_URL}/ai/chat`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        message,
+        userId: this.userId,
+        conversationId
+      })
+    });
+    return response.json();
+  }
+
+  async getUserContext(): Promise<AIUserContext> {
+    // For now, return mock data
+    return {
+      userId: this.userId,
+      userName: 'John Doe',
+      userRole: 'Client',
+      accountType: 'Normal User',
+      lastLogin: new Date().toISOString(),
+      preferences: {
+        language: 'en',
+        voiceEnabled: true,
+        theme: 'light',
+        fontSize: 'medium'
+      },
+      healthProfile: {
+        bloodGroup: 'O+',
+        age: 28,
+        gender: 'male'
+      }
+    };
+  }
+
+  async getConversations(): Promise<AIConversation[]> {
+    const response = await fetch(`${API_BASE_URL}/ai/conversations`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async speechToText(audioBlob: Blob): Promise<string> {
+    const formData = new FormData();
+    formData.append('audio', audioBlob);
+    
+    const response = await fetch(`${API_BASE_URL}/ai/speech-to-text`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${this.token}` },
+      body: formData
+    });
+    const data = await response.json();
+    return data.text;
+  }
+
+  async textToSpeech(text: string): Promise<string> {
+    const response = await fetch(`${API_BASE_URL}/ai/text-to-speech`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ text })
+    });
+    const data = await response.json();
+    return data.audioUrl;
+  }
+
+  async getMemory(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/ai/memory`, {
+      headers: this.getHeaders()
+    });
+    return response.json();
+  }
+
+  async queryDatabase(question: string): Promise<AIResponse> {
+    const response = await fetch(`${API_BASE_URL}/ai/database-query`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ question, userId: this.userId })
+    });
+    return response.json();
+  }
+}
+
+export const aiService = new AIService();
+
+export const aiService = new AIService();
 export interface ChatMessage {
   id: string;
   sender: 'bot' | 'user';
