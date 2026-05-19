@@ -24,11 +24,7 @@ Feature	Description
 hospital authoriy 
 admin authoriy 
 
-```
 
-
-
-```
 Apnar Age Theke Je Code Chilo:
 text
 ✅ Client Panel (16 files)
@@ -47,7 +43,6 @@ text
 ✅ Types (8 files)
 ✅ Services (6 files)
 🆕 Ami Extra Ja Add Korechi:
-text
 ✅ MedicalHistory Component     (Patient er jonno)
 ✅ ClientSidebar                (Navigation)
 ✅ NotificationBell             (Real-time alerts)
@@ -2380,21 +2375,6 @@ aetherion/
 │           ├── 📄 axios.ts
 │           └── 📄 firebase.ts
 │                   
-
-
-
-
-
-```
-
-
-
-
-
-```
-
-
-
 
 
 
