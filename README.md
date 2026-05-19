@@ -2774,4 +2774,276 @@ backend/
 
 
 
+## API Endpoints Reference
+
+### 1. Authentication (`/auth`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/auth/register` | Register new user | No |
+| POST | `/auth/login` | User login | No |
+| POST | `/auth/verify-email` | Verify email with OTP | No |
+| POST | `/auth/verify-phone` | Verify phone with OTP | No |
+| POST | `/auth/refresh-token` | Refresh access token | No |
+| POST | `/auth/forgot-password` | Request password reset | No |
+| POST | `/auth/reset-password` | Reset password | No |
+| POST | `/auth/change-password` | Change password | Yes |
+| POST | `/auth/setup-2fa` | Enable 2FA | Yes |
+| POST | `/auth/verify-2fa` | Verify 2FA code | No |
+| POST | `/auth/disable-2fa` | Disable 2FA | Yes |
+| GET | `/auth/me` | Get current user | Yes |
+| POST | `/auth/logout` | Logout user | Yes |
+
+### 2. Users (`/users`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/users/profile` | Get user profile | Yes |
+| PUT | `/users/profile` | Update profile | Yes |
+| PUT | `/users/location` | Update location | Yes |
+| POST | `/users/roles` | Add role | Yes |
+| DELETE | `/users/roles/{role}` | Remove role | Yes |
+| GET | `/users/emergency-contacts` | Get emergency contacts | Yes |
+| POST | `/users/emergency-contacts` | Add emergency contact | Yes |
+| PUT | `/users/emergency-contacts/{id}` | Update contact | Yes |
+| DELETE | `/users/emergency-contacts/{id}` | Delete contact | Yes |
+| POST | `/users/upload-avatar` | Upload avatar | Yes |
+| GET | `/users/search` | Search users | No |
+| GET | `/users/dashboard` | User dashboard | Yes |
+| DELETE | `/users/account` | Delete account | Yes |
+
+### 3. Doctors (`/doctors`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/doctors/profile` | Create doctor profile | Yes |
+| GET | `/doctors/profile/{id}` | Get doctor profile | No |
+| PUT | `/doctors/profile` | Update profile | Yes (Doctor) |
+| GET | `/doctors/search` | Search doctors | No |
+| POST | `/doctors/schedule` | Add schedule | Yes (Doctor) |
+| GET | `/doctors/schedule/{id}` | Get schedule | No |
+| PUT | `/doctors/schedule/{id}` | Update schedule | Yes (Doctor) |
+| DELETE | `/doctors/schedule/{id}` | Delete schedule | Yes (Doctor) |
+| POST | `/doctors/hospital-affiliations` | Add affiliation | Yes (Doctor) |
+| GET | `/doctors/{id}/patients` | Get patients | Yes (Doctor) |
+| GET | `/doctors/{id}/reviews` | Get reviews | No |
+| GET | `/doctors/dashboard` | Doctor dashboard | Yes (Doctor) |
+| PUT | `/doctors/toggle-online-status` | Toggle online | Yes (Doctor) |
+| GET | `/doctors/ranking` | Get rankings | No |
+| POST | `/doctors/compare` | Compare doctors | No |
+
+### 4. Patients (`/patients`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/patients/profile` | Create profile | Yes |
+| GET | `/patients/profile` | Get profile | Yes |
+| PUT | `/patients/profile` | Update profile | Yes |
+| POST | `/patients/vitals` | Record vitals | Yes |
+| GET | `/patients/vitals` | Get vitals history | Yes |
+| POST | `/patients/vaccinations` | Add vaccination | Yes |
+| GET | `/patients/vaccinations` | Get vaccinations | Yes |
+| POST | `/patients/medical-records` | Add record | Yes |
+| GET | `/patients/medical-records` | Get records | Yes |
+| POST | `/patients/medical-records/upload` | Upload file | Yes |
+| GET | `/patients/health-timeline` | Health timeline | Yes |
+| GET | `/patients/dashboard` | Patient dashboard | Yes |
+| GET | `/patients/blood-donation-history` | Donation history | Yes |
+| GET | `/patients/medicine-history` | Medicine history | Yes |
+| GET | `/patients/connected-doctors` | Connected doctors | Yes |
+| GET | `/patients/connected-hospitals` | Connected hospitals | Yes |
+
+### 5. Hospitals (`/hospitals`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/hospitals/profile` | Create profile | Yes |
+| GET | `/hospitals/profile/{id}` | Get profile | No |
+| PUT | `/hospitals/profile` | Update profile | Yes (Hospital) |
+| GET | `/hospitals/search` | Search hospitals | No |
+| GET | `/hospitals/icu-network` | Get ICU network | No |
+| POST | `/hospitals/departments` | Add department | Yes (Hospital) |
+| GET | `/hospitals/departments/{id}` | Get departments | No |
+| PUT | `/hospitals/beds` | Update bed status | Yes (Hospital) |
+| PUT | `/hospitals/blood-stock` | Update blood stock | Yes (Hospital) |
+| GET | `/hospitals/blood-stock/{id}` | Get blood stock | No |
+| PUT | `/hospitals/oxygen-stock` | Update oxygen stock | Yes (Hospital) |
+| GET | `/hospitals/oxygen-stock/{id}` | Get oxygen stock | No |
+| POST | `/hospitals/emergency-announcement` | Create announcement | Yes (Hospital) |
+| GET | `/hospitals/dashboard` | Hospital dashboard | Yes (Hospital) |
+| GET | `/hospitals/{id}/doctors` | Get doctors | No |
+| GET | `/hospitals/{id}/reviews` | Get reviews | No |
+| GET | `/hospitals/analytics` | Hospital analytics | Yes (Hospital) |
+
+### 6. Appointments (`/appointments`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/appointments/book` | Book appointment | Yes |
+| GET | `/appointments/{id}` | Get appointment | Yes |
+| GET | `/appointments/upcoming` | Upcoming appointments | Yes |
+| GET | `/appointments/history` | Appointment history | Yes |
+| PUT | `/appointments/{id}/reschedule` | Reschedule | Yes |
+| PUT | `/appointments/{id}/cancel` | Cancel | Yes |
+| POST | `/appointments/{id}/prescription` | Create prescription | Yes (Doctor) |
+| POST | `/appointments/{id}/prescription/medicines` | Add medicine | Yes (Doctor) |
+| POST | `/appointments/{id}/prescription/tests` | Add test | Yes (Doctor) |
+| POST | `/appointments/{id}/notes` | Add note | Yes (Doctor) |
+| POST | `/appointments/{id}/video-setup` | Setup video | Yes (Doctor) |
+| GET | `/appointments/{id}/prescription` | View prescription | Yes |
+| GET | `/appointments/doctor/{id}/available-slots` | Available slots | No |
+| GET | `/appointments/doctor/dashboard` | Doctor dashboard | Yes (Doctor) |
+
+### 7. Pharmacy (`/pharmacy`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/pharmacy/profile` | Create profile | Yes |
+| GET | `/pharmacy/profile/{id}` | Get profile | No |
+| GET | `/pharmacy/search` | Search pharmacies | No |
+| POST | `/pharmacy/medicines` | Add medicine | Yes (Pharmacy) |
+| GET | `/pharmacy/medicines/search` | Search medicines | No |
+| GET | `/pharmacy/medicines/{id}` | Get medicine | No |
+| GET | `/pharmacy/medicines/compare` | Compare medicines | No |
+| POST | `/pharmacy/inventory` | Add inventory | Yes (Pharmacy) |
+| PUT | `/pharmacy/inventory/{id}` | Update inventory | Yes (Pharmacy) |
+| GET | `/pharmacy/inventory` | Get inventory | Yes (Pharmacy) |
+| POST | `/pharmacy/orders` | Create order | Yes |
+| GET | `/pharmacy/orders/{id}` | Get order | Yes |
+| PUT | `/pharmacy/orders/{id}/status` | Update status | Yes (Pharmacy) |
+| GET | `/pharmacy/orders` | Get orders | Yes |
+| POST | `/pharmacy/prescriptions/upload` | Upload prescription | Yes |
+| GET | `/pharmacy/dashboard` | Pharmacy dashboard | Yes (Pharmacy) |
+| GET | `/pharmacy/client-dashboard` | Client dashboard | Yes |
+| GET | `/pharmacy/medicines/prices` | Compare prices | No |
+
+### 8. Emergency (`/emergency`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/emergency/request` | Create emergency | Yes |
+| POST | `/emergency/sos` | Trigger SOS | Yes |
+| GET | `/emergency/ambulances/nearby` | Nearby ambulances | No |
+| GET | `/emergency/hospitals/nearby` | Nearby hospitals | No |
+| POST | `/emergency/volunteers/register` | Register volunteer | Yes |
+| GET | `/emergency/volunteers/nearby` | Nearby volunteers | No |
+
+### 9. Blood Donors (`/blood-donors`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/blood-donors/register` | Register donor | Yes |
+| GET | `/blood-donors/search` | Search donors | No |
+| POST | `/blood-donors/request` | Request blood | Yes |
+| POST | `/blood-donors/donate` | Record donation | Yes |
+| GET | `/blood-donors/eligibility` | Check eligibility | Yes |
+| GET | `/blood-donors/history` | Donation history | Yes |
+| GET | `/blood-donors/stock` | Blood stock | No |
+| GET | `/blood-donors/rewards/{id}` | Donor rewards | Yes |
+| POST | `/blood-donors/emergency-alert` | Emergency alert | Yes |
+| GET | `/blood-donors/statistics` | Statistics | No |
+
+### 10. Oxygen (`/oxygen`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/oxygen/stock` | Add stock record | Yes (Hospital) |
+| PUT | `/oxygen/stock` | Update stock | Yes (Hospital) |
+| GET | `/oxygen/stock/{id}` | Get stock | No |
+| GET | `/oxygen/availability` | Check availability | No |
+| POST | `/oxygen/request` | Request oxygen | Yes |
+| GET | `/oxygen/request/{id}` | Get request | Yes |
+| GET | `/oxygen/requests` | Get requests | Yes |
+| PUT | `/oxygen/request/{id}/fulfill` | Fulfill request | Yes (Hospital) |
+| POST | `/oxygen/suppliers` | Add supplier | Yes (Hospital) |
+| GET | `/oxygen/suppliers` | Get suppliers | No |
+| GET | `/oxygen/alerts` | Get alerts | No |
+| GET | `/oxygen/dashboard` | Dashboard | Yes (Hospital) |
+| POST | `/oxygen/cylinder-tracking` | Track cylinder | No |
+| GET | `/oxygen/cylinder-tracking/{id}` | Cylinder location | No |
+
+### 11. Women Health (`/women-health`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/women-health/profile` | Create profile | Yes |
+| GET | `/women-health/profile` | Get profile | Yes |
+| PUT | `/women-health/profile` | Update profile | Yes |
+| POST | `/women-health/pregnancy` | Start tracking | Yes |
+| GET | `/women-health/pregnancy/current` | Current pregnancy | Yes |
+| PUT | `/women-health/pregnancy/{id}` | Update pregnancy | Yes |
+| GET | `/women-health/pregnancy/history` | Pregnancy history | Yes |
+| POST | `/women-health/menstrual/log` | Log cycle | Yes |
+| GET | `/women-health/menstrual/logs` | Get logs | Yes |
+| GET | `/women-health/menstrual/prediction` | Predict period | Yes |
+| GET | `/women-health/menstrual/fertility-window` | Fertility window | Yes |
+| POST | `/women-health/gynecologist-visits` | Log visit | Yes |
+| GET | `/women-health/gynecologist-visits` | Get visits | Yes |
+| POST | `/women-health/baby` | Add baby | Yes |
+| GET | `/women-health/babies` | Get babies | Yes |
+| POST | `/women-health/baby/{id}/growth` | Add growth | Yes |
+| GET | `/women-health/baby/{id}/growth` | Get growth | Yes |
+| POST | `/women-health/baby/{id}/vaccines` | Add vaccine | Yes |
+| GET | `/women-health/baby/{id}/vaccines` | Get vaccines | Yes |
+| GET | `/women-health/dashboard` | Dashboard | Yes |
+| GET | `/women-health/emergency-pregnancy-support` | Emergency support | No |
+
+### 12. AI Assistant (`/ai-assistant`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/ai-assistant/symptom-checker` | Check symptoms | Optional |
+| POST | `/ai-assistant/health-recommendations` | Get recommendations | Optional |
+| POST | `/ai-assistant/medicine-recommendation` | Recommend medicine | Optional |
+| POST | `/ai-assistant/drug-interaction-check` | Check interactions | No |
+| POST | `/ai-assistant/chatbot` | AI chatbot | Optional |
+| GET | `/ai-assistant/recovery-prediction/{condition}` | Predict recovery | No |
+| POST | `/ai-assistant/dosage-reminder` | Set reminder | Yes |
+| GET | `/ai-assistant/health-tips` | Health tips | No |
+| POST | `/ai-assistant/emergency-chatbot` | Emergency chatbot | No |
+
+### 13. Notifications (`/notifications`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/notifications/` | Get notifications | Yes |
+| GET | `/notifications/unread-count` | Unread count | Yes |
+| PUT | `/notifications/{id}/read` | Mark as read | Yes |
+| PUT | `/notifications/read-all` | Mark all read | Yes |
+| DELETE | `/notifications/{id}` | Delete notification | Yes |
+| POST | `/notifications/push-token` | Register token | Yes |
+| PUT | `/notifications/preferences` | Update preferences | Yes |
+| GET | `/notifications/preferences` | Get preferences | Yes |
+| POST | `/notifications/test` | Test notification | Yes |
+
+### 14. Admin (`/admin`)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/admin/dashboard` | Dashboard | Admin |
+| GET | `/admin/users` | Get all users | Admin |
+| GET | `/admin/users/{id}` | User details | Admin |
+| PUT | `/admin/users/{id}/status` | Update status | Admin |
+| POST | `/admin/users/block` | Block user | Admin |
+| DELETE | `/admin/users/{id}` | Delete user | Admin |
+| POST | `/admin/verify/doctor` | Verify doctor | Admin |
+| POST | `/admin/verify/hospital` | Verify hospital | Admin |
+| POST | `/admin/verify/pharmacy` | Verify pharmacy | Admin |
+| GET | `/admin/analytics/users` | User analytics | Admin |
+| GET | `/admin/analytics/blood` | Blood analytics | Admin |
+| GET | `/admin/analytics/revenue` | Revenue analytics | Admin |
+| GET | `/admin/analytics/emergency` | Emergency analytics | Admin |
+| GET | `/admin/reports` | Generate reports | Admin |
+| GET | `/admin/feedback` | Get feedback | Admin |
+| GET | `/admin/audit-logs` | Audit logs | Admin |
+
+## Response Format
+
+### Success Response
+```json
+{
+  "data": {},
+  "message": "Success",
+  "status": 200
+}
 
