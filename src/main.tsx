@@ -7,20 +7,14 @@ import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-
-
-import app from "src/app";
-import { Provider } from "react-redux";
-import { store } from "./store/store";
-
-
-
+import { Provider } from 'react-redux';
+import { store } from './store/store';
 
 // Styles
 import './styles/globals.css';
 
 // Lazy Load App
-const App = lazy(() => import('src/app'));
+const App = lazy(() => import('./app'));
 
 // Loading Fallback
 const LoadingFallback: React.FC = () => {
@@ -46,22 +40,6 @@ const LoadingFallback: React.FC = () => {
 
 const rootElement = document.getElementById('root');
 
-
-
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </React.StrictMode>
-);
-
-
-
-
-
-
-
 if (!rootElement) {
   throw new Error('Root element not found!');
 }
@@ -70,22 +48,24 @@ const root = ReactDOM.createRoot(rootElement);
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Suspense fallback={<LoadingFallback />}>
-        <App />
-      </Suspense>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#1f2937',
-            color: '#ffffff',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '12px',
-          },
-        }}
-      />
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Suspense fallback={<LoadingFallback />}>
+          <App />
+        </Suspense>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#1f2937',
+              color: '#ffffff',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '12px',
+            },
+          }}
+        />
+      </BrowserRouter>
+    </Provider>
   </React.StrictMode>
 );
