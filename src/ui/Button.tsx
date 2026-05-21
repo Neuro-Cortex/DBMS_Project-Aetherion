@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { motion, type HTMLMotionProps } from 'framer-motion';
 import { Loader2, type LucideIcon } from 'lucide-react';
 import clsx from 'clsx';
@@ -107,7 +107,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const [ripples, setRipples] = React.useState<
+    const [ripples, setRipples] = useState<
       { x: number; y: number; id: number }[]
     >([]);
 
@@ -204,3 +204,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 Button.displayName = 'Button';
+
+// ✅ IMPORTANT FIX: default export added for safety
+export default Button;
