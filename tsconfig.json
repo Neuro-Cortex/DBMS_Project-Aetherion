@@ -1,38 +1,99 @@
 {
   "compilerOptions": {
+    // Target & Module
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-
     "module": "ESNext",
     "moduleResolution": "Bundler",
 
+    // React
     "jsx": "react-jsx",
+    "jsxImportSource": "react",
 
+    // Strict Type Checking
     "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+
+    // Module Resolution
     "skipLibCheck": true,
     "noEmit": true,
-
     "isolatedModules": true,
     "resolveJsonModule": true,
-
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-
     "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "checkJs": false,
 
-    /* =================================
-       🔥 PATH ALIAS FIX (@/)
-    ================================= */
+    // Path Aliases
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@pages/*": ["src/pages/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@utils/*": ["src/utils/*"],
+      "@assets/*": ["src/assets/*"],
+      "@services/*": ["src/services/*"],
+      "@store/*": ["src/store/*"],
+      "@types/*": ["src/types/*"],
+      "@styles/*": ["src/styles/*"],
+      "@layouts/*": ["src/layouts/*"],
+      "@features/*": ["src/features/*"],
+      "@shared/*": ["src/shared/*"],
+      "@config/*": ["src/config/*"]
     },
 
-    /* TS 5/6 warning suppress (tumi je error peyechile) */
+    // Types
+    "types": ["vite/client", "node"],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+
+    // Additional Checks
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "declaration": false,
+    "declarationMap": false,
+    "inlineSources": false,
+
+    // Experimental
+    "experimentalDecorators": false,
+    "emitDecoratorMetadata": false,
+
+    // Suppress specific warnings
     "ignoreDeprecations": "5.0"
   },
 
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "vite-env.d.ts"
+  ],
+
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/__tests__/**"
+  ],
+
+  "references": [
+    { "path": "./tsconfig.node.json" }
+  ]
 }

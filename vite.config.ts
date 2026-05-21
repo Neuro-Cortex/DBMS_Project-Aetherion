@@ -25,6 +25,14 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       'src': path.resolve(__dirname, './src'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@assets': path.resolve(__dirname, './src/assets'),
+      '@services': path.resolve(__dirname, './src/services'),
+      '@store': path.resolve(__dirname, './src/store'),
+      '@types': path.resolve(__dirname, './src/types'),
       '@react-google-maps/api': path.resolve(__dirname, './src/shims/googleMapsApi.tsx'),
       'qrcode.react': path.resolve(__dirname, './src/shims/QRCode.tsx'),
     }
@@ -35,6 +43,28 @@ export default defineConfig({
     port: 3000,
     open: true,
     host: true,
+    cors: true,
+    strictPort: false,
+    hmr: {
+      overlay: true,
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/socket.io': {
+        target: 'http://localhost:5000',
+        ws: true,
+      }
+    }
+  },
+
+  // Preview server
+  preview: {
+    port: 4173,
+    open: true,
   },
 
   // Production build
@@ -42,7 +72,10 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'esbuild',
+    target: 'es2020',
     chunkSizeWarningLimit: 1000,
+    cssCodeSplit: true,
+    assetsInlineLimit: 4096,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -50,6 +83,9 @@ export default defineConfig({
           redux: ['@reduxjs/toolkit', 'react-redux'],
           motion: ['framer-motion'],
           icons: ['lucide-react'],
+          firebase: ['firebase'],
+          charts: ['recharts'],
+          calendar: ['react-big-calendar'],
         }
       }
     }
@@ -59,9 +95,52 @@ export default defineConfig({
   css: {
     modules: {
       localsConvention: 'camelCase',
-    }
+      scopeBehaviour: 'local',
+      generateScopedName: '[name]__[local]___[hash:base64:5]',
+    },
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "@/styles/variables.scss";`,
+      }
+    },
+    devSourcemap: true,
   },
 
   // Environment variables
-  envPrefix: 'REACT_APP_',
+  envPrefix: 'VITE_',
+  
+  // Optimize dependencies
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@reduxjs/toolkit',
+      'firebase',
+      'axios',
+      'date-fns',
+    ],
+    exclude: [
+      '@react-google-maps/api',
+      'qrcode.react',
+    ]
+  },
+
+  // Worker configuration
+  worker: {
+    format: 'es',
+  },
+
+  // ESBuild options
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' },
+    jsx: 'automatic',
+    jsxImportSource: 'react',
+  },
+
+  // Define global constants
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+    __DEV__: process.env.NODE_ENV === 'development',
+  },
 })

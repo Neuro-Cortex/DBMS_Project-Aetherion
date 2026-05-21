@@ -10,8 +10,12 @@ import {
   Building2, Pill, Brain, Search
 } from 'lucide-react';
 
-import { Button } from '../ui/Button';
-import { Badge } from 'src/ui/Badge'
+import { Button } from 'src/ui/Button';
+
+
+import  Badge  from 'src/ui/Badge';
+
+
 import { Avatar } from 'src/ui/Avatar';
 
 interface NavbarProps {
@@ -28,9 +32,10 @@ export const Navbar: React.FC<NavbarProps> = ({ transparent = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // SAFE Redux access (prevents crash)
-  const authState = useSelector((state: any) => state.auth || {});
-  const { user, isAuthenticated } = authState;
+  // SAFE Redux access
+  const authState = useSelector((state: any) => state.auth || null);
+  const user = authState?.user || null;
+  const isAuthenticated = authState?.isAuthenticated || false;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -98,7 +103,7 @@ export const Navbar: React.FC<NavbarProps> = ({ transparent = false }) => {
           </div>
 
           {/* RIGHT SIDE */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 relative">
 
             {/* SEARCH */}
             <button onClick={() => setSearchOpen(!searchOpen)}>
@@ -143,31 +148,33 @@ export const Navbar: React.FC<NavbarProps> = ({ transparent = false }) => {
                 </Button>
 
                 {/* PROFILE */}
-                <button
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2"
-                >
-                  <Avatar name={user?.name || 'User'} size="sm" />
-                  <ChevronDown className="w-4 h-4 text-slate-300" />
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className="flex items-center gap-2"
+                  >
+                    <Avatar name={user?.name || 'User'} size="sm" />
+                    <ChevronDown className="w-4 h-4 text-slate-300" />
+                  </button>
 
-                <AnimatePresence>
-                  {profileDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-4 top-16 w-56 bg-slate-900 border border-white/10 rounded-2xl p-2"
-                    >
-                      <button className="w-full text-left px-4 py-2 text-slate-300 hover:bg-white/5">
-                        Profile
-                      </button>
-                      <button className="w-full text-left px-4 py-2 text-red-400 hover:bg-red-500/10">
-                        Sign Out
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  <AnimatePresence>
+                    {profileDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute right-0 top-12 w-56 bg-slate-900 border border-white/10 rounded-2xl p-2"
+                      >
+                        <button className="w-full text-left px-4 py-2 text-slate-300 hover:bg-white/5">
+                          Profile
+                        </button>
+                        <button className="w-full text-left px-4 py-2 text-red-400 hover:bg-red-500/10">
+                          Sign Out
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </>
             ) : (
               <>

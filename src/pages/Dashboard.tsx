@@ -1,4 +1,4 @@
-// src/pages/Home.tsx
+
 import React, { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,9 +10,9 @@ import {
   Video, Wind, Zap, ArrowRight, Bot, Send
 } from 'lucide-react';
 
-// ============================================
-// EXISTING COMPONENTS (Reused, not duplicated) - FIXED IMPORTS
-// ============================================
+
+
+
 import { Navbar } from '../components/layout/Navbar';
 import { Footer } from '../components/layout/Footer';
 import { GlassmorphicCard } from '../components/ui/GlassmorphicCard';
@@ -21,21 +21,28 @@ import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
 import { Loader } from '../components/ui/Loader';
 import { SearchBar } from '../components/common/SearchBar';
+
+
+
+
 import { AIResponseCard } from '../components/ai/AIResponseCard';
 import { AISuggestionChips } from '../components/ai/AISuggestionChips';
 import { AIVoiceButton } from '../components/ai/AIVoiceButton';
+
+
+
+
 import { useMediaQuery } from '../hooks/useMediaQuery';
 
-// ============================================
-// LAZY LOADED COMPONENTS (Performance optimization)
-// ============================================
+
+
 const GoogleMap = lazy(() => import('../components/common/GoogleMap'));
 const TestimonialsSection = lazy(() => import('../components/common/TestimonialsSection'));
 const BackToTop = lazy(() => import('../components/layout/BackToTop'));
 
-// ============================================
-// TYPE DEFINITIONS
-// ============================================
+
+
+
 type ColorKey = 'blue' | 'teal' | 'purple' | 'red' | 'amber' | 'green' | 'indigo' | 'pink' | 'rose';
 type MarkerType = 'hospital' | 'blood' | 'pharmacy' | 'icu' | 'ambulance';
 
@@ -380,6 +387,10 @@ const HeroSection: React.FC = React.memo(() => {
                 </div>
               </div>
 
+
+
+
+
               <div className="space-y-2">
                 {[...Array(3)].map((_, i) => (
                   <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-white/5">
@@ -396,6 +407,16 @@ const HeroSection: React.FC = React.memo(() => {
           </motion.div>
         </div>
       </div>
+
+
+
+
+
+
+
+
+
+
 
       {/* Scroll Indicator */}
       <motion.div
@@ -417,9 +438,10 @@ const HeroSection: React.FC = React.memo(() => {
 
 HeroSection.displayName = 'HeroSection';
 
-// ============================================
-// LIVE STATS SECTION
-// ============================================
+
+
+
+
 
 const LiveStatsSection: React.FC = React.memo(() => {
   const statsRef = useRef(null);
