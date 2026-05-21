@@ -9,7 +9,7 @@ import clientReducer from "./slices/clientSlice";
 import doctorReducer from "src/store/slices/DoctorSlice";
 import hospitalReducer from "./slices/hospitalSlice";
 import appointmentReducer from "src/store/slices/appointmentSlice";
-import emergencyReducer from "src/store/emergencySlice";
+import emergencyReducer from "./emergencySlice";
 import pharmacyReducer from "./slices/pharmacySlice";
 import adminReducer from "./slices/adminSlice";
 import uiReducer from "./slices/uiSlice";
