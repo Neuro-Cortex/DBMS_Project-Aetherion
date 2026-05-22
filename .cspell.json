@@ -1,0 +1,41 @@
+{
+  "version": "0.2",
+  "language": "en-US",
+  "words": [
+    "aetherion",
+    "Aetherion",
+    "assistent",
+    "Clientprofile",
+    "Physiothrerapy",
+    "Schdule",
+    "Veccine",
+    "tailwindcss",
+    "autoprefixer",
+    "postcss",
+    "lucide",
+    "reduxjs",
+    "hookform",
+    "resolvers",
+    "radix",
+    "recharts",
+    "framer",
+    "motion",
+    "clsx",
+    "vite",
+    "esbuild",
+    "rollup",
+    "sourcery",
+    "Telemedicine",
+    "telemedicine"
+  ],
+  "flagWords": [],
+  "ignorePaths": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    "*.log",
+    ".git/**",
+    "package-lock.json",
+    "public/**"
+  ]
+}

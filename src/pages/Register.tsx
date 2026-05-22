@@ -77,7 +77,7 @@ const Register: React.FC = () => {
       'doctor': '/doctor/dashboard',
       'hospital': '/hospital/dashboard',
       'pharmacy': '/pharmacy/dashboard',
-      'blood-donor': '/donor/dashboard',
+      'blood-donor': '/client/dashboard',
       'admin': '/admin/dashboard',
     };
     

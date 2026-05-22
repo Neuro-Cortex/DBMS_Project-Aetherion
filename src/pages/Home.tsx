@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
-import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion';
+// cspell:ignore Aetherion Csvg Fwww Fsvg Ccircle
+import React, { useEffect, useRef, useState } from 'react';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Heart, Activity, Brain, Calendar, Video, User, Building2,
@@ -11,7 +12,7 @@ import {
   Rocket, Target, Eye, Layers, Wallet, Wand2,
   GraduationCap, Laptop, Smartphone, Headphones, Smile,
   Frown, Meh, Flame, Cloud, Sun, Moon, Wind,
-  Infinity, Sigma, Atom, Dna, Microscope, Syringe,
+  Sigma, Atom, Dna, Microscope, Syringe,
   Bone, Baby, Footprints, Accessibility, Monitor, Tablet,
   Bell, Settings, Users2, MapPin, Navigation2, Send,
   Share2, Download, Upload, RefreshCw, Trash2, Edit,
@@ -19,7 +20,8 @@ import {
   Menu, X, ChevronDown, ExternalLink, Bot, Cpu, Network,
   Wifi, Bluetooth, Radio, Satellite, Database, Server,
   Code, Terminal, GitBranch, Package, FileCode, FolderTree,
-  Hammer, Wrench, Cog, Gauge, Thermometer, Ruler
+  Hammer, Wrench, Cog, Gauge, Thermometer, Ruler,
+  Apple, QrCode
 } from 'lucide-react';
 
 // ============================================
@@ -31,16 +33,6 @@ interface StatItem {
   label: string;
   icon: React.ComponentType<any>;
   color: string;
-}
-
-interface FeatureItem {
-  icon: React.ComponentType<any>;
-  title: string;
-  desc: string;
-  color: string;
-  iconColor: string;
-  badge?: string;
-  stats?: string;
 }
 
 interface RoleItem {
@@ -68,6 +60,7 @@ interface SystemModule {
   color: string;
   files: number;
   features: string[];
+  link: string;
 }
 
 // ============================================
@@ -354,6 +347,7 @@ const SystemModulesSection: React.FC = () => {
       desc: 'Smart patient dashboard with appointments, health records, prescriptions, and AI recommendations.',
       color: 'from-blue-500 to-cyan-500',
       files: 16,
+      link: '/client/dashboard',
       features: ['Appointment Booking', 'Health Records', 'Prescriptions', 'Nearby Donors']
     },
     {
@@ -362,6 +356,7 @@ const SystemModulesSection: React.FC = () => {
       desc: 'Complete practice management with patient lists, scheduling, prescriptions, and video consultations.',
       color: 'from-emerald-500 to-teal-500',
       files: 6,
+      link: '/doctor/dashboard',
       features: ['Patient Management', 'Schedule', 'Prescriptions', 'Video Calls']
     },
     {
@@ -370,6 +365,7 @@ const SystemModulesSection: React.FC = () => {
       desc: 'Hospital administration with bed management, ICU tracking, ambulance, and emergency services.',
       color: 'from-purple-500 to-violet-500',
       files: 8,
+      link: '/hospital/dashboard',
       features: ['Bed Tracking', 'ICU Monitor', 'Ambulance', 'ER Management']
     },
     {
@@ -378,6 +374,7 @@ const SystemModulesSection: React.FC = () => {
       desc: 'Blood donor network with real-time availability, emergency requests, and donation history.',
       color: 'from-red-500 to-rose-500',
       files: 5,
+      link: '/blood-donors',
       features: ['Donor Search', 'Blood Stock', 'Emergency Alert', 'Donation History']
     },
     {
@@ -386,6 +383,7 @@ const SystemModulesSection: React.FC = () => {
       desc: 'Online pharmacy with medicine search, price comparison, prescription upload, and home delivery.',
       color: 'from-amber-500 to-orange-500',
       files: 8,
+      link: '/pharmacy',
       features: ['Medicine Search', 'Price Compare', 'Rx Upload', 'Delivery']
     },
     {
@@ -394,6 +392,7 @@ const SystemModulesSection: React.FC = () => {
       desc: 'Real-time oxygen cylinder tracking, hospital availability, and emergency oxygen support.',
       color: 'from-sky-500 to-indigo-500',
       files: 5,
+      link: '/oxygen-network',
       features: ['Stock Monitor', 'Hospital List', 'Emergency O2', 'Cylinder Track']
     },
     {
@@ -402,6 +401,7 @@ const SystemModulesSection: React.FC = () => {
       desc: 'Super admin dashboard with user management, verifications, analytics, and system monitoring.',
       color: 'from-slate-500 to-gray-500',
       files: 12,
+      link: '/admin/login',
       features: ['User Management', 'Verification', 'Analytics', 'Security']
     },
     {
@@ -410,6 +410,7 @@ const SystemModulesSection: React.FC = () => {
       desc: 'Dedicated women health section with pregnancy tracking, menstrual cycle, and baby care.',
       color: 'from-pink-500 to-fuchsia-500',
       files: 9,
+      link: '/women-care',
       features: ['Pregnancy Track', 'Cycle Monitor', 'Baby Care', 'Vaccines']
     },
     {
@@ -418,6 +419,7 @@ const SystemModulesSection: React.FC = () => {
       desc: 'Intelligent health chatbot with symptom checker, medicine recommendations, and voice support.',
       color: 'from-violet-500 to-purple-500',
       files: 8,
+      link: '/ai-assistant',
       features: ['Symptom Check', 'Medicine Info', 'Voice Input', 'Smart Alerts']
     },
   ];
@@ -453,7 +455,7 @@ const SystemModulesSection: React.FC = () => {
                 transition={{ delay: i * 0.08 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -8 }}
-                onClick={() => navigate(`/${sys.title.toLowerCase().replace(/\s+/g, '-')}`)}
+                onClick={() => navigate(sys.link)}
                 className="group cursor-pointer relative p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-cyan-300 dark:hover:border-cyan-600 hover:shadow-xl transition-all duration-300 overflow-hidden"
               >
                 <div className={`absolute top-0 right-0 w-32 h-32 rounded-full bg-gradient-to-br ${sys.color} opacity-5 group-hover:opacity-10 transition-opacity duration-500 -translate-y-1/2 translate-x-1/2`} />
@@ -491,6 +493,32 @@ const SystemModulesSection: React.FC = () => {
 // ============================================
 // REAL-TIME STATS SECTION
 // ============================================
+
+// Extracted to its own component so the hook is never called inside a loop
+const StatCard: React.FC<{ stat: StatItem; index: number }> = ({ stat, index }) => {
+  const Icon = stat.icon;
+  const { count, ref } = useAnimatedCounter(stat.value, 2500);
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.08 }}
+      whileHover={{ scale: 1.05 }}
+      className="text-center group cursor-default p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all"
+    >
+      <div className={`w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+        <Icon className="w-7 h-7 text-white" />
+      </div>
+      <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1">
+        {count}{stat.suffix}
+      </div>
+      <div className="text-slate-500 dark:text-slate-400 text-sm font-medium">{stat.label}</div>
+    </motion.div>
+  );
+};
+
 const StatsSection: React.FC = () => {
   const stats: StatItem[] = [
     { value: 50, suffix: 'K+', label: 'Active Patients', icon: Users2, color: 'from-blue-500 to-cyan-500' },
@@ -511,22 +539,9 @@ const StatsSection: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-400 text-lg">Real-time statistics from our growing ecosystem</p>
         </motion.div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {stats.map((s, i) => {
-            const Icon = s.icon;
-            const { count, ref } = useAnimatedCounter(s.value, 2500);
-            return (
-              <motion.div key={i} ref={ref} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                whileHover={{ scale: 1.05 }} className="text-center group cursor-default p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all">
-                <div className={`w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                  <Icon className="w-7 h-7 text-white" />
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1">
-                  {count}{s.suffix}
-                </div>
-                <div className="text-slate-500 dark:text-slate-400 text-sm font-medium">{s.label}</div>
-              </motion.div>
-            );
-          })}
+          {stats.map((s, i) => (
+            <StatCard key={i} stat={s} index={i} />
+          ))}
         </div>
       </div>
     </section>
@@ -762,11 +777,6 @@ const AIAssistantSection: React.FC = () => {
     </section>
   );
 };
-
-// Missing icon component
-const Apple: React.FC<any> = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>;
-
-const QrCode: React.FC<any> = (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>;
 
 // ============================================
 // EMERGENCY SECTION
