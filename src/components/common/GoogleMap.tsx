@@ -1,6 +1,6 @@
 // src/components/common/GoogleMap.tsx
 import React, { useState } from 'react';
-import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker, InfoWindow } from '@/shims/googleMapsApi';
 
 const MapComponent: React.FC = () => {
   const [selectedMarker, setSelectedMarker] = useState<any>(null);

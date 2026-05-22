@@ -3,7 +3,8 @@
 import {
   PregnancyRecord, BabyVaccine, GynecologistConsultation,
   MenstrualCycle, ChildGrowth, WomenHealthNotification,
-  EmergencyPregnancySupport, WomenCareDashboardData
+  EmergencyPregnancySupport, WomenCareDashboardData,
+  PregnancyAppointment, VaccineRecord
 } from '../types/womenCare';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';

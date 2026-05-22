@@ -1,15 +1,15 @@
 // src/services/hospitalService.ts
-// src/services/hospitalService.ts
 
 import {
-  Hospital, HospitalDoctor, BloodDonor, BloodRequest,
+  HospitalDoctor, BloodDonor, BloodRequest,
   Ambulance, EmergencyAnnouncement, Department,
-  ICUBed, HospitalDashboardData, OxygenStock
+  ICUBed, HospitalDashboardData, OxygenStock,
+  BloodStock, AmbulanceRequest as AmbulanceRequestType, HospitalAnalytics as HospitalAnalyticsType
 } from '../types/hospital';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-class HospitalService {
+class HospitalServiceAPI {
   private token: string = '';
 
   setToken(token: string) {
@@ -276,7 +276,6 @@ class HospitalService {
   }
 }
 
-export const hospitalService = new HospitalService();
 import api, { simulateDelay } from './api';
 
 // ============================================

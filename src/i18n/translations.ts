@@ -1,5 +1,8 @@
 // src/i18n/translations.ts
-export const translations = {
+
+type TranslationMap = Record<string, Record<string, string>>;
+
+export const translations: TranslationMap = {
   en: {
     dashboard: 'Dashboard',
     appointments: 'Appointments',

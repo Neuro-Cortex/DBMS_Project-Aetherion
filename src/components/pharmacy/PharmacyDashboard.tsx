@@ -7,17 +7,17 @@ import {
   XCircle, Truck, Search, Bell, Settings,
   Activity, Users, Star, Calendar
 } from 'lucide-react';
-import { PharmacyDashboardData, GoogleMap, LoadScript, Marker } from '../../types/pharmacy';
+import { PharmacyDashboardData } from '../../types/pharmacy';
 
 interface PharmacyDashboardProps {
-  pharmacyId: string;
-  onNavigate: (page: string) => void;
+  pharmacyId?: string;
+  onNavigate?: (page: string) => void;
   googleMapsApiKey?: string;
 }
 
 export const PharmacyDashboard: React.FC<PharmacyDashboardProps> = ({
-  pharmacyId,
-  onNavigate,
+  pharmacyId = 'default-pharmacy',
+  onNavigate = () => {},
   googleMapsApiKey
 }) => {
   const [dashboardData, setDashboardData] = useState<PharmacyDashboardData | null>(null);

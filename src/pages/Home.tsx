@@ -10,7 +10,7 @@ import {
   CheckCircle2, XCircle, Quote, ThumbsUp, Award, Crown, Gem,
   Rocket, Target, Eye, Layers, Wallet, Wand2,
   GraduationCap, Laptop, Smartphone, Headphones, Smile,
-  Frown, Meh, Flame, Bolt, Cloud, Sun, Moon, Wind,
+  Frown, Meh, Flame, Cloud, Sun, Moon, Wind,
   Infinity, Sigma, Atom, Dna, Microscope, Syringe,
   Bone, Baby, Footprints, Accessibility, Monitor, Tablet,
   Bell, Settings, Users2, MapPin, Navigation2, Send,

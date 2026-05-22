@@ -74,7 +74,7 @@ export interface Patient {
 }
 
 export interface PatientProfileProps {
-  patient: Patient;
+  patient?: Patient;
   variant?: 'glass' | 'gradient' | 'neon';
   onEdit?: (field: keyof Patient, value: any) => void;
   onEmergencyContactAdd?: () => void;
@@ -86,7 +86,22 @@ export interface PatientProfileProps {
 // PATIENT PROFILE COMPONENT
 // ============================================
 export const PatientProfile: React.FC<PatientProfileProps> = ({
-  patient,
+  patient = {
+    id: 'default',
+    name: 'Patient Name',
+    email: 'patient@example.com',
+    phone: '+1 (555) 000-0000',
+    dateOfBirth: '1990-01-01',
+    gender: 'other',
+    bloodGroup: 'O+',
+    address: { street: '', city: '', state: '', zip: '', country: '' },
+    emergencyContacts: [],
+    insurance: { provider: '', policyNumber: '', groupNumber: '', validUntil: '' },
+    medicalInfo: { height: '', weight: '', allergies: [], chronicDiseases: [], surgeries: [], medications: [] },
+    status: 'active',
+    privacyLevel: 'private',
+    createdAt: new Date().toISOString()
+  },
   variant = 'glass',
   onEdit,
   onEmergencyContactAdd,

@@ -8,7 +8,7 @@ import {
   HospitalProfile,
   BloodDonorProfile,
   PharmacyProfile 
-} from '../../types/auth';
+} from '../types/auth';
 
 interface AuthState {
   user: UserProfile | null;

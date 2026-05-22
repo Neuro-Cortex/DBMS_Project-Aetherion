@@ -48,7 +48,7 @@ export interface MedicalInfo {
 }
 
 export interface MedicalHistoryProps {
-  medicalInfo: MedicalInfo;
+  medicalInfo?: MedicalInfo;
   variant?: 'glass' | 'gradient' | 'neon';
   isEditing?: boolean;
   onEdit?: (field: keyof MedicalInfo, value: any) => void;
@@ -195,7 +195,16 @@ const getMockTimeline = (): TimelineEvent[] => [
 // ============================================
 
 export const MedicalHistory: React.FC<MedicalHistoryProps> = ({
-  medicalInfo,
+  medicalInfo = {
+    height: '',
+    weight: '',
+    allergies: [],
+    chronicDiseases: [],
+    surgeries: [],
+    medications: [],
+    familyHistory: [],
+    immunizations: []
+  },
   variant = 'glass',
   isEditing = false,
   onEdit,

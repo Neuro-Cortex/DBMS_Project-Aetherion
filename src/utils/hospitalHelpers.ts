@@ -4,7 +4,7 @@ import type { HospitalListItem, BedSummary, BedInfo } from '@/types/hospital';
 // ============================================
 // Get bed summary regardless of format
 // ============================================
-export function getBedSummary(hospital: Hospital): BedSummary {
+export function getBedSummary(hospital: HospitalListItem): BedSummary {
   const beds = hospital.beds;
   
   if (!beds) {

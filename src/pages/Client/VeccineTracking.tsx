@@ -1,7 +1,7 @@
 // src/pages/client/VaccineTracking.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ClientSidebar from '../../components/client/ClientSidebar';
+import ClientSidebar from '../../components/client/clientSidebar';
 import {
   Syringe, Calendar, Clock, CheckCircle2, AlertCircle,
   ChevronRight, Plus, Shield, Baby, Activity,

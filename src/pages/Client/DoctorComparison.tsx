@@ -318,19 +318,15 @@ const ClientDoctorComparison: React.FC = () => {
 
                     {comparedDoctors.map(d => (
                       <td key={d.id} className="py-3 text-center text-white">
-                        {row.isBoolean ? (
-                          d[row.key as keyof Doctor] ? (
+{row.isBoolean ? (
+                          String(d[row.key as keyof Doctor]) === 'true' ? (
                             <CheckCircle2 className="w-5 h-5 text-emerald-400 mx-auto" />
                           ) : (
                             <XCircle className="w-5 h-5 text-red-400 mx-auto" />
                           )
-                        ) :
-                        
-                        
-                        
-                        (
+                        ) : (
                           <span className={row.key === 'consultationFee' ? 'text-emerald-400 font-medium' : ''}>
-                            {row.prefix || ''}{d[row.key as keyof Doctor]}{row.suffix || ''}
+                            {row.prefix || ''}{String(d[row.key as keyof Doctor] ?? '')}{row.suffix || ''}
                           </span>
                         )}
                       </td>

@@ -148,7 +148,7 @@ export const Discover: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
-        <Loader type="spinner" message="Discovering healthcare updates..." />
+        <Loader variant="spinner" text="Discovering healthcare updates..." />
       </div>
     );
   }
@@ -203,12 +203,12 @@ export const Discover: React.FC = () => {
             placeholder="Search hospitals, doctors, pharmacies..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            icon={<Search className="w-4 h-4" />}
+            leftIcon={Search}
             className="flex-1 min-w-[250px]"
           />
           <Select
             value={filterBadge}
-            onChange={(e) => setFilterBadge(e.target.value)}
+            onChange={(value) => setFilterBadge(value as string)}
             options={[
               { value: 'all', label: '🔍 All Items' },
               { value: 'new', label: '🆕 New' },
@@ -229,7 +229,7 @@ export const Discover: React.FC = () => {
       {/* ============================================ */}
       {/* TABS */}
       {/* ============================================ */}
-      <Tab tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
+      <Tab tabs={tabs} defaultTab={activeTab} onChange={setActiveTab} />
 
       {/* ============================================ */}
       {/* DISCOVERY CARDS GRID */}

@@ -4,7 +4,7 @@ import {
   ChevronRight,
   ChevronLeft,
   LayoutDashboard,
-  Hospital,
+  Building2 as Hospital,
   Stethoscope,
   Users,
   Calendar,

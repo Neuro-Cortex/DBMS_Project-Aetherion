@@ -83,7 +83,7 @@ export default defineConfig({
           redux: ['@reduxjs/toolkit', 'react-redux'],
           motion: ['framer-motion'],
           icons: ['lucide-react'],
-          firebase: ['firebase'],
+
           charts: ['recharts'],
           calendar: ['react-big-calendar'],
         }
@@ -116,7 +116,7 @@ export default defineConfig({
       'react-dom',
       'react-router-dom',
       '@reduxjs/toolkit',
-      'firebase',
+
       'axios',
       'date-fns',
     ],

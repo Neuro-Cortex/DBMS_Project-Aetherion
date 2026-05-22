@@ -1,7 +1,7 @@
 // src/pages/client/MedicalReports.tsx
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ClientSidebar from '../../components/client/ClientSidebar';
+import ClientSidebar from '../../components/client/clientSidebar';
 import {
   FileText, Upload, Download, Search, Filter,
   Calendar, ChevronRight, Trash2, Eye, Clock,

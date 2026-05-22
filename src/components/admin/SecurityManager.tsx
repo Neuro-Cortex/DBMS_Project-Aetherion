@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Shield, Lock, Key, AlertTriangle, Activity,
   Server, Wifi, UserX, Eye, Download,
-  Filter, RefreshCw, Globe,
+  Filter, RefreshCw, Globe, Search,
   Clock, Zap, CheckCircle, XCircle,
   Smartphone, Monitor, MapPin
 } from 'lucide-react';
@@ -59,7 +59,7 @@ export interface SecurityStats {
 const securityColumns = [
   {
     key: 'event',
-    header: 'Event',
+    title: 'Event',
     render: (log: SecurityLog) => (
       <div className="flex items-center gap-2">
         <div className={`w-2 h-2 rounded-full ${
@@ -72,21 +72,21 @@ const securityColumns = [
   },
   {
     key: 'userName',
-    header: 'User',
+    title: 'User',
     render: (log: SecurityLog) => (
       <span className="text-sm">{log.userName || 'Unknown'}</span>
     )
   },
   {
     key: 'ipAddress',
-    header: 'IP Address',
+    title: 'IP Address',
     render: (log: SecurityLog) => (
       <span className="text-sm font-mono text-gray-600">{log.ipAddress}</span>
     )
   },
   {
     key: 'status',
-    header: 'Status',
+    title: 'Status',
     render: (log: SecurityLog) => (
       <Badge 
         variant={log.status === 'success' ? 'success' : log.status === 'failed' ? 'danger' : 'warning'}
@@ -98,21 +98,21 @@ const securityColumns = [
   },
   {
     key: 'timestamp',
-    header: 'Timestamp',
+    title: 'Timestamp',
     render: (log: SecurityLog) => (
       <span className="text-sm text-gray-500">{new Date(log.timestamp).toLocaleString()}</span>
     )
   },
   {
     key: 'details',
-    header: 'Details',
+    title: 'Details',
     render: (log: SecurityLog) => (
       <span className="text-sm text-gray-600">{log.details}</span>
     )
   },
   {
     key: 'actions',
-    header: '',
+    title: '',
     render: (log: SecurityLog) => (
       <div className="flex gap-1">
         <Button variant="ghost" size="xs" iconOnly>
@@ -235,7 +235,7 @@ export const SecurityManager: React.FC = () => {
   if (isLoading && securityLogs.length === 0) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader type="spinner" message="Loading security data..." />
+        <Loader variant="aetherion" text="Loading security data..." />
       </div>
     );
   }
@@ -365,7 +365,7 @@ export const SecurityManager: React.FC = () => {
       {/* ============================================ */}
       <Tabs
         tabs={tabs}
-        activeTab={activeTab}
+        defaultTab="logs"
         onChange={setActiveTab}
       />
 
@@ -378,13 +378,12 @@ export const SecurityManager: React.FC = () => {
             placeholder="Search events, users, IPs..."
             value={searchTerm}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-            
-            icon={<Search className="w-5 h-5" />}
+            leftIcon={Search}
             className="flex-1 min-w-[200px]"
           />
           <Select
             value={filter}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilter(e.target.value)}
+            onChange={(value: string | string[]) => setFilter(value as string)}
             options={[
               { value: 'all', label: 'All Events' },
               { value: 'success', label: 'Success' },

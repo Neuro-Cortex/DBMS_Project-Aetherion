@@ -753,10 +753,15 @@ export const authService = {
       throw new Error('Not authenticated');
     }
     
-    const updatedPreferences = {
-      ...currentUser.preferences,
+    const updatedPreferences: UserPreferences = {
+      ...(currentUser.preferences ?? {
+        notifications: { email: true, sms: true, push: true },
+        language: 'en',
+        theme: 'system',
+        timezone: 'Asia/Dhaka'
+      }),
       ...preferences
-    } as UserPreferences;
+    };
     
     await authService.updateProfile({ preferences: updatedPreferences });
     

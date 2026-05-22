@@ -13,7 +13,7 @@ import { Footer } from '@/components/layout/Footer';
 // TYPES
 // ============================================
 export interface DashboardLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   title?: string;
   breadcrumbs?: Array<{ label: string; path: string }>;
   actions?: React.ReactNode;

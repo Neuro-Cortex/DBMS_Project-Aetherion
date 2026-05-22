@@ -1,6 +1,6 @@
 // src/components/common/QRMedicalCard.tsx
 import React from 'react';
-import QRCode from 'qrcode.react';
+import QRCode from '@/shims/QRCode';
 
 interface MedicalCardProps {
   userData: {

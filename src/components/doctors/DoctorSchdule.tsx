@@ -43,7 +43,7 @@ export interface Doctor {
 }
 
 export interface DoctorScheduleProps {
-  doctor: Doctor;
+  doctor?: Doctor;
   variant?: 'glass' | 'gradient' | 'neon';
   onSlotSelect?: (slot: TimeSlot) => void;
   onDateSelect?: (date: Date) => void;
@@ -55,7 +55,7 @@ export interface DoctorScheduleProps {
 // ============================================
 
 export const DoctorSchedule: React.FC<DoctorScheduleProps> = ({
-  doctor,
+  doctor = { id: 'default', name: 'Dr. Smith', specialization: 'General', price: 100, rating: 4.5, availableSlots: 10 },
   variant = 'glass',
   onSlotSelect,
   onDateSelect,

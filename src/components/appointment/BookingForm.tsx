@@ -31,6 +31,29 @@ import { DoctorCard } from '../doctor/DoctorCard';
 // ============================================
 // TYPES & INTERFACES
 // ============================================
+export interface Doctor {
+  id: string;
+  name: string;
+  specialty: string;
+  phone?: string;
+  email?: string;
+  avatar?: string;
+  experience?: number;
+  rating?: number;
+  reviewCount?: number;
+  price?: number;
+  location?: string;
+  hospital?: string;
+}
+
+export interface Patient {
+  id: string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  avatar?: string;
+  emergencyContacts?: Array<{ name?: string; phone?: string; relationship?: string }>;
+}
 export interface BookingData {
   doctorId: string;
   patientId: string;

@@ -3,7 +3,8 @@
 import {
   Pharmacy, Medicine, MedicineOrder, Prescription,
   PharmacySearchParams, PharmacyDashboardData,
-  ClientPharmacyData, DeliveryTracking, StockAlert
+  ClientPharmacyData, DeliveryTracking, StockAlert,
+  MedicineReminder, SalesData
 } from '../types/pharmacy';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';

@@ -7,7 +7,7 @@ import {
   Bell, Search, Filter, Navigation, Droplet,
   Thermometer, Shield, Zap, Truck, Layers
 } from 'lucide-react';
-import { GoogleMap, LoadScript, Marker, InfoWindow, Circle } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker, InfoWindow, Circle } from '@/shims/googleMapsApi';
 import { OxygenDashboardData, OxygenCenter } from '../../types/oxygenNetwork';
 
 // Google Maps container style
@@ -40,13 +40,13 @@ const mapOptions = {
 };
 
 interface OxygenDashboardProps {
-  onNavigate: (page: string) => void;
-  googleMapsApiKey: string; // Your Google Maps API Key
+  onNavigate?: (page: string) => void;
+  googleMapsApiKey?: string; // Your Google Maps API Key
 }
 
 export const OxygenDashboard: React.FC<OxygenDashboardProps> = ({ 
-  onNavigate, 
-  googleMapsApiKey 
+  onNavigate = () => {}, 
+  googleMapsApiKey = '' 
 }) => {
   const [dashboardData, setDashboardData] = useState<OxygenDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);

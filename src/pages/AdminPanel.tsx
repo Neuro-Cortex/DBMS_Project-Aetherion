@@ -66,9 +66,9 @@ export const AdminPanel: React.FC = () => {
 
       {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <StatCard title="Users" value="5230" icon={Users} variant="neon" color="cyan" trend={{ direction: "up", value: 12, label: "+12%" }} />
-        <StatCard title="Hospitals" value="125" icon={Building2} variant="neon" color="blue" trend={{ direction: "up", value: 5, label: "+5%" }} />
-        <StatCard title="Revenue" value="$45K" icon={TrendingUp} variant="neon" color="pink" trend={{ direction: "up", value: 18, label: "+18%" }} />
+        <StatCard title="Users" value="5230" icon={Users} variant="glass" color="cyan" trend="up" change="+12%" />
+        <StatCard title="Hospitals" value="125" icon={Building2} variant="glass" color="blue" trend="up" change="+5%" />
+        <StatCard title="Revenue" value="$45K" icon={TrendingUp} variant="glass" color="pink" trend="up" change="+18%" />
       </div>
 
       {/* TAB */}

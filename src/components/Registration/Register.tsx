@@ -3,12 +3,12 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { login } from '../store/slices/authSlice';
+import { login } from '@/store/slices/authSlice';
 import toast from 'react-hot-toast';
 import { Sparkles, Shield, Pause, Play, Volume2, VolumeX } from 'lucide-react';
-import { AccountRole } from '../types/auth';
-import RoleSelector from '../components/Registration/RoleSelector';
-import RegistrationForm from '../components/Registration/RegistrationForm';
+import { AccountRole } from '@/types/auth';
+import RoleSelector from './RoleSelector';
+import RegistrationForm from './RegistratinForm';
 
 const Register: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<AccountRole | null>(null);

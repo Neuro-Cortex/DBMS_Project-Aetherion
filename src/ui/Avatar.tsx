@@ -43,6 +43,7 @@ const statusSizes = {
 // ============================================
 // COMPONENT
 // ============================================
+export default Avatar;
 export const Avatar: React.FC<AvatarProps> = ({
   src,
   alt = '',

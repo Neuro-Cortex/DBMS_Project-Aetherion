@@ -10,17 +10,17 @@ import {
 import { User } from '../../types/admin';
 
 interface UserManagerProps {
-  onViewUser: (userId: string) => void;
-  onEditUser: (userId: string) => void;
-  onBlockUser: (userId: string) => void;
-  onDeleteUser: (userId: string) => void;
+  onViewUser?: (userId: string) => void;
+  onEditUser?: (userId: string) => void;
+  onBlockUser?: (userId: string) => void;
+  onDeleteUser?: (userId: string) => void;
 }
 
 export const UserManager: React.FC<UserManagerProps> = ({
-  onViewUser,
-  onEditUser,
-  onBlockUser,
-  onDeleteUser
+  onViewUser = () => {},
+  onEditUser = () => {},
+  onBlockUser = () => {},
+  onDeleteUser = () => {}
 }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);

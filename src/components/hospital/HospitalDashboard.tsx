@@ -42,8 +42,8 @@ import {
 // ============================================
 
 interface HospitalDashboardProps {
-  hospitalId: string;
-  onNavigate: (page: string) => void;
+  hospitalId?: string;
+  onNavigate?: (page: string) => void;
 }
 
 // ============================================
@@ -72,8 +72,8 @@ const defaultVisitingHours: VisitingHours = {
 // ============================================
 
 export const HospitalDashboard: React.FC<HospitalDashboardProps> = ({
-  hospitalId,
-  onNavigate,
+  hospitalId = 'default-hospital',
+  onNavigate = () => {},
 }) => {
   const [dashboardData, setDashboardData] = useState<HospitalDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);

@@ -16,8 +16,8 @@ import {
   Pause, Play, Volume2, VolumeX, ChevronRight
 } from 'lucide-react';
 
-// Base schema for all users
-const baseSchema = z.object({
+// Base object schema (no refine)
+const baseObj = z.object({
   fullName: z.string().min(3, 'Name must be at least 3 characters'),
   email: z.string().email('Please enter a valid email'),
   phone: z.string().min(10, 'Phone must be at least 10 digits'),
@@ -26,30 +26,60 @@ const baseSchema = z.object({
   gender: z.enum(['male', 'female'], { required_error: 'Please select gender' }),
   address: z.string().min(5, 'Address is required'),
   dateOfBirth: z.string().min(1, 'Date of birth is required'),
-}).refine(data => data.password === data.confirmPassword, {
+});
+
+// Base schema with password match check
+const baseSchema = baseObj.refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
 });
 
 // Doctor-specific schema
-const doctorSchema = baseSchema.extend({
+const doctorSchema = baseObj.extend({
   specialization: z.string().min(3, 'Specialization is required'),
   licenseNumber: z.string().min(5, 'License number is required'),
   experience: z.string().min(1, 'Experience is required'),
   qualifications: z.string().min(3, 'Qualifications are required'),
   consultationFee: z.string().min(1, 'Consultation fee is required'),
   hospitalAffiliation: z.string().min(3, 'Hospital affiliation is required'),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 // Admin-specific schema
-const adminSchema = baseSchema.extend({
+const adminSchema = baseObj.extend({
   organization: z.string().min(3, 'Organization is required'),
   designation: z.string().min(2, 'Designation is required'),
   reasonForAccess: z.string().min(20, 'Please provide detailed reason (min 20 chars)'),
   adminCode: z.string().optional(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
-type RegisterFormData = z.infer<typeof baseSchema>;
+interface RegisterFormData {
+  fullName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  gender: 'male' | 'female';
+  address: string;
+  dateOfBirth: string;
+  // Doctor fields
+  specialization?: string;
+  licenseNumber?: string;
+  experience?: string;
+  qualifications?: string;
+  consultationFee?: string;
+  hospitalAffiliation?: string;
+  // Admin fields
+  organization?: string;
+  designation?: string;
+  reasonForAccess?: string;
+  adminCode?: string;
+}
 
 const Register: React.FC = () => {
   const { role } = useParams<{ role: string }>();
@@ -93,6 +123,16 @@ const Register: React.FC = () => {
       gender: undefined,
       address: '',
       dateOfBirth: '',
+      specialization: '',
+      licenseNumber: '',
+      experience: '',
+      qualifications: '',
+      consultationFee: '',
+      hospitalAffiliation: '',
+      organization: '',
+      designation: '',
+      reasonForAccess: '',
+      adminCode: '',
     },
   });
 

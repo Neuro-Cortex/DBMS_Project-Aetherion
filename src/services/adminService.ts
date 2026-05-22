@@ -5,7 +5,8 @@ import {
   HospitalVerification, PharmacyVerification,
   SystemAnalytics, BloodStockAnalytics,
   Report, Feedback, EmergencyAlert,
-  SecurityLog, AdminDashboardData
+  SecurityLog, AdminDashboardData,
+  SystemHealth
 } from '../types/admin';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/admin';

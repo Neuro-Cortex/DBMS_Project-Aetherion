@@ -132,8 +132,8 @@ export interface DoctorNotification {
 // ============================================
 
 interface DoctorDashboardProps {
-  doctorId: string;
-  onNavigate: (page: string) => void;
+  doctorId?: string;
+  onNavigate?: (page: string) => void;
 }
 
 // ============================================
@@ -151,7 +151,7 @@ const statsIconBg: Record<string, string> = {
 // MAIN COMPONENT
 // ============================================
 
-export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ doctorId, onNavigate }) => {
+export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ doctorId = 'default-doctor', onNavigate = () => {} }) => {
   const [dashboardData, setDashboardData] = useState<DoctorDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 

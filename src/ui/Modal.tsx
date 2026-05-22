@@ -101,6 +101,7 @@ const animationVariants = {
 // ============================================
 // MODAL COMPONENT
 // ============================================
+export default Modal;
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,

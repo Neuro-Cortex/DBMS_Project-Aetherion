@@ -107,6 +107,7 @@ const AnimatedCounter: React.FC<{ value: string; suffix?: string }> = ({ value, 
       
       return () => clearInterval(timer);
     }
+    return undefined;
   }, [isInView, value, suffix]);
 
   return <span ref={ref}>{displayValue}</span>;

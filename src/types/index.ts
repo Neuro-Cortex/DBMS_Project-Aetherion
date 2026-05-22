@@ -80,7 +80,7 @@ export type {
   ICUStats,
   BloodStats,
   OxygenStats,
-  EmergencyStats,
+  EmergencyStats as HospitalEmergencyStats,
   AmbulanceStats,
   HospitalActivity,
   PendingApproval,
@@ -129,5 +129,5 @@ export type {
   EmergencyResource,
   EmergencyStaff,
   EmergencyState,
-  EmergencyStats,
+  EmergencyStats as EmergencyStatsType,
 } from './emergency';

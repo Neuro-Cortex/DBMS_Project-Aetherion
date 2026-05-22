@@ -20,6 +20,7 @@ export const EmergencyMonitor: React.FC = () => {
       const interval = setInterval(fetchEmergencies, 30000); // Refresh every 30s
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [autoRefresh]);
 
   const fetchEmergencies = async () => {

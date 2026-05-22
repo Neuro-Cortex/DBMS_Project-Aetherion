@@ -8,7 +8,7 @@ export interface Hospital {
   id: string;
   name: string;
   registrationNumber: string;
-  type: 'government' | 'private' | 'charitable';
+  type: 'government' | 'private' | 'charitable' | 'general' | 'multispecialty' | 'community' | 'teaching' | 'specialized';
 
   phone: string;
   emergencyPhone: string;
@@ -58,6 +58,25 @@ export interface Hospital {
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;
+
+  // Extended properties for hospital service
+  location?: HospitalLocation & { coordinates?: { lat: number; lng: number } };
+  rating?: number;
+  reviewsCount?: number;
+  beds?: {
+    total: number;
+    available: number;
+    icu: { total: number; available: number };
+    emergency?: { total: number; available: number };
+  };
+  emergency?: boolean;
+  verified?: boolean;
+  distance?: number;
+  eta?: number;
+  ambulanceAvailable?: boolean;
+  oxygenAvailable?: boolean;
+  pharmacy?: boolean;
+  departments?: Department[] | string[];
 }
 
 export interface HospitalAddress {

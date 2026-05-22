@@ -35,7 +35,7 @@ export interface Doctor {
 }
 
 export interface DoctorRankingProps {
-  doctors: Doctor[];
+  doctors?: Doctor[];
   filters?: {
     specialties: string[];
     locations: string[];
@@ -71,7 +71,7 @@ function calculateScore(doctor: Doctor): number {
 // MAIN COMPONENT
 // ============================================
 export const DoctorRanking: React.FC<DoctorRankingProps> = ({
-  doctors: initialDoctors,
+  doctors: initialDoctors = [],
   filters: filterOptions,
   onDoctorSelect,
   className = '',

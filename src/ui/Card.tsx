@@ -6,7 +6,7 @@ import { twMerge } from 'tailwind-merge';
 // ============================================
 // TYPES & INTERFACES
 // ============================================
-export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+export interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onAnimationStart'> {
   variant?: 'default' | 'bordered' | 'elevated' | 'glass' | 'gradient' | 'neon' | 'neumorphic';
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
@@ -277,3 +277,5 @@ export const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
 );
 
 CardFooter.displayName = 'CardFooter';
+
+export default Card;

@@ -9,8 +9,8 @@ import {
 } from 'lucide-react';
 
 interface AdminLoginProps {
-  onLogin: (credentials: AdminCredentials) => void;
-  onForgotPassword: () => void;
+  onLogin?: (credentials: AdminCredentials) => void;
+  onForgotPassword?: () => void;
 }
 
 interface AdminCredentials {
@@ -21,8 +21,8 @@ interface AdminCredentials {
 }
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({
-  onLogin,
-  onForgotPassword
+  onLogin = () => {},
+  onForgotPassword = () => {}
 }) => {
   const [credentials, setCredentials] = useState<AdminCredentials>({
     username: '',
@@ -54,6 +54,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
       }, 1000);
       return () => clearInterval(timer);
     }
+    return undefined;
   }, [isLocked, lockTimer]);
 
   // Check Caps Lock

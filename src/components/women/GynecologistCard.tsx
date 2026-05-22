@@ -31,7 +31,7 @@ export interface Gynecologist {
 }
 
 export interface GynecologistCardProps {
-  doctor: Gynecologist;
+  doctor?: Gynecologist;
   onBookAppointment?: (doctorId: string) => void;
   onAskQuestion?: (doctorId: string) => void;
   className?: string;
@@ -41,7 +41,23 @@ export interface GynecologistCardProps {
 // MAIN COMPONENT
 // ============================================
 export const GynecologistCard: React.FC<GynecologistCardProps> = ({
-  doctor,
+  doctor = {
+    id: 'default',
+    name: 'Doctor',
+    specializations: [],
+    experience: 0,
+    rating: 0,
+    reviewCount: 0,
+    hospital: '',
+    location: '',
+    languages: [],
+    consultationFee: 0,
+    nextAvailable: '',
+    isOnline: false,
+    isVerified: false,
+    treatsConditions: [],
+    degrees: []
+  },
   onBookAppointment,
   onAskQuestion,
   className = '',

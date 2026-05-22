@@ -6,6 +6,7 @@ interface DropdownProps {
   children: React.ReactNode;
 }
 
+export default Dropdown;
 export const Dropdown: React.FC<DropdownProps> = ({
   trigger,
   children,

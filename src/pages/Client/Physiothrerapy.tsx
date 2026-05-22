@@ -1,7 +1,7 @@
 // src/pages/client/Physiotherapy.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ClientSidebar from '../../components/client/ClientSidebar';
+import ClientSidebar from '../../components/client/clientSidebar';
 import {
   Activity, Calendar, Clock, CheckCircle2, TrendingUp,
   Play, Pause, ChevronRight, Plus, Target, Heart,

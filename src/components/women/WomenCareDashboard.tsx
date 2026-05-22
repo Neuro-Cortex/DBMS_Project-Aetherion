@@ -11,13 +11,13 @@ import {
 import { WomenCareDashboardData } from '../../types/womenCare';
 
 interface WomenCareDashboardProps {
-  userId: string;
-  onNavigate: (page: string) => void;
+  userId?: string;
+  onNavigate?: (page: string) => void;
 }
 
 export const WomenCareDashboard: React.FC<WomenCareDashboardProps> = ({
-  userId,
-  onNavigate
+  userId = 'default-user',
+  onNavigate = () => {}
 }) => {
   const [dashboardData, setDashboardData] = useState<WomenCareDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);

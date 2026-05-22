@@ -32,7 +32,7 @@ export interface ICUStaff {
 }
 
 export interface ICUTrackerProps {
-  icuBeds: {
+  icuBeds?: {
     total: number;
     available: number;
     occupied: number;
@@ -43,8 +43,8 @@ export interface ICUTrackerProps {
     pediatric?: number;
     neonatal?: number;
   };
-  resources: ICUResource[];
-  staff: ICUStaff[];
+  resources?: ICUResource[];
+  staff?: ICUStaff[];
   realTime?: boolean;
   updateInterval?: number;
   onStaffRequest?: (role: string, count: number) => void;
@@ -77,9 +77,9 @@ const roleConfig: Record<string, { icon: React.ElementType; color: string }> = {
 // MAIN COMPONENT
 // ============================================
 export const ICUTracker: React.FC<ICUTrackerProps> = ({
-  icuBeds: initialBeds,
-  resources: initialResources,
-  staff: initialStaff,
+  icuBeds: initialBeds = { total: 0, available: 0, occupied: 0, covid: 0, nonCovid: 0 },
+  resources: initialResources = [],
+  staff: initialStaff = [],
   realTime = false,
   updateInterval = 5000,
   onStaffRequest,

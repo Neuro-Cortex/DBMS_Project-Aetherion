@@ -204,7 +204,9 @@ export const SymptomChecker: React.FC<SymptomCheckerProps> = ({
               >
                 <h3 className="text-xl font-bold text-white mb-4">Where are you experiencing discomfort?</h3>
                 <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-                  {bodyParts.map((part) => (
+                  {bodyParts.map((part) => {
+                    if (!part) return null;
+                    return (
                     <motion.button
                       key={part.id}
                       whileHover={{ scale: 1.05, y: -5 }}
@@ -220,7 +222,8 @@ export const SymptomChecker: React.FC<SymptomCheckerProps> = ({
                       <part.icon className={clsx('w-8 h-8', `text-${part.color}-400`)} />
                       <span className="text-xs text-white font-medium">{part.label}</span>
                     </motion.button>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="flex justify-end">

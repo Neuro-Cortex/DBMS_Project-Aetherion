@@ -3,8 +3,9 @@
 import {
   BloodDonor, Donation, BloodStock, BloodRequest,
   EmergencyAlert, BloodDonationCamp, DonorStats,
-  DonationCertificate, BloodDonorSearch, DonationReminder
-} from '../types/bloodDonation';
+  DonationCertificate, BloodDonorSearch, DonationReminder,
+  DonorReward
+} from '../types/BloodDonation';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
