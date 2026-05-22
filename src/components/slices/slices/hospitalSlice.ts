@@ -88,7 +88,7 @@ export const bookBed = createAsyncThunk(
   'hospital/bookBed',
   async (
     { hospitalId, bedType, patientId }: { hospitalId: string; bedType: string; patientId: string },
-    { rejectWithValue }
+    { rejectWithValue }: any
   ) => {
     try {
       return await hospitalService.bookBed({ hospitalId, bedType: bedType as any, patientId, patientName: '' });
