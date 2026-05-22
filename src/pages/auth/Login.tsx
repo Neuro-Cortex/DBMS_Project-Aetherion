@@ -99,7 +99,7 @@ const roleConfig: Record<UserRole, {
     description: 'Manage beds, ICU, staff, and patient admissions',
     demoEmail: 'hospital@aetherion.com',
     demoPassword: 'hospital123',
-    dashboardPath: 'src/components/hospital/HospitalAccount.tsx',
+    dashboardPath: 'src/components/hospital/HospitalDashboard.tsx',
     registerFields: ['hospitalName', 'email', 'phone', 'registrationNumber', 'password']
   },
 
