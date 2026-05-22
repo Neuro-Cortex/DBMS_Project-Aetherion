@@ -4,13 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield, Users, UserCheck, Building2, Pill,
   Droplet, Calendar, TrendingUp, Activity, AlertCircle, 
-  Bell, Settings, FileText, MessageSquare, Radio, Zap,
-  Server, Clock, HardDrive, Cpu, Wifi, LogOut, Menu, X,
-  Search, ChevronRight, Eye, CheckCircle, XCircle, Clock as ClockIcon,
-  Heart, Stethoscope, Syringe, ClipboardList, Download, Filter,
-  MoreVertical, ArrowUp, ArrowDown, DollarSign, Phone, Mail,
-  MapPin, Star, Award, Target, BarChart3,  LineChart,
-  Globe, Database, Cloud, Shield as ShieldIcon, Lock, Key
+  Bell, Settings, BarChart3, PieChart as LucidePieChart, LineChart,
+  MessageSquare, Award, Star, ArrowUp, ArrowDown,
+  Server, LogOut, Menu, X, Search, ChevronRight,
+  Eye, CheckCircle, XCircle, Download, MoreVertical,
+  Heart, Stethoscope, DollarSign, Clock as ClockIcon
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,7 +22,7 @@ import {
   Area,
   BarChart,
   Bar,
-  PieChart,
+  PieChart as RePieChart,
   Pie,
   Cell,
   XAxis,
@@ -34,6 +32,12 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+
+// Shared UI Components
+import { Card } from '../../ui/Card';
+import { Button } from '../../ui/Button';
+import { Badge } from '../../ui/Badge';
+import { GlassmorphicCard } from '../../ui/GlassmorphicCard';
 
 // ============================================
 // TYPES
@@ -89,6 +93,31 @@ interface TopPerformer {
   avatar: string;
 }
 
+interface BloodAlert {
+  id: string;
+  bloodBank: string;
+  bloodGroup: string;
+  unitsLeft: number;
+  status: 'critical' | 'low' | 'normal';
+}
+
+interface Feedback {
+  id: string;
+  userName: string;
+  subject: string;
+  message: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  timestamp: string;
+}
+
+interface QuickAction {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  path: string;
+  color: string;
+  description?: string;
+}
+
 // ============================================
 // CHART DATA
 // ============================================
@@ -129,34 +158,6 @@ const doctorDistribution = [
 ];
 
 // ============================================
-// TYPES (continued)
-// ============================================
-interface BloodAlert {
-  id: string;
-  bloodBank: string;
-  bloodGroup: string;
-  unitsLeft: number;
-  status: 'critical' | 'low' | 'normal';
-}
-
-interface Feedback {
-  id: string;
-  userName: string;
-  subject: string;
-  message: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  timestamp: string;
-}
-
-interface QuickAction {
-  title: string;
-  icon: React.ComponentType<{ className?: string }>;
-  path: string;
-  color: string;
-  description?: string;
-}
-
-// ============================================
 // STATIC DATA
 // ============================================
 const quickActions: QuickAction[] = [
@@ -169,39 +170,6 @@ const quickActions: QuickAction[] = [
   { title: 'Reports', icon: BarChart3, path: '/admin/reports', color: 'from-pink-500 to-purple-500' },
   { title: 'System Settings', icon: Settings, path: '/admin/settings', color: 'from-gray-500 to-slate-500' },
 ];
-
-const bloodAlerts: BloodAlert[] = [
-  { id: '1', bloodBank: 'Central Blood Bank', bloodGroup: 'O-', unitsLeft: 5, status: 'critical' },
-  { id: '2', bloodBank: 'City Hospital', bloodGroup: 'A+', unitsLeft: 12, status: 'low' },
-  { id: '3', bloodBank: 'Red Cross', bloodGroup: 'B-', unitsLeft: 8, status: 'low' },
-  { id: '4', bloodBank: 'Plasma Center', bloodGroup: 'AB+', unitsLeft: 25, status: 'normal' },
-];
-
-const feedbacks: Feedback[] = [
-  { id: '1', userName: 'John Patient', subject: 'Appointment Issue', message: 'Had trouble scheduling an appointment online. The calendar widget was not showing available slots.', priority: 'high', timestamp: '1 hour ago' },
-  { id: '2', userName: 'Dr. Sarah Johnson', subject: 'System Performance', message: 'The EMR system is running slow during peak hours. Affecting patient consultations.', priority: 'urgent', timestamp: '2 hours ago' },
-  { id: '3', userName: 'City Hospital Admin', subject: 'Feature Request', message: 'Would like to have bulk patient data export functionality added to the dashboard.', priority: 'medium', timestamp: '5 hours ago' },
-  { id: '4', userName: 'MediCare Pharmacy', subject: 'Inventory Sync', message: 'Inventory levels are not syncing in real-time between the pharmacy and the main system.', priority: 'high', timestamp: '8 hours ago' },
-];
-
-const getStatusColor = (status: string): string => {
-  switch(status) {
-    case 'critical': return 'bg-red-500/20 text-red-400';
-    case 'low': return 'bg-yellow-500/20 text-yellow-400';
-    case 'normal': return 'bg-green-500/20 text-green-400';
-    default: return 'bg-blue-500/20 text-blue-400';
-  }
-};
-
-const getPriorityColor = (priority: string): string => {
-  switch(priority) {
-    case 'urgent': return 'bg-red-500/20 text-red-400';
-    case 'high': return 'bg-orange-500/20 text-orange-400';
-    case 'medium': return 'bg-yellow-500/20 text-yellow-400';
-    case 'low': return 'bg-green-500/20 text-green-400';
-    default: return 'bg-blue-500/20 text-blue-400';
-  }
-};
 
 const statsCards = [
   { title: 'Total Users', value: '12,847', change: '+12.5%', icon: Users, color: 'from-blue-500 to-cyan-500', trend: 'up' },
@@ -236,13 +204,26 @@ const topPerformers: TopPerformer[] = [
   { id: '4', name: 'MediCare Pharmacy', role: 'Pharmacy', rating: 4.9, totalPatients: 3421, revenue: 456000, avatar: 'MP' },
 ];
 
+const bloodAlerts: { id: string; bloodBank: string; bloodGroup: string; unitsLeft: number; status: 'critical' | 'low' | 'normal' }[] = [
+  { id: '1', bloodBank: 'Central Blood Bank', bloodGroup: 'O-', unitsLeft: 5, status: 'critical' },
+  { id: '2', bloodBank: 'City Hospital', bloodGroup: 'A+', unitsLeft: 12, status: 'low' },
+  { id: '3', bloodBank: 'Red Cross', bloodGroup: 'B-', unitsLeft: 8, status: 'low' },
+  { id: '4', bloodBank: 'Plasma Center', bloodGroup: 'AB+', unitsLeft: 25, status: 'normal' },
+];
+
+const feedbacks: { id: string; userName: string; subject: string; message: string; priority: 'low' | 'medium' | 'high' | 'urgent'; timestamp: string }[] = [
+  { id: '1', userName: 'John Patient', subject: 'Appointment Issue', message: 'Had trouble scheduling an appointment online...', priority: 'high', timestamp: '1 hour ago' },
+  { id: '2', userName: 'Dr. Sarah Johnson', subject: 'System Performance', message: 'The EMR system is running slow during peak hours...', priority: 'urgent', timestamp: '2 hours ago' },
+  { id: '3', userName: 'City Hospital Admin', subject: 'Feature Request', message: 'Would like to have bulk patient data export...', priority: 'medium', timestamp: '5 hours ago' },
+  { id: '4', userName: 'MediCare Pharmacy', subject: 'Inventory Sync', message: 'Inventory levels are not syncing in real-time...', priority: 'high', timestamp: '8 hours ago' },
+];
+
 // ============================================
 // MAIN ADMIN DASHBOARD
 // ============================================
 const AdminDashboard: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [stats, setStats] = useState<SystemStats | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedTimeRange, setSelectedTimeRange] = useState<'today' | 'week' | 'month' | 'year'>('month');
   const [selectedChart, setSelectedChart] = useState<'users' | 'appointments' | 'revenue'>('users');
@@ -257,33 +238,7 @@ const AdminDashboard: React.FC = () => {
       toast.error('Access denied. Admin privileges required.');
       navigate('/login');
     }
-    loadStats();
   }, [user, navigate]);
-
-  const loadStats = async () => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setStats({
-      totalUsers: 12847,
-      totalDoctors: 1234,
-      totalHospitals: 156,
-      totalPharmacies: 432,
-      totalBloodDonors: 5231,
-      totalAppointments: 45200,
-      activeUsers: 3245,
-      newUsersToday: 47,
-      newUsersThisMonth: 1250,
-      verifiedDoctors: 1189,
-      pendingVerifications: 45,
-      blockedUsers: 23,
-      totalDonations: 15234,
-      totalBloodUnits: 18456,
-      livesSaved: 54321,
-      totalRevenue: 72500,
-      monthlyGrowth: 18.5
-    });
-    setIsLoading(false);
-  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -300,8 +255,33 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const markAllNotificationsRead = () => {
-    toast.success('All notifications marked as read');
+  const severityVariant = (severity: string): 'success' | 'warning' | 'danger' | 'default' | 'info' => {
+    switch(severity) {
+      case 'critical': return 'danger';
+      case 'warning': return 'warning';
+      case 'success': return 'success';
+      case 'info': return 'info';
+      default: return 'default';
+    }
+  };
+
+  const priorityVariant = (priority: string): 'success' | 'warning' | 'danger' | 'default' | 'info' => {
+    switch(priority) {
+      case 'urgent': return 'danger';
+      case 'high': return 'warning';
+      case 'medium': return 'info';
+      case 'low': return 'success';
+      default: return 'default';
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+      case 'critical': return 'danger';
+      case 'low': return 'warning';
+      case 'normal': return 'success';
+      default: return 'default' as const;
+    }
   };
 
   const getChartComponent = () => {
@@ -503,10 +483,7 @@ const AdminDashboard: React.FC = () => {
                     >
                       <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
                         <h4 className="text-white font-semibold">Notifications</h4>
-                        <button
-                          onClick={markAllNotificationsRead}
-                          className="text-xs text-cyan-400 hover:text-cyan-300"
-                        >
+                        <button onClick={() => toast.success('All notifications marked as read')} className="text-xs text-cyan-400 hover:text-cyan-300">
                           Mark all read
                         </button>
                       </div>
@@ -538,26 +515,10 @@ const AdminDashboard: React.FC = () => {
                   <p className="text-white text-sm font-medium">{user?.fullName || 'Admin User'}</p>
                   <p className="text-cyan-400 text-xs">Super Admin</p>
                 </div>
-                <div className="relative group">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center cursor-pointer">
-                    <span className="text-white font-bold text-sm">
-                      {user?.fullName?.charAt(0) || 'A'}
-                    </span>
-                  </div>
-                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[#0a0a14] border border-white/[0.08] shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                    <div className="p-2">
-                      <button className="w-full text-left px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/[0.04] rounded-lg transition-colors">
-                        Profile Settings
-                      </button>
-                      <button className="w-full text-left px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/[0.04] rounded-lg transition-colors">
-                        Account Security
-                      </button>
-                      <div className="border-t border-white/[0.06] my-1" />
-                      <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
-                        Logout
-                      </button>
-                    </div>
-                  </div>
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">
+                    {user?.fullName?.charAt(0) || 'A'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -567,11 +528,7 @@ const AdminDashboard: React.FC = () => {
         {/* Main Content Area */}
         <main className="p-6">
           {/* Welcome Banner */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-6 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-white/[0.06] relative overflow-hidden group"
-          >
+          <GlassmorphicCard variant="premium" padding="lg" rounded="2xl" border="subtle" className="mb-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-transparent" />
             <div className="relative flex items-center justify-between flex-wrap gap-4">
               <div>
@@ -583,16 +540,11 @@ const AdminDashboard: React.FC = () => {
                 </p>
               </div>
               <div className="flex gap-3">
-                <button className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white/60 hover:text-white/90 text-sm flex items-center gap-2 transition-all hover:scale-105">
-                  <Download className="w-4 h-4" />
-                  Export Report
-                </button>
-                <button className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-medium shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all hover:scale-105">
-                  View Analytics
-                </button>
+                <Button variant="glass" size="sm" leftIcon={Download}>Export Report</Button>
+                <Button variant="gradient" size="sm">View Analytics</Button>
               </div>
             </div>
-          </motion.div>
+          </GlassmorphicCard>
 
           {/* Stats Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 mb-8">
@@ -611,15 +563,15 @@ const AdminDashboard: React.FC = () => {
                   <div className={`absolute inset-0 bg-gradient-to-r ${card.color} opacity-0 group-hover:opacity-10 transition-opacity`} />
                   <div className="relative">
                     <div className="flex items-center justify-between mb-3">
-                      <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center shadow-lg`}>
+                      <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center`}>
                         <Icon className="w-4 h-4 text-white" />
                       </div>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-1 ${
-                        card.trend === 'up' ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
-                      }`}>
-                        {card.trend === 'up' ? <ArrowUp className="w-2 h-2" /> : <ArrowDown className="w-2 h-2" />}
-                        {card.change}
-                      </span>
+                      <Badge variant={card.trend === 'up' ? 'success' : 'danger'} size="xs" dot>
+                        <span className="flex items-center gap-0.5">
+                          {card.trend === 'up' ? <ArrowUp className="w-2 h-2" /> : <ArrowDown className="w-2 h-2" />}
+                          {card.change}
+                        </span>
+                      </Badge>
                     </div>
                     <motion.p 
                       className="text-white text-xl font-bold"
@@ -637,7 +589,7 @@ const AdminDashboard: React.FC = () => {
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Main Chart */}
-            <div className="lg:col-span-2 rounded-2xl bg-white/[0.02] border border-white/[0.06] p-6">
+            <Card variant="glass" padding="lg" rounded="2xl" className="lg:col-span-2">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-white font-semibold flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-cyan-400" />
@@ -645,31 +597,28 @@ const AdminDashboard: React.FC = () => {
                 </h3>
                 <div className="flex gap-2">
                   {(['users', 'appointments', 'revenue'] as const).map((chart) => (
-                    <button
+                    <Button
                       key={chart}
+                      variant={selectedChart === chart ? 'neon' : 'ghost'}
+                      size="xs"
                       onClick={() => setSelectedChart(chart)}
-                      className={`px-3 py-1 rounded-lg text-xs transition-all ${
-                        selectedChart === chart
-                          ? 'bg-cyan-500/20 text-cyan-400'
-                          : 'text-white/40 hover:text-white/60'
-                      }`}
                     >
                       {chart.charAt(0).toUpperCase() + chart.slice(1)}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
               {getChartComponent()}
-            </div>
+            </Card>
 
             {/* Doctor Distribution Pie Chart */}
-            <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] p-6">
+            <Card variant="glass" padding="lg" rounded="2xl">
               <h3 className="text-white font-semibold flex items-center gap-2 mb-4">
-                <PieChart className="w-5 h-5 text-purple-400" />
+                <LucidePieChart className="w-5 h-5 text-purple-400" />
                 Doctor Distribution
               </h3>
               <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
+                <RePieChart>
                   <Pie
                     data={doctorDistribution}
                     cx="50%"
@@ -685,7 +634,7 @@ const AdminDashboard: React.FC = () => {
                   </Pie>
                   <Tooltip contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #ffffff20', borderRadius: '8px' }} />
                   <Legend />
-                </PieChart>
+                </RePieChart>
               </ResponsiveContainer>
               <div className="grid grid-cols-2 gap-2 mt-4">
                 {doctorDistribution.map((item) => (
@@ -696,7 +645,7 @@ const AdminDashboard: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* Main Grid */}
@@ -727,7 +676,7 @@ const AdminDashboard: React.FC = () => {
               </div>
 
               {/* Top Performers */}
-              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+              <Card variant="glass" padding="none" rounded="2xl" className="overflow-hidden">
                 <div className="p-6 border-b border-white/[0.06]">
                   <h3 className="text-white font-semibold flex items-center gap-2">
                     <Award className="w-5 h-5 text-yellow-400" />
@@ -756,17 +705,17 @@ const AdminDashboard: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
 
               {/* Recent Activities */}
-              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+              <Card variant="glass" padding="none" rounded="2xl" className="overflow-hidden">
                 <div className="p-6 border-b border-white/[0.06]">
                   <div className="flex items-center justify-between">
                     <h3 className="text-white font-semibold flex items-center gap-2">
                       <Activity className="w-5 h-5 text-cyan-400" />
                       Recent Activities
                     </h3>
-                    <button className="text-xs text-cyan-400 hover:text-cyan-300">View All</button>
+                    <Button variant="ghost" size="xs">View All</Button>
                   </div>
                 </div>
                 <div className="divide-y divide-white/[0.04]">
@@ -776,14 +725,9 @@ const AdminDashboard: React.FC = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <p className="text-white text-sm font-medium">{activity.userName}</p>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                              activity.severity === 'critical' ? 'bg-red-500/10 text-red-400' :
-                              activity.severity === 'warning' ? 'bg-yellow-500/10 text-yellow-400' :
-                              activity.severity === 'success' ? 'bg-green-500/10 text-green-400' :
-                              'bg-blue-500/10 text-blue-400'
-                            }`}>
+                            <Badge variant={severityVariant(activity.severity)} size="xs">
                               {activity.severity}
-                            </span>
+                            </Badge>
                           </div>
                           <p className="text-white/40 text-xs">{activity.action}</p>
                           <div className="flex items-center gap-3 mt-2">
@@ -800,13 +744,13 @@ const AdminDashboard: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
             </div>
 
             {/* Right Column - 1 col */}
             <div className="space-y-6">
               {/* Blood Stock Alerts */}
-              <div className="rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 overflow-hidden">
+              <Card variant="glass" padding="none" rounded="2xl" className="overflow-hidden bg-gradient-to-br from-red-500/10 to-rose-500/10 border-red-500/20">
                 <div className="p-6 border-b border-red-500/20">
                   <h3 className="text-white font-semibold flex items-center gap-2">
                     <Droplet className="w-5 h-5 text-red-400 animate-pulse" />
@@ -818,26 +762,26 @@ const AdminDashboard: React.FC = () => {
                     <div key={alert.id} className="p-3 rounded-xl bg-red-500/5 border border-red-500/10">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-white font-medium text-sm">{alert.bloodBank}</span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${getStatusColor(alert.status)}`}>
-                          {alert.status === 'critical' ? '⚠️ CRITICAL' : alert.status === 'low' ? '⚠️ LOW' : '✓ NORMAL'}
-                        </span>
+                        <Badge variant={getStatusBadge(alert.status)} size="xs" dot>
+                          {alert.status === 'critical' ? 'CRITICAL' : alert.status === 'low' ? 'LOW' : 'NORMAL'}
+                        </Badge>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-2xl font-bold text-white">{alert.bloodGroup}</span>
                         <span className="text-red-400 text-sm font-medium">{alert.unitsLeft} units left</span>
                       </div>
                       {alert.status === 'critical' && (
-                        <button className="mt-3 w-full py-1.5 rounded-lg bg-red-500/20 text-red-400 text-xs hover:bg-red-500/30 transition-colors">
+                        <Button variant="danger" size="xs" fullWidth className="mt-3">
                           Request Emergency Supply
-                        </button>
+                        </Button>
                       )}
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
 
               {/* System Health Monitor */}
-              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] p-6">
+              <Card variant="glass" padding="lg" rounded="2xl">
                 <h3 className="text-white font-semibold flex items-center gap-2 mb-4">
                   <Server className="w-5 h-5 text-green-400" />
                   System Health
@@ -881,17 +825,17 @@ const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Card>
 
               {/* Recent Feedbacks */}
-              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+              <Card variant="glass" padding="none" rounded="2xl" className="overflow-hidden">
                 <div className="p-6 border-b border-white/[0.06]">
                   <div className="flex items-center justify-between">
                     <h3 className="text-white font-semibold flex items-center gap-2">
                       <MessageSquare className="w-5 h-5 text-yellow-400" />
                       Recent Feedbacks
                     </h3>
-                    <button className="text-xs text-cyan-400 hover:text-cyan-300">View All</button>
+                    <Button variant="ghost" size="xs">View All</Button>
                   </div>
                 </div>
                 <div className="p-4 space-y-3">
@@ -899,24 +843,20 @@ const AdminDashboard: React.FC = () => {
                     <div key={feedback.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-colors">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-white text-sm font-medium">{feedback.userName}</span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${getPriorityColor(feedback.priority)}`}>
+                        <Badge variant={priorityVariant(feedback.priority)} size="xs">
                           {feedback.priority.toUpperCase()}
-                        </span>
+                        </Badge>
                       </div>
                       <p className="text-white/60 text-xs mb-1">{feedback.subject}</p>
                       <p className="text-white/40 text-[10px] line-clamp-2">{feedback.message}</p>
                       <div className="flex gap-2 mt-3">
-                        <button className="flex-1 text-[10px] px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-colors">
-                          Resolve
-                        </button>
-                        <button className="flex-1 text-[10px] px-3 py-1 rounded-lg bg-white/[0.05] text-white/60 hover:bg-white/[0.1] transition-colors">
-                          Reply
-                        </button>
+                        <Button variant="glass" size="xs" className="flex-1">Resolve</Button>
+                        <Button variant="ghost" size="xs" className="flex-1">Reply</Button>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
             </div>
           </div>
         </main>
