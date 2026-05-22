@@ -7,13 +7,33 @@ import {
   Bell, Settings, FileText, MessageSquare, Radio, Zap,
   Server, Clock, HardDrive, Cpu, Wifi, LogOut, Menu, X,
   Search, ChevronRight, Eye, CheckCircle, XCircle, Clock as ClockIcon,
-  Heart, Stethoscope, Syringe, ClipboardList
+  Heart, Stethoscope, Syringe, ClipboardList, Download, Filter,
+  MoreVertical, ArrowUp, ArrowDown, DollarSign, Phone, Mail,
+  MapPin, Star, Award, Target, BarChart3, PieChart, LineChart,
+  Globe, Database, Cloud, Shield as ShieldIcon, Lock, Key
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { logout } from '../../store/slices/authSlice';
 import toast from 'react-hot-toast';
+import {
+  LineChart as ReLineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 
 // ============================================
 // TYPES
@@ -27,85 +47,121 @@ interface SystemStats {
   totalAppointments: number;
   activeUsers: number;
   newUsersToday: number;
+  newUsersThisMonth: number;
   verifiedDoctors: number;
   pendingVerifications: number;
+  blockedUsers: number;
   totalDonations: number;
   totalBloodUnits: number;
   livesSaved: number;
+  totalRevenue: number;
+  monthlyGrowth: number;
 }
 
 interface ActivityItem {
   id: string;
   userName: string;
+  userAvatar?: string;
   userRole: string;
   action: string;
   timestamp: string;
-  severity: 'info' | 'warning' | 'critical';
+  severity: 'info' | 'warning' | 'critical' | 'success';
+  ipAddress?: string;
+  location?: string;
 }
 
-interface BloodAlert {
+interface NotificationItem {
   id: string;
-  bloodBank: string;
-  bloodGroup: string;
-  status: 'critical' | 'low' | 'normal';
-  unitsLeft: number;
-}
-
-interface FeedbackItem {
-  id: string;
-  userName: string;
-  subject: string;
+  title: string;
   message: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  timestamp: string;
+  isRead: boolean;
 }
+
+interface TopPerformer {
+  id: string;
+  name: string;
+  role: string;
+  rating: number;
+  totalPatients: number;
+  revenue: number;
+  avatar: string;
+}
+
+// ============================================
+// CHART DATA
+// ============================================
+const userGrowthData = [
+  { month: 'Jan', users: 12000, active: 8900 },
+  { month: 'Feb', users: 12500, active: 9200 },
+  { month: 'Mar', users: 13100, active: 9600 },
+  { month: 'Apr', users: 13800, active: 10100 },
+  { month: 'May', users: 14500, active: 10700 },
+  { month: 'Jun', users: 15200, active: 11300 },
+];
+
+const appointmentData = [
+  { day: 'Mon', appointments: 450, consultations: 380 },
+  { day: 'Tue', appointments: 520, consultations: 430 },
+  { day: 'Wed', appointments: 480, consultations: 410 },
+  { day: 'Thu', appointments: 550, consultations: 460 },
+  { day: 'Fri', appointments: 600, consultations: 510 },
+  { day: 'Sat', appointments: 350, consultations: 290 },
+  { day: 'Sun', appointments: 200, consultations: 160 },
+];
+
+const revenueData = [
+  { month: 'Jan', revenue: 45000, expenses: 32000 },
+  { month: 'Feb', revenue: 52000, expenses: 35000 },
+  { month: 'Mar', revenue: 48000, expenses: 33000 },
+  { month: 'Apr', revenue: 58000, expenses: 38000 },
+  { month: 'May', revenue: 65000, expenses: 42000 },
+  { month: 'Jun', revenue: 72000, expenses: 45000 },
+];
+
+const doctorDistribution = [
+  { name: 'Cardiology', value: 25, color: '#3B82F6' },
+  { name: 'Neurology', value: 18, color: '#10B981' },
+  { name: 'Pediatrics', value: 22, color: '#F59E0B' },
+  { name: 'Orthopedics', value: 20, color: '#EF4444' },
+  { name: 'Dermatology', value: 15, color: '#8B5CF6' },
+];
 
 // ============================================
 // STATIC DATA
 // ============================================
 const statsCards = [
-  { title: 'Total Users', value: '12,847', change: '+12.5%', icon: Users, color: 'from-blue-500 to-cyan-500' },
-  { title: 'Active Doctors', value: '1,234', change: '+8.2%', icon: Stethoscope, color: 'from-emerald-500 to-teal-500' },
-  { title: 'Hospitals', value: '156', change: '+3', icon: Building2, color: 'from-purple-500 to-violet-500' },
-  { title: 'Pharmacies', value: '432', change: '+5', icon: Pill, color: 'from-amber-500 to-orange-500' },
-  { title: 'Blood Donors', value: '5,231', change: '+15%', icon: Droplet, color: 'from-red-500 to-rose-500' },
-  { title: 'Appointments', value: '45.2K', change: '+22%', icon: Calendar, color: 'from-indigo-500 to-blue-500' },
-  { title: 'Lives Saved', value: '54,321', change: '+1,234', icon: Heart, color: 'from-pink-500 to-rose-500' },
-  { title: 'Active Sessions', value: '3,245', change: '+432', icon: Activity, color: 'from-green-500 to-emerald-500' }
+  { title: 'Total Users', value: '12,847', change: '+12.5%', icon: Users, color: 'from-blue-500 to-cyan-500', trend: 'up' },
+  { title: 'Active Doctors', value: '1,234', change: '+8.2%', icon: Stethoscope, color: 'from-emerald-500 to-teal-500', trend: 'up' },
+  { title: 'Hospitals', value: '156', change: '+3', icon: Building2, color: 'from-purple-500 to-violet-500', trend: 'up' },
+  { title: 'Pharmacies', value: '432', change: '+5', icon: Pill, color: 'from-amber-500 to-orange-500', trend: 'up' },
+  { title: 'Blood Donors', value: '5,231', change: '+15%', icon: Droplet, color: 'from-red-500 to-rose-500', trend: 'up' },
+  { title: 'Appointments', value: '45.2K', change: '+22%', icon: Calendar, color: 'from-indigo-500 to-blue-500', trend: 'up' },
+  { title: 'Lives Saved', value: '54,321', change: '+1,234', icon: Heart, color: 'from-pink-500 to-rose-500', trend: 'up' },
+  { title: 'Revenue', value: '$72.5K', change: '+18%', icon: DollarSign, color: 'from-green-500 to-emerald-500', trend: 'up' }
 ];
 
 const recentActivities: ActivityItem[] = [
-  { id: '1', userName: 'Dr. Sarah Johnson', userRole: 'doctor', action: 'New patient appointment scheduled', timestamp: '2 min ago', severity: 'info' },
-  { id: '2', userName: 'City Hospital', userRole: 'hospital', action: 'Updated bed availability (45 beds available)', timestamp: '15 min ago', severity: 'info' },
-  { id: '3', userName: 'John Patient', userRole: 'patient', action: 'Medical records requested', timestamp: '1 hour ago', severity: 'warning' },
-  { id: '4', userName: 'MediCare Pharmacy', userRole: 'pharmacy', action: 'Low stock alert: Paracetamol', timestamp: '2 hours ago', severity: 'critical' },
-  { id: '5', userName: 'Blood Bank', userRole: 'blood-donor', action: 'Emergency: O- blood needed', timestamp: '3 hours ago', severity: 'critical' }
+  { id: '1', userName: 'Dr. Sarah Johnson', userRole: 'doctor', action: 'New patient appointment scheduled', timestamp: '2 min ago', severity: 'info', ipAddress: '192.168.1.1', location: 'New York, USA' },
+  { id: '2', userName: 'City Hospital', userRole: 'hospital', action: 'Updated bed availability (45 beds available)', timestamp: '15 min ago', severity: 'success', ipAddress: '192.168.1.2', location: 'Los Angeles, USA' },
+  { id: '3', userName: 'John Patient', userRole: 'patient', action: 'Medical records requested', timestamp: '1 hour ago', severity: 'warning', ipAddress: '192.168.1.3', location: 'Chicago, USA' },
+  { id: '4', userName: 'MediCare Pharmacy', userRole: 'pharmacy', action: 'Low stock alert: Paracetamol', timestamp: '2 hours ago', severity: 'critical', ipAddress: '192.168.1.4', location: 'Houston, USA' },
+  { id: '5', userName: 'Blood Bank', userRole: 'blood-donor', action: 'Emergency: O- blood needed', timestamp: '3 hours ago', severity: 'critical', ipAddress: '192.168.1.5', location: 'Phoenix, USA' },
 ];
 
-const bloodAlerts: BloodAlert[] = [
-  { id: '1', bloodBank: 'City Blood Bank', bloodGroup: 'O-', status: 'critical', unitsLeft: 3 },
-  { id: '2', bloodBank: 'Red Cross', bloodGroup: 'A+', status: 'low', unitsLeft: 8 },
-  { id: '3', bloodBank: 'LifeSave Center', bloodGroup: 'B-', status: 'critical', unitsLeft: 2 }
+const notifications: NotificationItem[] = [
+  { id: '1', title: 'New User Registration', message: 'John Doe registered as a patient', type: 'info', timestamp: '5 min ago', isRead: false },
+  { id: '2', title: 'Doctor Verification Request', message: 'Dr. Smith needs verification', type: 'warning', timestamp: '30 min ago', isRead: false },
+  { id: '3', title: 'System Update Complete', message: 'Version 2.1.0 deployed successfully', type: 'success', timestamp: '2 hours ago', isRead: true },
+  { id: '4', title: 'Security Alert', message: 'Multiple failed login attempts detected', type: 'error', timestamp: '3 hours ago', isRead: false },
 ];
 
-const feedbacks: FeedbackItem[] = [
-  { id: '1', userName: 'Michael Brown', subject: 'Appointment Delay', message: 'Had to wait 45 minutes beyond scheduled time', priority: 'high', status: 'pending' },
-  { id: '2', userName: 'Emma Wilson', subject: 'Excellent Service', message: 'Dr. Johnson was very professional', priority: 'low', status: 'resolved' },
-  { id: '3', userName: 'Robert Chen', subject: 'Payment Issue', message: 'Double charged for consultation', priority: 'urgent', status: 'pending' }
-];
-
-// ============================================
-// QUICK ACTIONS
-// ============================================
-const quickActions = [
-  { title: 'User Management', icon: Users, path: '/admin/users', color: 'from-blue-500 to-cyan-500' },
-  { title: 'Doctor Verification', icon: UserCheck, path: '/admin/doctors/verify', color: 'from-emerald-500 to-teal-500' },
-  { title: 'Emergency Monitor', icon: Syringe, path: '/admin/emergency', color: 'from-red-500 to-rose-500' },
-  { title: 'Blood Bank', icon: Droplet, path: '/admin/blood-bank', color: 'from-red-500 to-pink-500' },
-  { title: 'Hospital Management', icon: Building2, path: '/admin/hospitals', color: 'from-purple-500 to-violet-500' },
-  { title: 'Pharmacy Control', icon: Pill, path: '/admin/pharmacies', color: 'from-amber-500 to-orange-500' },
-  { title: 'Security Settings', icon: Shield, path: '/admin/security', color: 'from-slate-500 to-gray-500' },
-  { title: 'System Analytics', icon: TrendingUp, path: '/admin/analytics', color: 'from-indigo-500 to-blue-500' }
+const topPerformers: TopPerformer[] = [
+  { id: '1', name: 'Dr. Sarah Johnson', role: 'Cardiologist', rating: 4.9, totalPatients: 1247, revenue: 184500, avatar: 'SJ' },
+  { id: '2', name: 'Dr. Michael Chen', role: 'Neurologist', rating: 4.8, totalPatients: 982, revenue: 147300, avatar: 'MC' },
+  { id: '3', name: 'City General Hospital', role: 'Hospital', rating: 4.7, totalPatients: 5840, revenue: 892000, avatar: 'CG' },
+  { id: '4', name: 'MediCare Pharmacy', role: 'Pharmacy', rating: 4.9, totalPatients: 3421, revenue: 456000, avatar: 'MP' },
 ];
 
 // ============================================
@@ -116,6 +172,10 @@ const AdminDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedTimeRange, setSelectedTimeRange] = useState<'today' | 'week' | 'month' | 'year'>('month');
+  const [selectedChart, setSelectedChart] = useState<'users' | 'appointments' | 'revenue'>('users');
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -140,11 +200,15 @@ const AdminDashboard: React.FC = () => {
       totalAppointments: 45200,
       activeUsers: 3245,
       newUsersToday: 47,
+      newUsersThisMonth: 1250,
       verifiedDoctors: 1189,
       pendingVerifications: 45,
+      blockedUsers: 23,
       totalDonations: 15234,
       totalBloodUnits: 18456,
-      livesSaved: 54321
+      livesSaved: 54321,
+      totalRevenue: 72500,
+      monthlyGrowth: 18.5
     });
     setIsLoading(false);
   };
@@ -155,20 +219,73 @@ const AdminDashboard: React.FC = () => {
     navigate('/login');
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch(priority) {
-      case 'urgent': return 'text-red-400 bg-red-500/10 border-red-500/20';
-      case 'high': return 'text-orange-400 bg-orange-500/10 border-orange-500/20';
-      case 'medium': return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20';
-      default: return 'text-green-400 bg-green-500/10 border-green-500/20';
+  const getNotificationIcon = (type: string) => {
+    switch(type) {
+      case 'success': return <CheckCircle className="w-4 h-4 text-green-400" />;
+      case 'warning': return <AlertCircle className="w-4 h-4 text-yellow-400" />;
+      case 'error': return <XCircle className="w-4 h-4 text-red-400" />;
+      default: return <Bell className="w-4 h-4 text-blue-400" />;
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch(status) {
-      case 'critical': return 'text-red-400 bg-red-500/10';
-      case 'low': return 'text-orange-400 bg-orange-500/10';
-      default: return 'text-green-400 bg-green-500/10';
+  const markAllNotificationsRead = () => {
+    toast.success('All notifications marked as read');
+  };
+
+  const getChartComponent = () => {
+    switch(selectedChart) {
+      case 'users':
+        return (
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={userGrowthData}>
+              <defs>
+                <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+              <XAxis dataKey="month" stroke="#ffffff40" />
+              <YAxis stroke="#ffffff40" />
+              <Tooltip contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #ffffff20', borderRadius: '8px' }} />
+              <Legend />
+              <Area type="monotone" dataKey="users" stroke="#3B82F6" fillOpacity={1} fill="url(#colorUsers)" />
+              <Area type="monotone" dataKey="active" stroke="#10B981" fillOpacity={1} fill="url(#colorActive)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        );
+      case 'appointments':
+        return (
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={appointmentData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+              <XAxis dataKey="day" stroke="#ffffff40" />
+              <YAxis stroke="#ffffff40" />
+              <Tooltip contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #ffffff20', borderRadius: '8px' }} />
+              <Legend />
+              <Bar dataKey="appointments" fill="#3B82F6" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="consultations" fill="#10B981" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      case 'revenue':
+        return (
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={revenueData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+              <XAxis dataKey="month" stroke="#ffffff40" />
+              <YAxis stroke="#ffffff40" />
+              <Tooltip contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #ffffff20', borderRadius: '8px' }} />
+              <Legend />
+              <Line type="monotone" dataKey="revenue" stroke="#F59E0B" strokeWidth={3} dot={{ fill: '#F59E0B' }} />
+              <Line type="monotone" dataKey="expenses" stroke="#EF4444" strokeWidth={3} dot={{ fill: '#EF4444' }} />
+            </LineChart>
+          </ResponsiveContainer>
+        );
     }
   };
 
@@ -182,51 +299,78 @@ const AdminDashboard: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
             <div className={`flex items-center gap-3 ${!isSidebarOpen && 'justify-center w-full'}`}>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl blur-lg opacity-50" />
+                <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
               </div>
               {isSidebarOpen && (
-                <span className="text-white font-bold text-lg">Aetherion</span>
+                <span className="text-white font-bold text-lg bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                  Aetherion
+                </span>
               )}
             </div>
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white/40 hover:text-white/70"
+              className="p-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white/40 hover:text-white/70 transition-all"
             >
               {isSidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
 
+          {/* Admin Profile */}
+          <div className="p-4 border-b border-white/[0.06]">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">
+                    {user?.fullName?.charAt(0) || 'A'}
+                  </span>
+                </div>
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0a0a14] animate-pulse" />
+              </div>
+              {isSidebarOpen && (
+                <div>
+                  <p className="text-white font-semibold text-sm">{user?.fullName || 'Admin User'}</p>
+                  <p className="text-cyan-400 text-xs">Super Administrator</p>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Navigation */}
-          <nav className="flex-1 py-6 space-y-1">
+          <nav className="flex-1 py-4 space-y-1 overflow-y-auto">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
-                <button
+                <motion.button
                   key={index}
+                  whileHover={{ x: 5 }}
                   onClick={() => navigate(action.path)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-white/60 hover:text-white hover:bg-white/[0.04] transition-all ${
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-white/60 hover:text-white hover:bg-white/[0.04] transition-all ${
                     !isSidebarOpen && 'justify-center'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
                   {isSidebarOpen && <span className="text-sm">{action.title}</span>}
-                </button>
+                </motion.button>
               );
             })}
           </nav>
 
           {/* Logout */}
           <div className="p-4 border-t border-white/[0.06]">
-            <button
+            <motion.button
+              whileHover={{ x: -5 }}
               onClick={handleLogout}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all ${
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all ${
                 !isSidebarOpen && 'justify-center'
               }`}
             >
               <LogOut className="w-5 h-5" />
               {isSidebarOpen && <span className="text-sm">Logout</span>}
-            </button>
+            </motion.button>
           </div>
         </div>
       </aside>
@@ -242,38 +386,72 @@ const AdminDashboard: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Search users, doctors, activities..."
-                  className="w-full pl-10 pr-4 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-sm placeholder-white/20 outline-none focus:border-cyan-400/50 transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-white text-sm placeholder-white/20 outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all"
                 />
               </div>
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Time Range Selector */}
+              <div className="hidden md:flex items-center gap-1 px-2 py-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                {(['today', 'week', 'month', 'year'] as const).map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => setSelectedTimeRange(range)}
+                    className={`px-3 py-1 rounded-lg text-xs transition-all ${
+                      selectedTimeRange === range
+                        ? 'bg-cyan-500/20 text-cyan-400'
+                        : 'text-white/40 hover:text-white/60'
+                    }`}
+                  >
+                    {range.charAt(0).toUpperCase() + range.slice(1)}
+                  </button>
+                ))}
+              </div>
+
+              {/* Notifications */}
               <div className="relative">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white/60 hover:text-white/90"
+                  className="relative p-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white/60 hover:text-white/90 transition-all"
                 >
                   <Bell className="w-5 h-5" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                    {notifications.filter(n => !n.isRead).length}
+                  </span>
                 </button>
                 
                 <AnimatePresence>
                   {showNotifications && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-80 rounded-2xl bg-[#0a0a14] border border-white/[0.08] shadow-2xl overflow-hidden"
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-2 w-96 rounded-2xl bg-[#0a0a14] border border-white/[0.08] shadow-2xl overflow-hidden z-50"
                     >
-                      <div className="p-4 border-b border-white/[0.06]">
+                      <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
                         <h4 className="text-white font-semibold">Notifications</h4>
+                        <button
+                          onClick={markAllNotificationsRead}
+                          className="text-xs text-cyan-400 hover:text-cyan-300"
+                        >
+                          Mark all read
+                        </button>
                       </div>
                       <div className="max-h-96 overflow-y-auto">
-                        {recentActivities.slice(0, 3).map((activity) => (
-                          <div key={activity.id} className="p-4 border-b border-white/[0.04] hover:bg-white/[0.02]">
-                            <p className="text-white text-sm">{activity.userName}</p>
-                            <p className="text-white/40 text-xs mt-1">{activity.action}</p>
-                            <p className="text-white/20 text-[10px] mt-1">{activity.timestamp}</p>
+                        {notifications.map((notification) => (
+                          <div key={notification.id} className={`p-4 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors ${!notification.isRead ? 'bg-cyan-500/5' : ''}`}>
+                            <div className="flex items-start gap-3">
+                              {getNotificationIcon(notification.type)}
+                              <div className="flex-1">
+                                <p className="text-white text-sm font-medium">{notification.title}</p>
+                                <p className="text-white/40 text-xs mt-1">{notification.message}</p>
+                                <p className="text-white/20 text-[10px] mt-1">{notification.timestamp}</p>
+                              </div>
+                              {!notification.isRead && (
+                                <div className="w-2 h-2 bg-cyan-400 rounded-full" />
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -282,15 +460,32 @@ const AdminDashboard: React.FC = () => {
                 </AnimatePresence>
               </div>
 
+              {/* Admin Profile */}
               <div className="flex items-center gap-3 pl-3 border-l border-white/[0.06]">
                 <div className="text-right hidden sm:block">
                   <p className="text-white text-sm font-medium">{user?.fullName || 'Admin User'}</p>
-                  <p className="text-white/40 text-xs">Super Admin</p>
+                  <p className="text-cyan-400 text-xs">Super Admin</p>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">
-                    {user?.fullName?.charAt(0) || 'A'}
-                  </span>
+                <div className="relative group">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center cursor-pointer">
+                    <span className="text-white font-bold text-sm">
+                      {user?.fullName?.charAt(0) || 'A'}
+                    </span>
+                  </div>
+                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[#0a0a14] border border-white/[0.08] shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                    <div className="p-2">
+                      <button className="w-full text-left px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/[0.04] rounded-lg transition-colors">
+                        Profile Settings
+                      </button>
+                      <button className="w-full text-left px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/[0.04] rounded-lg transition-colors">
+                        Account Security
+                      </button>
+                      <div className="border-t border-white/[0.06] my-1" />
+                      <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                        Logout
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -303,23 +498,24 @@ const AdminDashboard: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-6 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-white/[0.06]"
+            className="mb-6 p-6 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-white/[0.06] relative overflow-hidden group"
           >
-            <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-transparent" />
+            <div className="relative flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-white mb-1">
-                  Welcome back, {user?.fullName?.split(' ')[0] || 'Admin'}!
+                  Welcome back, {user?.fullName?.split(' ')[0] || 'Admin'}! 👋
                 </h1>
                 <p className="text-white/40 text-sm">
                   Here's what's happening with your healthcare platform today.
                 </p>
               </div>
               <div className="flex gap-3">
-                <button className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white/60 hover:text-white/90 text-sm flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
+                <button className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white/60 hover:text-white/90 text-sm flex items-center gap-2 transition-all hover:scale-105">
+                  <Download className="w-4 h-4" />
                   Export Report
                 </button>
-                <button className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-medium shadow-lg shadow-cyan-500/25">
+                <button className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-medium shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all hover:scale-105">
                   View Analytics
                 </button>
               </div>
@@ -336,24 +532,99 @@ const AdminDashboard: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="relative overflow-hidden rounded-2xl bg-white/[0.02] border border-white/[0.06] p-4 group hover:bg-white/[0.04] transition-all"
+                  onHoverStart={() => setHoveredCard(card.title)}
+                  onHoverEnd={() => setHoveredCard(null)}
+                  className="relative overflow-hidden rounded-2xl bg-white/[0.02] border border-white/[0.06] p-4 group hover:bg-white/[0.04] transition-all cursor-pointer"
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-r ${card.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
+                  <div className={`absolute inset-0 bg-gradient-to-r ${card.color} opacity-0 group-hover:opacity-10 transition-opacity`} />
                   <div className="relative">
                     <div className="flex items-center justify-between mb-3">
-                      <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center`}>
+                      <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center shadow-lg`}>
                         <Icon className="w-4 h-4 text-white" />
                       </div>
-                      <span className="text-[10px] text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full">
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-1 ${
+                        card.trend === 'up' ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
+                      }`}>
+                        {card.trend === 'up' ? <ArrowUp className="w-2 h-2" /> : <ArrowDown className="w-2 h-2" />}
                         {card.change}
                       </span>
                     </div>
-                    <p className="text-white text-xl font-bold">{card.value}</p>
+                    <motion.p 
+                      className="text-white text-xl font-bold"
+                      animate={{ scale: hoveredCard === card.title ? 1.05 : 1 }}
+                    >
+                      {card.value}
+                    </motion.p>
                     <p className="text-white/40 text-[10px] mt-1">{card.title}</p>
                   </div>
                 </motion.div>
               );
             })}
+          </div>
+
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Main Chart */}
+            <div className="lg:col-span-2 rounded-2xl bg-white/[0.02] border border-white/[0.06] p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-white font-semibold flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-cyan-400" />
+                  Analytics Overview
+                </h3>
+                <div className="flex gap-2">
+                  {(['users', 'appointments', 'revenue'] as const).map((chart) => (
+                    <button
+                      key={chart}
+                      onClick={() => setSelectedChart(chart)}
+                      className={`px-3 py-1 rounded-lg text-xs transition-all ${
+                        selectedChart === chart
+                          ? 'bg-cyan-500/20 text-cyan-400'
+                          : 'text-white/40 hover:text-white/60'
+                      }`}
+                    >
+                      {chart.charAt(0).toUpperCase() + chart.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {getChartComponent()}
+            </div>
+
+            {/* Doctor Distribution Pie Chart */}
+            <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] p-6">
+              <h3 className="text-white font-semibold flex items-center gap-2 mb-4">
+                <PieChart className="w-5 h-5 text-purple-400" />
+                Doctor Distribution
+              </h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={doctorDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {doctorDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #ffffff20', borderRadius: '8px' }} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="grid grid-cols-2 gap-2 mt-4">
+                {doctorDistribution.map((item) => (
+                  <div key={item.name} className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span className="text-white/60 text-xs">{item.name}</span>
+                    <span className="text-white text-xs ml-auto">{item.value}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Main Grid */}
@@ -370,6 +641,7 @@ const AdminDashboard: React.FC = () => {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.2 + index * 0.05 }}
+                      whileHover={{ y: -5 }}
                       onClick={() => navigate(action.path)}
                       className="relative p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] transition-all group overflow-hidden"
                     >
@@ -382,32 +654,76 @@ const AdminDashboard: React.FC = () => {
                 })}
               </div>
 
-              {/* Recent Activities */}
+              {/* Top Performers */}
               <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
                 <div className="p-6 border-b border-white/[0.06]">
                   <h3 className="text-white font-semibold flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-cyan-400" />
-                    Recent Activities
+                    <Award className="w-5 h-5 text-yellow-400" />
+                    Top Performers
                   </h3>
+                </div>
+                <div className="divide-y divide-white/[0.04]">
+                  {topPerformers.map((performer) => (
+                    <div key={performer.id} className="p-4 hover:bg-white/[0.02] transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">{performer.avatar}</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-white font-medium text-sm">{performer.name}</p>
+                          <p className="text-white/40 text-xs">{performer.role}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                            <span className="text-white text-sm">{performer.rating}</span>
+                          </div>
+                          <p className="text-white/40 text-xs">{performer.totalPatients} patients</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recent Activities */}
+              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+                <div className="p-6 border-b border-white/[0.06]">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-white font-semibold flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-cyan-400" />
+                      Recent Activities
+                    </h3>
+                    <button className="text-xs text-cyan-400 hover:text-cyan-300">View All</button>
+                  </div>
                 </div>
                 <div className="divide-y divide-white/[0.04]">
                   {recentActivities.map((activity) => (
                     <div key={activity.id} className="p-4 hover:bg-white/[0.02] transition-colors">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <p className="text-white text-sm font-medium">{activity.userName}</p>
-                          <p className="text-white/40 text-xs mt-1">{activity.action}</p>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-white text-sm font-medium">{activity.userName}</p>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                              activity.severity === 'critical' ? 'bg-red-500/10 text-red-400' :
+                              activity.severity === 'warning' ? 'bg-yellow-500/10 text-yellow-400' :
+                              activity.severity === 'success' ? 'bg-green-500/10 text-green-400' :
+                              'bg-blue-500/10 text-blue-400'
+                            }`}>
+                              {activity.severity}
+                            </span>
+                          </div>
+                          <p className="text-white/40 text-xs">{activity.action}</p>
+                          <div className="flex items-center gap-3 mt-2">
+                            <p className="text-white/20 text-[10px]">{activity.timestamp}</p>
+                            {activity.ipAddress && (
+                              <p className="text-white/20 text-[10px]">{activity.ipAddress}</p>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                            activity.severity === 'critical' ? 'bg-red-500/10 text-red-400' :
-                            activity.severity === 'warning' ? 'bg-yellow-500/10 text-yellow-400' :
-                            'bg-green-500/10 text-green-400'
-                          }`}>
-                            {activity.severity}
-                          </span>
-                          <p className="text-white/20 text-[10px] mt-1">{activity.timestamp}</p>
-                        </div>
+                        <button className="p-1 hover:bg-white/[0.04] rounded-lg transition-colors">
+                          <MoreVertical className="w-4 h-4 text-white/30" />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -421,7 +737,7 @@ const AdminDashboard: React.FC = () => {
               <div className="rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 overflow-hidden">
                 <div className="p-6 border-b border-red-500/20">
                   <h3 className="text-white font-semibold flex items-center gap-2">
-                    <Droplet className="w-5 h-5 text-red-400" />
+                    <Droplet className="w-5 h-5 text-red-400 animate-pulse" />
                     Blood Stock Alerts
                   </h3>
                 </div>
@@ -431,78 +747,102 @@ const AdminDashboard: React.FC = () => {
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-white font-medium text-sm">{alert.bloodBank}</span>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full ${getStatusColor(alert.status)}`}>
-                          {alert.status.toUpperCase()}
+                          {alert.status === 'critical' ? '⚠️ CRITICAL' : alert.status === 'low' ? '⚠️ LOW' : '✓ NORMAL'}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-2xl font-bold text-white">{alert.bloodGroup}</span>
-                        <span className="text-red-400 text-sm">{alert.unitsLeft} units left</span>
+                        <span className="text-red-400 text-sm font-medium">{alert.unitsLeft} units left</span>
                       </div>
+                      {alert.status === 'critical' && (
+                        <button className="mt-3 w-full py-1.5 rounded-lg bg-red-500/20 text-red-400 text-xs hover:bg-red-500/30 transition-colors">
+                          Request Emergency Supply
+                        </button>
+                      )}
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* System Health Monitor */}
+              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] p-6">
+                <h3 className="text-white font-semibold flex items-center gap-2 mb-4">
+                  <Server className="w-5 h-5 text-green-400" />
+                  System Health
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-white/40 text-xs">CPU Usage</span>
+                      <span className="text-white text-sm font-medium">35%</span>
+                    </div>
+                    <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+                      <div className="h-full w-[35%] bg-gradient-to-r from-green-500 to-cyan-500 rounded-full" />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-white/40 text-xs">Memory Usage</span>
+                      <span className="text-white text-sm font-medium">62%</span>
+                    </div>
+                    <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+                      <div className="h-full w-[62%] bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full" />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-white/40 text-xs">Storage</span>
+                      <span className="text-white text-sm font-medium">42%</span>
+                    </div>
+                    <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+                      <div className="h-full w-[42%] bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/[0.06]">
+                    <div className="text-center">
+                      <p className="text-white/40 text-xs">Uptime</p>
+                      <p className="text-white text-lg font-bold">99.9%</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-white/40 text-xs">Response Time</p>
+                      <p className="text-white text-lg font-bold">124ms</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Recent Feedbacks */}
               <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
                 <div className="p-6 border-b border-white/[0.06]">
-                  <h3 className="text-white font-semibold flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-yellow-400" />
-                    Recent Feedbacks
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-white font-semibold flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-yellow-400" />
+                      Recent Feedbacks
+                    </h3>
+                    <button className="text-xs text-cyan-400 hover:text-cyan-300">View All</button>
+                  </div>
                 </div>
                 <div className="p-4 space-y-3">
                   {feedbacks.map((feedback) => (
-                    <div key={feedback.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                    <div key={feedback.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-colors">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-white text-sm font-medium">{feedback.userName}</span>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full ${getPriorityColor(feedback.priority)}`}>
-                          {feedback.priority}
+                          {feedback.priority.toUpperCase()}
                         </span>
                       </div>
-                      <p className="text-white/60 text-xs mb-2">{feedback.subject}</p>
+                      <p className="text-white/60 text-xs mb-1">{feedback.subject}</p>
                       <p className="text-white/40 text-[10px] line-clamp-2">{feedback.message}</p>
                       <div className="flex gap-2 mt-3">
-                        <button className="text-[10px] px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-colors">
+                        <button className="flex-1 text-[10px] px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-colors">
                           Resolve
                         </button>
-                        <button className="text-[10px] px-3 py-1 rounded-lg bg-white/[0.05] text-white/60 hover:bg-white/[0.1] transition-colors">
+                        <button className="flex-1 text-[10px] px-3 py-1 rounded-lg bg-white/[0.05] text-white/60 hover:bg-white/[0.1] transition-colors">
                           Reply
                         </button>
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-
-              {/* System Status */}
-              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] p-6">
-                <h3 className="text-white font-semibold flex items-center gap-2 mb-4">
-                  <Server className="w-5 h-5 text-green-400" />
-                  System Status
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/40 text-xs">API Response</span>
-                    <span className="text-white text-sm">124ms</span>
-                  </div>
-                  <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                    <div className="h-full w-[96%] bg-gradient-to-r from-green-500 to-cyan-500 rounded-full" />
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/40 text-xs">Uptime</span>
-                    <span className="text-white text-sm">99.9%</span>
-                  </div>
-                  <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                    <div className="h-full w-[99.9%] bg-gradient-to-r from-emerald-500 to-green-500 rounded-full" />
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/40 text-xs">Storage</span>
-                    <span className="text-white text-sm">42%</span>
-                  </div>
-                  <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                    <div className="h-full w-[42%] bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
-                  </div>
                 </div>
               </div>
             </div>
