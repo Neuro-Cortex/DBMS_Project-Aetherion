@@ -9,7 +9,7 @@ import {
   Search, ChevronRight, Eye, CheckCircle, XCircle, Clock as ClockIcon,
   Heart, Stethoscope, Syringe, ClipboardList, Download, Filter,
   MoreVertical, ArrowUp, ArrowDown, DollarSign, Phone, Mail,
-  MapPin, Star, Award, Target, BarChart3, PieChart, LineChart,
+  MapPin, Star, Award, Target, BarChart3,  LineChart,
   Globe, Database, Cloud, Shield as ShieldIcon, Lock, Key
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -129,8 +129,80 @@ const doctorDistribution = [
 ];
 
 // ============================================
+// TYPES (continued)
+// ============================================
+interface BloodAlert {
+  id: string;
+  bloodBank: string;
+  bloodGroup: string;
+  unitsLeft: number;
+  status: 'critical' | 'low' | 'normal';
+}
+
+interface Feedback {
+  id: string;
+  userName: string;
+  subject: string;
+  message: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  timestamp: string;
+}
+
+interface QuickAction {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  path: string;
+  color: string;
+  description?: string;
+}
+
+// ============================================
 // STATIC DATA
 // ============================================
+const quickActions: QuickAction[] = [
+  { title: 'User Management', icon: Users, path: '/admin/users', color: 'from-blue-500 to-cyan-500' },
+  { title: 'Doctor Verification', icon: UserCheck, path: '/admin/doctors', color: 'from-emerald-500 to-teal-500' },
+  { title: 'Hospital Management', icon: Building2, path: '/admin/hospitals', color: 'from-purple-500 to-violet-500' },
+  { title: 'Pharmacy Management', icon: Pill, path: '/admin/pharmacies', color: 'from-amber-500 to-orange-500' },
+  { title: 'Blood Bank', icon: Droplet, path: '/admin/blood-bank', color: 'from-red-500 to-rose-500' },
+  { title: 'Appointments', icon: Calendar, path: '/admin/appointments', color: 'from-indigo-500 to-blue-500' },
+  { title: 'Reports', icon: BarChart3, path: '/admin/reports', color: 'from-pink-500 to-purple-500' },
+  { title: 'System Settings', icon: Settings, path: '/admin/settings', color: 'from-gray-500 to-slate-500' },
+];
+
+const bloodAlerts: BloodAlert[] = [
+  { id: '1', bloodBank: 'Central Blood Bank', bloodGroup: 'O-', unitsLeft: 5, status: 'critical' },
+  { id: '2', bloodBank: 'City Hospital', bloodGroup: 'A+', unitsLeft: 12, status: 'low' },
+  { id: '3', bloodBank: 'Red Cross', bloodGroup: 'B-', unitsLeft: 8, status: 'low' },
+  { id: '4', bloodBank: 'Plasma Center', bloodGroup: 'AB+', unitsLeft: 25, status: 'normal' },
+];
+
+const feedbacks: Feedback[] = [
+  { id: '1', userName: 'John Patient', subject: 'Appointment Issue', message: 'Had trouble scheduling an appointment online. The calendar widget was not showing available slots.', priority: 'high', timestamp: '1 hour ago' },
+  { id: '2', userName: 'Dr. Sarah Johnson', subject: 'System Performance', message: 'The EMR system is running slow during peak hours. Affecting patient consultations.', priority: 'urgent', timestamp: '2 hours ago' },
+  { id: '3', userName: 'City Hospital Admin', subject: 'Feature Request', message: 'Would like to have bulk patient data export functionality added to the dashboard.', priority: 'medium', timestamp: '5 hours ago' },
+  { id: '4', userName: 'MediCare Pharmacy', subject: 'Inventory Sync', message: 'Inventory levels are not syncing in real-time between the pharmacy and the main system.', priority: 'high', timestamp: '8 hours ago' },
+];
+
+const getStatusColor = (status: string): string => {
+  switch(status) {
+    case 'critical': return 'bg-red-500/20 text-red-400';
+    case 'low': return 'bg-yellow-500/20 text-yellow-400';
+    case 'normal': return 'bg-green-500/20 text-green-400';
+    default: return 'bg-blue-500/20 text-blue-400';
+  }
+};
+
+const getPriorityColor = (priority: string): string => {
+  switch(priority) {
+    case 'urgent': return 'bg-red-500/20 text-red-400';
+    case 'high': return 'bg-orange-500/20 text-orange-400';
+    case 'medium': return 'bg-yellow-500/20 text-yellow-400';
+    case 'low': return 'bg-green-500/20 text-green-400';
+    default: return 'bg-blue-500/20 text-blue-400';
+  }
+};
+
 const statsCards = [
   { title: 'Total Users', value: '12,847', change: '+12.5%', icon: Users, color: 'from-blue-500 to-cyan-500', trend: 'up' },
   { title: 'Active Doctors', value: '1,234', change: '+8.2%', icon: Stethoscope, color: 'from-emerald-500 to-teal-500', trend: 'up' },
@@ -275,7 +347,7 @@ const AdminDashboard: React.FC = () => {
       case 'revenue':
         return (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={revenueData}>
+            <ReLineChart data={revenueData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
               <XAxis dataKey="month" stroke="#ffffff40" />
               <YAxis stroke="#ffffff40" />
@@ -283,7 +355,7 @@ const AdminDashboard: React.FC = () => {
               <Legend />
               <Line type="monotone" dataKey="revenue" stroke="#F59E0B" strokeWidth={3} dot={{ fill: '#F59E0B' }} />
               <Line type="monotone" dataKey="expenses" stroke="#EF4444" strokeWidth={3} dot={{ fill: '#EF4444' }} />
-            </LineChart>
+            </ReLineChart>
           </ResponsiveContainer>
         );
     }
