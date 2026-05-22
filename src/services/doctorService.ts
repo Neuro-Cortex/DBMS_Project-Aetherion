@@ -213,6 +213,28 @@ class DoctorService {
     });
     return response.json();
   }
+
+  // Public search/browse methods used by store slices
+  async getDoctors(filters?: any): Promise<any[]> {
+    const response = await fetch(`${API_BASE_URL}/doctors`, {
+      headers: this.getHeaders(),
+    });
+    return response.json();
+  }
+
+  async getDoctorById(id: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/doctors/${id}`, {
+      headers: this.getHeaders(),
+    });
+    return response.json();
+  }
+
+  async getSpecialties(): Promise<string[]> {
+    const response = await fetch(`${API_BASE_URL}/doctors/specialties`, {
+      headers: this.getHeaders(),
+    });
+    return response.json();
+  }
 }
 
 export const doctorService = new DoctorService();

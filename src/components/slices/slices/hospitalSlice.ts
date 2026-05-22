@@ -53,7 +53,7 @@ const initialState: HospitalState = {
 // ============================================
 export const fetchHospitals = createAsyncThunk(
   'hospital/fetchHospitals',
-  async (params?: { emergency?: boolean; city?: string }, { rejectWithValue }) => {
+  async (params: { emergency?: boolean; city?: string } | undefined, { rejectWithValue }: any) => {
     try {
       return await hospitalService.getHospitals(params);
     } catch (error: any) {
@@ -64,7 +64,7 @@ export const fetchHospitals = createAsyncThunk(
 
 export const fetchHospitalById = createAsyncThunk(
   'hospital/fetchHospitalById',
-  async (id: string, { rejectWithValue }) => {
+  async (id: string, { rejectWithValue }: any) => {
     try {
       return await hospitalService.getHospitalById(id);
     } catch (error: any) {
@@ -75,7 +75,7 @@ export const fetchHospitalById = createAsyncThunk(
 
 export const fetchBeds = createAsyncThunk(
   'hospital/fetchBeds',
-  async (hospitalId: string, { rejectWithValue }) => {
+  async (hospitalId: string, { rejectWithValue }: any) => {
     try {
       return await hospitalService.getBeds(hospitalId);
     } catch (error: any) {
@@ -91,7 +91,7 @@ export const bookBed = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      return await hospitalService.bookBed(hospitalId, bedType, patientId);
+      return await hospitalService.bookBed({ hospitalId, bedType: bedType as any, patientId, patientName: '' });
     } catch (error: any) {
       return rejectWithValue(error.message || 'Booking failed');
     }

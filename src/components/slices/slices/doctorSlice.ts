@@ -58,7 +58,7 @@ const initialState: DoctorState = {
 // ============================================
 export const fetchDoctors = createAsyncThunk(
   'doctor/fetchDoctors',
-  async (filters?: DoctorFilters, { rejectWithValue }) => {
+  async (filters: DoctorFilters | undefined, { rejectWithValue }: any) => {
     try {
       const doctors = await doctorService.getDoctors(filters);
       return { doctors, filters };
@@ -70,7 +70,7 @@ export const fetchDoctors = createAsyncThunk(
 
 export const fetchDoctorById = createAsyncThunk(
   'doctor/fetchDoctorById',
-  async (id: string, { rejectWithValue }) => {
+  async (id: string, { rejectWithValue }: any) => {
     try {
       const doctor = await doctorService.getDoctorById(id);
       return doctor;
@@ -82,7 +82,7 @@ export const fetchDoctorById = createAsyncThunk(
 
 export const fetchSpecialties = createAsyncThunk(
   'doctor/fetchSpecialties',
-  async (_, { rejectWithValue }) => {
+  async (_: void, { rejectWithValue }: any) => {
     try {
       return await doctorService.getSpecialties();
     } catch (error: any) {

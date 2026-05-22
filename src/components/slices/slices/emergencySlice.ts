@@ -62,7 +62,7 @@ const getCritical = (requests: EmergencyRequest[]): EmergencyRequest[] =>
 // ============================================
 export const fetchEmergencyServices = createAsyncThunk(
   'emergency/fetchServices',
-  async (type?: EmergencyServiceItem['type'], { rejectWithValue }) => {
+  async (type: EmergencyServiceItem['type'] | undefined, { rejectWithValue }: any) => {
     try {
       return await emergencyService.getServices(type);
     } catch (error: any) {
