@@ -8,9 +8,11 @@ import {
   MessageSquare, Award, Star, ArrowUp, ArrowDown,
   Server, LogOut, Menu, X, Search, ChevronRight,
   Eye, CheckCircle, XCircle, Download, MoreVertical,
-  Heart, Stethoscope, DollarSign, Clock as ClockIcon
+  Heart, Stethoscope, DollarSign, Clock as ClockIcon,
+  Syringe, ClipboardList, Filter, Zap, Radio,
+  Globe, Database, Cloud, Lock, Key
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { logout } from '../../store/slices/authSlice';
@@ -34,10 +36,10 @@ import {
 } from 'recharts';
 
 // Shared UI Components
-import { Card } from '../../ui/Card';
-import { Button } from '../../ui/Button';
-import { Badge } from '../../ui/Badge';
-import { GlassmorphicCard } from '../../ui/GlassmorphicCard';
+import { Card } from 'src/ui/Card';
+import { Button } from 'src/ui/Button';
+import { Badge } from  'src/ui/Badge';
+import { GlassmorphicCard } from 'src/ui/GlassmorphicCard';
 
 // ============================================
 // TYPES
@@ -101,12 +103,13 @@ interface BloodAlert {
   status: 'critical' | 'low' | 'normal';
 }
 
-interface Feedback {
+interface FeedbackItem {
   id: string;
   userName: string;
   subject: string;
   message: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: 'pending' | 'reviewed' | 'resolved' | 'closed';
   timestamp: string;
 }
 
@@ -162,13 +165,13 @@ const doctorDistribution = [
 // ============================================
 const quickActions: QuickAction[] = [
   { title: 'User Management', icon: Users, path: '/admin/users', color: 'from-blue-500 to-cyan-500' },
-  { title: 'Doctor Verification', icon: UserCheck, path: '/admin/doctors', color: 'from-emerald-500 to-teal-500' },
+  { title: 'Doctor Verification', icon: UserCheck, path: '/admin/doctors/verify', color: 'from-emerald-500 to-teal-500' },
+  { title: 'Emergency Monitor', icon: Syringe, path: '/admin/emergency', color: 'from-red-500 to-rose-500' },
+  { title: 'Blood Bank', icon: Droplet, path: '/admin/blood-bank', color: 'from-red-500 to-pink-500' },
   { title: 'Hospital Management', icon: Building2, path: '/admin/hospitals', color: 'from-purple-500 to-violet-500' },
-  { title: 'Pharmacy Management', icon: Pill, path: '/admin/pharmacies', color: 'from-amber-500 to-orange-500' },
-  { title: 'Blood Bank', icon: Droplet, path: '/admin/blood-bank', color: 'from-red-500 to-rose-500' },
-  { title: 'Appointments', icon: Calendar, path: '/admin/appointments', color: 'from-indigo-500 to-blue-500' },
-  { title: 'Reports', icon: BarChart3, path: '/admin/reports', color: 'from-pink-500 to-purple-500' },
-  { title: 'System Settings', icon: Settings, path: '/admin/settings', color: 'from-gray-500 to-slate-500' },
+  { title: 'Pharmacy Control', icon: Pill, path: '/admin/pharmacies', color: 'from-amber-500 to-orange-500' },
+  { title: 'Security Settings', icon: Shield, path: '/admin/security', color: 'from-slate-500 to-gray-500' },
+  { title: 'System Analytics', icon: TrendingUp, path: '/admin/analytics', color: 'from-indigo-500 to-blue-500' },
 ];
 
 const statsCards = [
@@ -204,18 +207,18 @@ const topPerformers: TopPerformer[] = [
   { id: '4', name: 'MediCare Pharmacy', role: 'Pharmacy', rating: 4.9, totalPatients: 3421, revenue: 456000, avatar: 'MP' },
 ];
 
-const bloodAlerts: { id: string; bloodBank: string; bloodGroup: string; unitsLeft: number; status: 'critical' | 'low' | 'normal' }[] = [
-  { id: '1', bloodBank: 'Central Blood Bank', bloodGroup: 'O-', unitsLeft: 5, status: 'critical' },
-  { id: '2', bloodBank: 'City Hospital', bloodGroup: 'A+', unitsLeft: 12, status: 'low' },
-  { id: '3', bloodBank: 'Red Cross', bloodGroup: 'B-', unitsLeft: 8, status: 'low' },
-  { id: '4', bloodBank: 'Plasma Center', bloodGroup: 'AB+', unitsLeft: 25, status: 'normal' },
+const bloodAlerts: BloodAlert[] = [
+  { id: '1', bloodBank: 'City Blood Bank', bloodGroup: 'O-', status: 'critical', unitsLeft: 3 },
+  { id: '2', bloodBank: 'Red Cross', bloodGroup: 'A+', status: 'low', unitsLeft: 8 },
+  { id: '3', bloodBank: 'LifeSave Center', bloodGroup: 'B-', status: 'critical', unitsLeft: 2 },
+  { id: '4', bloodBank: 'Plasma Center', bloodGroup: 'AB+', status: 'normal', unitsLeft: 25 },
 ];
 
-const feedbacks: { id: string; userName: string; subject: string; message: string; priority: 'low' | 'medium' | 'high' | 'urgent'; timestamp: string }[] = [
-  { id: '1', userName: 'John Patient', subject: 'Appointment Issue', message: 'Had trouble scheduling an appointment online...', priority: 'high', timestamp: '1 hour ago' },
-  { id: '2', userName: 'Dr. Sarah Johnson', subject: 'System Performance', message: 'The EMR system is running slow during peak hours...', priority: 'urgent', timestamp: '2 hours ago' },
-  { id: '3', userName: 'City Hospital Admin', subject: 'Feature Request', message: 'Would like to have bulk patient data export...', priority: 'medium', timestamp: '5 hours ago' },
-  { id: '4', userName: 'MediCare Pharmacy', subject: 'Inventory Sync', message: 'Inventory levels are not syncing in real-time...', priority: 'high', timestamp: '8 hours ago' },
+const feedbacks: FeedbackItem[] = [
+  { id: '1', userName: 'Michael Brown', subject: 'Appointment Delay', message: 'Had to wait 45 minutes beyond scheduled time', priority: 'high', status: 'pending', timestamp: '1 hour ago' },
+  { id: '2', userName: 'Dr. Sarah Johnson', subject: 'System Performance', message: 'The EMR system is running slow during peak hours...', priority: 'urgent', status: 'pending', timestamp: '2 hours ago' },
+  { id: '3', userName: 'Emma Wilson', subject: 'Excellent Service', message: 'Dr. Johnson was very professional and thorough', priority: 'low', status: 'resolved', timestamp: '5 hours ago' },
+  { id: '4', userName: 'Robert Chen', subject: 'Payment Issue', message: 'Double charged for consultation visit', priority: 'urgent', status: 'pending', timestamp: '8 hours ago' },
 ];
 
 // ============================================
@@ -223,7 +226,8 @@ const feedbacks: { id: string; userName: string; subject: string; message: strin
 // ============================================
 const AdminDashboard: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<SystemStats | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedTimeRange, setSelectedTimeRange] = useState<'today' | 'week' | 'month' | 'year'>('month');
   const [selectedChart, setSelectedChart] = useState<'users' | 'appointments' | 'revenue'>('users');
@@ -238,7 +242,32 @@ const AdminDashboard: React.FC = () => {
       toast.error('Access denied. Admin privileges required.');
       navigate('/login');
     }
+    loadStats();
   }, [user, navigate]);
+
+  const loadStats = async () => {
+    setIsLoading(true);
+    setStats({
+      totalUsers: 12847,
+      totalDoctors: 1234,
+      totalHospitals: 156,
+      totalPharmacies: 432,
+      totalBloodDonors: 5231,
+      totalAppointments: 45200,
+      activeUsers: 3245,
+      newUsersToday: 47,
+      newUsersThisMonth: 1250,
+      verifiedDoctors: 1189,
+      pendingVerifications: 45,
+      blockedUsers: 23,
+      totalDonations: 15234,
+      totalBloodUnits: 18456,
+      livesSaved: 54321,
+      totalRevenue: 72500,
+      monthlyGrowth: 18.5
+    });
+    setIsLoading(false);
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -283,6 +312,27 @@ const AdminDashboard: React.FC = () => {
       default: return 'default' as const;
     }
   };
+
+  const feedbackStatusVariant = (status: string): 'success' | 'warning' | 'danger' | 'default' | 'info' => {
+    switch(status) {
+      case 'resolved': return 'success';
+      case 'reviewed': return 'info';
+      case 'pending': return 'warning';
+      case 'closed': return 'default';
+      default: return 'default';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#050508] via-[#0a0a14] to-[#050508] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   const getChartComponent = () => {
     switch(selectedChart) {
@@ -843,12 +893,18 @@ const AdminDashboard: React.FC = () => {
                     <div key={feedback.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-colors">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-white text-sm font-medium">{feedback.userName}</span>
-                        <Badge variant={priorityVariant(feedback.priority)} size="xs">
-                          {feedback.priority.toUpperCase()}
-                        </Badge>
+                        <div className="flex items-center gap-1.5">
+                          <Badge variant={feedbackStatusVariant(feedback.status)} size="xs">
+                            {feedback.status}
+                          </Badge>
+                          <Badge variant={priorityVariant(feedback.priority)} size="xs">
+                            {feedback.priority.toUpperCase()}
+                          </Badge>
+                        </div>
                       </div>
                       <p className="text-white/60 text-xs mb-1">{feedback.subject}</p>
                       <p className="text-white/40 text-[10px] line-clamp-2">{feedback.message}</p>
+                      <p className="text-white/20 text-[10px] mt-1">{feedback.timestamp}</p>
                       <div className="flex gap-2 mt-3">
                         <Button variant="glass" size="xs" className="flex-1">Resolve</Button>
                         <Button variant="ghost" size="xs" className="flex-1">Reply</Button>
