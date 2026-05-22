@@ -1,9 +1,3 @@
-// ============================================
-// src/pages/Home.tsx
-// AETHERION - Smart Healthcare Ecosystem
-// Complete 145+ File Project Showcase
-// ============================================
-
 import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
@@ -181,7 +175,7 @@ const NavigationBar: React.FC = () => {
   
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Dashboard', path: '/client/dashboard' },
+    
     { name: 'Doctors', path: '/client/doctor-comparison' },
     { name: 'Pharmacy', path: '/pharmacy' },
     { name: 'Emergency', path: '/emergency' },
@@ -327,8 +321,7 @@ const HeroSection: React.FC = () => {
 
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
               className="flex flex-wrap items-center gap-6 mt-10 text-slate-400 dark:text-slate-500 text-sm">
-              <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500"/> HIPAA Compliant</span>
-              <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500"/> 50K+ Patients</span>
+              <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500"/> 23K+ Patients</span>
               <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500"/> 250+ Hospitals</span>
               <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500"/> ISO 27001 Certified</span>
               <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500"/> 24/7 Support</span>
