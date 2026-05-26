@@ -4,19 +4,20 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  Star, MapPin, Phone, Mail, Calendar, Clock, Award, 
-  Shield, BookOpen, Users, Heart, Share2, Flag, 
-  ChevronLeft, ChevronRight, CheckCircle, AlertCircle,
-  Video, MessageCircle, ThumbsUp, TrendingUp, Activity
+  Star, MapPin, Phone, Calendar, Clock, Award, 
+   Share2, Flag, 
+  ChevronLeft,  CheckCircle, 
+  Video, MessageCircle, ThumbsUp, 
 } from 'lucide-react';
-import { DoctorCard } from 'src/components/doctors/DoctorCard';
-import { DoctorSchedule } from 'src/components/doctors/DoctorSchdule';
-import { BookingForm } from 'src/components/doctors/BookingForm';
-import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
-import { GlassmorphicCard } from '../components/ui/GlassmorphicCard';
-import { Avatar } from '../components/ui/Avatar';
-import { Tabs } from 'src/components/ui/Tab';
+
+
+
+
+
+import { GlassmorphicCard } from 'src/ui/GlassmorphicCard';
+import { Button } from 'src/ui/Button';
+import { Badge } from 'src/ui/Badge';
+import { Avatar } from 'src/ui/Avatar';
 
 // ============================================
 // TYPES
@@ -131,22 +132,17 @@ const reviews: Review[] = [
 export const DoctorProfile: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [doctor, setDoctor] = useState<Doctor>(doctorData);
-  const [activeTab, setActiveTab] = useState('about');
+  const [doctor] = useState<Doctor>(doctorData);
+  const [activeTab] = useState('about');
   const [showBooking, setShowBooking] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line no-empty-pattern
+  const [] = useState(false);
 
   useEffect(() => {
     // Fetch doctor data based on id
     window.scrollTo(0, 0);
   }, [id]);
 
-  const tabs = [
-    { id: 'about', label: 'About', icon: BookOpen },
-    { id: 'schedule', label: 'Schedule', icon: Calendar },
-    { id: 'reviews', label: 'Reviews', icon: Star },
-    { id: 'location', label: 'Location', icon: MapPin },
-  ];
 
   const getConsultationModeIcon = (mode: string) => {
     switch (mode) {

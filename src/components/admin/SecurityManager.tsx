@@ -267,8 +267,7 @@ export const SecurityManager: React.FC = () => {
             />
             Auto-refresh
           </label>
-          <Button variant="primary" onClick={fetchSecurityLogs}>
-            <RefreshCw className="w-4 h-4 mr-2" />
+          <Button variant="primary" onClick={fetchSecurityLogs} leftIcon={RefreshCw}>
             Refresh Now
           </Button>
         </div>
@@ -366,7 +365,7 @@ export const SecurityManager: React.FC = () => {
       <Tabs
         tabs={tabs}
         defaultTab="logs"
-        onChange={setActiveTab}
+        onChange={(tabId: string) => setActiveTab(tabId)}
       />
 
       {/* ============================================ */}
@@ -391,8 +390,7 @@ export const SecurityManager: React.FC = () => {
               { value: 'blocked', label: 'Blocked' },
             ]}
           />
-          <Button variant="outline">
-            <Download className="w-4 h-4 mr-2" />
+          <Button variant="outline" leftIcon={Download}>
             Export
           </Button>
         </div>
@@ -409,8 +407,8 @@ export const SecurityManager: React.FC = () => {
         <Table
           columns={securityColumns}
           data={filteredLogs}
-          keyExtractor={(log: SecurityLog) => log.id}
-          onRowClick={(log: SecurityLog) => console.log('View log:', log)}
+          searchable
+          searchKeys={['event', 'userName', 'ipAddress']}
           emptyMessage="No security logs found"
         />
       </Card>

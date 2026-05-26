@@ -2,12 +2,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Calendar, Clock, User, Stethoscope, MapPin, Video, Phone,
+  Calendar,  User, Stethoscope, MapPin, Video, Phone,
   CheckCircle, ChevronRight, ChevronLeft, AlertCircle,
-  CreditCard, Shield, Star, Plus, Minus
+  CreditCard, Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 
 // ============================================
 // TYPES

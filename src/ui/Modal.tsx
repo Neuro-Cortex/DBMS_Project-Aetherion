@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, Fragment } from 'react';
+import React, { useEffect, useRef} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -12,6 +12,7 @@ export interface ModalProps {
   onClose: () => void;
   title?: string;
   description?: string;
+  className?: string;
   children: React.ReactNode;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
   position?: 'center' | 'top' | 'bottom';
@@ -101,12 +102,12 @@ const animationVariants = {
 // ============================================
 // MODAL COMPONENT
 // ============================================
-export default Modal;
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   title,
   description,
+  className,
   children,
   size = 'md',
   position = 'center',
@@ -184,7 +185,8 @@ export const Modal: React.FC<ModalProps> = ({
                   'relative w-full',
                   sizeStyles[size],
                   variantStyles[variant],
-                  'rounded-3xl shadow-2xl overflow-hidden'
+                  'rounded-3xl shadow-2xl overflow-hidden',
+                  className
                 )
               )}
               onClick={(e) => e.stopPropagation()}
@@ -236,6 +238,8 @@ export const Modal: React.FC<ModalProps> = ({
     </AnimatePresence>
   );
 };
+
+export default Modal;
 
 // ============================================
 // CONFIRM MODAL COMPONENT

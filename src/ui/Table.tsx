@@ -28,7 +28,6 @@ interface TableProps<T> {
 // ============================================
 // COMPONENT
 // ============================================
-export default Table;
 export function Table<T extends Record<string, any>>({
   columns,
   data,
@@ -217,3 +216,5 @@ export function Table<T extends Record<string, any>>({
     </div>
   );
 }
+
+export default Table;

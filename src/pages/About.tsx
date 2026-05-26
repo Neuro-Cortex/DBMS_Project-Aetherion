@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView,  } from 'framer-motion';
 import { 
-  Heart, Shield, Globe, Award, Users, TrendingUp, Clock, Star, 
-  Quote, Zap, Target, Sparkles, ArrowRight, Play, Pause,
-  ChevronRight, Building2, Stethoscope, Microscope, Activity,
-  Brain, Cpu, LineChart, MessageSquare, ThumbsUp, Verified, Twitter, Linkedin
+  Heart, Shield, Globe,  TrendingUp,  Star, 
+  Quote, Zap, Target, Sparkles, ArrowRight, Play, 
+   Activity,
+  Brain, Cpu,  Verified, Twitter, Linkedin
 } from 'lucide-react';
 
 // Types

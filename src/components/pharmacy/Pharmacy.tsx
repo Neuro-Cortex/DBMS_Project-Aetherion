@@ -2,10 +2,8 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Pill, Search, MapPin, Star, Phone, Clock, Truck, CreditCard, Shield,
-  AlertCircle, Package, DollarSign, ShoppingCart, Download, RefreshCw,
-  ChevronRight, CheckCircle, XCircle, Plus, Minus, Heart, TrendingUp,
-  Navigation, Users, Award, Filter, SlidersHorizontal, Zap
+  Pill, Search, MapPin, Star, Phone,  Truck, 
+  AlertCircle, Package, DollarSign, ShoppingCart, Download, 
 } from 'lucide-react';
 import { GlassmorphicCard } from '@/components/ui/GlassmorphicCard';
 import { Button } from '@/components/ui/Button';
@@ -234,7 +232,7 @@ const StockCard: React.FC<{ item: StockItem }> = ({ item }) => {
 // ============================================
 export const Pharmacy: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'search' | 'pharmacies' | 'stock'>('pharmacies');
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 

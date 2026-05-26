@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   Activity, Calendar, Users, Building2, Stethoscope,
-  Pill, Baby, FileText, Sparkles
+  Pill, Baby, FileText
 } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -94,7 +94,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       <ParticleEffect />
 
       {/* Navbar */}
-      <Navbar sidebarOpen={sidebarOpen} onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+      <Navbar />
 
       {/* Main */}
       <main className={`pt-20 min-h-screen ${className}`}>

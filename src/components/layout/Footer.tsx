@@ -1,26 +1,24 @@
 // src/components/layout/Footer.tsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, useInView, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
-  Heart, Sparkles, Mail, Phone, MapPin, ArrowRight, Shield,
+  Heart, Sparkles, Mail, Phone, MapPin, Shield,
   Twitter, Linkedin, Github, Youtube, Instagram, Send,
-  CheckCircle, ChevronRight, Zap, Globe, Award, Star,
-  MessageCircle, Clock, Users, TrendingUp, BadgeCheck,
-  Fingerprint, Lock, Cloud, Server, Command, ChevronUp,
-  FileText, ExternalLink, Copy, Coffee, Gift, Rocket,
-  Sun, Moon, ZapOff, Wifi, Bluetooth, Signal, Antenna,
-  Eye, EyeOff, Volume2, Mic, Radio, Tv, Cast, Airplay,
-  Layers, Grid, Layout, Columns, Split, PanelTop, PanelBottom
+  CheckCircle, ChevronRight, Zap,
+  MessageCircle, BadgeCheck,
+  Fingerprint, Lock, Cloud, ChevronUp,
+  ExternalLink, Coffee, Calendar, Stethoscope, Pill
 } from 'lucide-react';
-import { GlassmorphicCard } from 'src/ui/GlassmorphicCard';
-import { Button } from 'src/ui/Button';
-import { Badge } from 'src/ui/Badge';
+
+// ✅ FIXED IMPORT PATH
+import { Badge } from '../ui/Badge';
 
 // ============================================
 // CONSTANTS
 // ============================================
 const currentYear = new Date().getFullYear();
+
 
 // ============================================
 // SUB-COMPONENTS
@@ -161,11 +159,11 @@ export const Footer: React.FC = () => {
   }, []);
 
   const socialLinks = [
-    { icon: Twitter, href: '#', label: 'Twitter', gradient: 'hover:bg-sky-500/20 hover:text-sky-400 hover:border-sky-500/30' },
-    { icon: Linkedin, href: '#', label: 'LinkedIn', gradient: 'hover:bg-blue-500/20 hover:text-blue-400 hover:border-blue-500/30' },
-    { icon: Github, href: '#', label: 'GitHub', gradient: 'hover:bg-purple-500/20 hover:text-purple-400 hover:border-purple-500/30' },
-    { icon: Youtube, href: '#', label: 'YouTube', gradient: 'hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30' },
-    { icon: Instagram, href: '#', label: 'Instagram', gradient: 'hover:bg-pink-500/20 hover:text-pink-400 hover:border-pink-500/30' },
+    { icon: Twitter, href: '#', label: 'Twitter' },
+    { icon: Linkedin, href: '#', label: 'LinkedIn' },
+    { icon: Github, href: '#', label: 'GitHub' },
+    { icon: Youtube, href: '#', label: 'YouTube' },
+    { icon: Instagram, href: '#', label: 'Instagram' },
   ];
 
   const trustBadges = [
@@ -183,25 +181,27 @@ export const Footer: React.FC = () => {
     { icon: Pill, label: 'Order Medicine', href: '/pharmacy' },
   ];
 
+  // ✅ Inline Badge component (fallback if Badge import fails)
+  const RenderBadge: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => {
+    try {
+      return <Badge variant="info" className={`text-[10px] ${className || ''}`}>{children}</Badge>;
+    } catch {
+      return <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 text-[10px] font-medium">{children}</span>;
+    }
+  };
+
   return (
     <footer ref={footerRef} className="relative bg-[#020205] border-t border-white/[0.03] overflow-hidden">
       
-      {/* ============================================ */}
       {/* DYNAMIC BACKGROUND */}
-      {/* ============================================ */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {/* Mouse-following glow */}
         <motion.div
           className="absolute w-[600px] h-[600px] rounded-full bg-gradient-to-r from-cyan-500/[0.03] to-purple-500/[0.03] blur-3xl"
           animate={{ x: cursorPos.x - 300, y: cursorPos.y - 300 }}
           transition={{ type: 'spring', stiffness: 50, damping: 30 }}
         />
-        
-        {/* Static orbs */}
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/[0.02] rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-cyan-500/[0.02] rounded-full blur-3xl" />
-
-        {/* Grid */}
         <div className="absolute inset-0 opacity-[0.01]"
           style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)`,
@@ -217,9 +217,7 @@ export const Footer: React.FC = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
         
-        {/* ============================================ */}
         {/* QUICK ACTIONS ROW */}
-        {/* ============================================ */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -248,12 +246,10 @@ export const Footer: React.FC = () => {
           })}
         </motion.div>
 
-        {/* ============================================ */}
         {/* MAIN GRID */}
-        {/* ============================================ */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16">
           
-          {/* BRAND + NEWSLETTER (5 cols) */}
+          {/* BRAND + NEWSLETTER */}
           <div className="lg:col-span-5 space-y-8">
             <TiltCard>
               <GlowingBorder>
@@ -261,7 +257,7 @@ export const Footer: React.FC = () => {
                   <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
                     <motion.div
                       whileHover={{ scale: 1.1, rotate: -10 }}
-                      className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 via-pink-500 to-cyan-500 flex items-center justify-center shadow-2xl shadow-indigo-500/30"
+                      className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-5000 via-pink-500 to-cyan-500 flex items-center justify-center shadow-2xl shadow-indigo-500/30"
                     >
                       <Sparkles className="w-8 h-8 text-white" />
                     </motion.div>
@@ -293,7 +289,7 @@ export const Footer: React.FC = () => {
               </GlowingBorder>
             </TiltCard>
 
-            {/* Social Proof */}
+            {/* Social Links */}
             <div className="flex items-center gap-4">
               {socialLinks.map((link, i) => {
                 const Icon = link.icon;
@@ -305,17 +301,17 @@ export const Footer: React.FC = () => {
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.2, y: -5 }}
                     whileTap={{ scale: 0.9 }}
-                    className={`w-11 h-11 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center transition-all ${link.gradient}`}
+                    className="w-11 h-11 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-center transition-all hover:bg-white/[0.08]"
                     aria-label={link.label}
                   >
-                    <Icon className="w-4.5 h-4.5 text-white/30" />
+                    <Icon className="w-4 h-4 text-white/30 hover:text-white/60" />
                   </motion.a>
                 );
               })}
             </div>
           </div>
 
-          {/* LINKS (5 cols) */}
+          {/* LINKS */}
           <div className="lg:col-span-5 grid grid-cols-2 gap-8">
             {[
               {
@@ -383,9 +379,7 @@ export const Footer: React.FC = () => {
                         <span className="w-1 h-1 rounded-full bg-white/10 group-hover:bg-cyan-400 group-hover:w-2 transition-all duration-300" />
                         {link.label}
                         {link.badge && (
-                          <Badge variant="info" size="xs" className="scale-75 -ml-1">
-                            {link.badge}
-                          </Badge>
+                          <RenderBadge>{link.badge}</RenderBadge>
                         )}
                       </Link>
                     </li>
@@ -395,7 +389,7 @@ export const Footer: React.FC = () => {
             ))}
           </div>
 
-          {/* CONTACT CARD (2 cols) */}
+          {/* CONTACT CARD */}
           <div className="lg:col-span-2">
             <TiltCard>
               <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-500/[0.05] to-purple-500/[0.05] border border-white/[0.06]">
@@ -442,9 +436,7 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* ============================================ */}
         {/* BOTTOM BAR */}
-        {/* ============================================ */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-white/[0.03]">
           
           <div className="flex items-center gap-3 text-white/15 text-xs">
@@ -476,9 +468,7 @@ export const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* ============================================ */}
       {/* BACK TO TOP BUTTON */}
-      {/* ============================================ */}
       <AnimatePresence>
         {showBackToTop && (
           <motion.button
@@ -502,7 +492,5 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
-
-import { Calendar, Stethoscope, Pill } from 'lucide-react';
 
 export default Footer;

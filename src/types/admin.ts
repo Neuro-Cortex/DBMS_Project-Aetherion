@@ -178,7 +178,7 @@ export interface Report {
   type: 'user' | 'doctor' | 'hospital' | 'donation' | 'financial' | 'system';
   generatedBy: string;
   generatedDate: string;
-  parameters: any;
+  parameters: Record<string, unknown>;
   format: 'pdf' | 'excel' | 'csv';
   downloadUrl: string;
   fileSize: string;

@@ -1,18 +1,40 @@
+// src/store/index.ts
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
+import storage from "redux-persist/lib/storage";
 
 // ============================================
 // SLICES
 // ============================================
 import authReducer from "./slices/authSlice";
 import clientReducer from "./slices/clientSlice";
-import doctorReducer from "src/store/slices/DoctorSlice";
+import doctorReducer from "./slices/DoctorSlice";
 import hospitalReducer from "./slices/hospitalSlice";
-import appointmentReducer from "src/store/slices/appointmentSlice";
-import emergencyReducer from "./emergencySlice";
+import appointmentReducer from "./slices/appointmentSlice";
+import emergencyReducer from "./slices/emergencySlice";
 import pharmacyReducer from "./slices/pharmacySlice";
 import adminReducer from "./slices/adminSlice";
 import uiReducer from "./slices/uiSlice";
+
+// ============================================
+// PERSIST CONFIG
+// ============================================
+const persistConfig = {
+  key: "root",
+  version: 1,
+  storage,
+  whitelist: ["client", "doctor", "hospital", "appointment", "emergency", "pharmacy", "admin", "ui"],
+};
 
 // ============================================
 // ROOT REDUCER
@@ -29,19 +51,25 @@ const rootReducer = combineReducers({
   ui: uiReducer,
 });
 
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
 // ============================================
 // STORE
 // ============================================
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: persistedReducer,
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
     }),
 
-  devTools: process.env.NODE_ENV !== "production",
+  devTools: import.meta.env.DEV,
 });
+
+export const persistor = persistStore(store);
 
 // ============================================
 // TYPES
@@ -50,10 +78,9 @@ export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
 
 // ============================================
-// HOOKS
+// HOOKS - FIXED
 // ============================================
-export const useAppDispatch = () => useDispatch<AppDispatch>();
-
+export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 // Default export

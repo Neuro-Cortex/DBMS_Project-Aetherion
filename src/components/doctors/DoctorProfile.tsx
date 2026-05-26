@@ -1,14 +1,3 @@
-// src/components/doctor/DoctorProfile.tsx
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-  User, Star, MapPin, DollarSign, Calendar, Clock, Phone,
-  Video, MessageSquare, Award, BookOpen, Briefcase, Heart,
-  Shield, Globe, ChevronDown, ChevronUp, ThumbsUp, Share2,
-  Printer, Users
-} from 'lucide-react';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
 
 // 
 // src/pages/doctor/DoctorProfile.tsx
@@ -17,10 +6,10 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   Stethoscope, Star, MapPin, Clock, Award,
-  GraduationCap, DollarSign, Edit, Camera,
-  CheckCircle2, ChevronRight, Calendar, Users,
-  ThumbsUp, MessageCircle, Activity, Building2,
-  Phone, Mail, Globe, Heart, Shield, Plus
+  GraduationCap, DollarSign, Edit, Globe, Mail, Phone, Camera,
+  Building2,
+
+
 } from 'lucide-react';
 
 const DoctorProfile: React.FC = () => {

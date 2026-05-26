@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  User, Star, MapPin, Award, Clock, Phone, Video,
-  MessageSquare, Heart, Verified, Users, TrendingUp
+  User, Star, MapPin, Award,  Video,
+  MessageSquare, Heart, Verified, 
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -55,7 +55,8 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({
   onViewProfile,
   className = '',
 }) => {
-  const [imageError, setImageError] = useState(false);
+  // eslint-disable-next-line no-empty-pattern
+  const [] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   // COMPACT VARIANT

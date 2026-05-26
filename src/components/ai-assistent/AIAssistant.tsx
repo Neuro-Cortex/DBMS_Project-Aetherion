@@ -11,16 +11,16 @@ import { useAIAssistant } from '../../hooks/useAIAssistant';
 import type { AIMessage } from '../../types/aiAssistant';
 
 interface AIAssistantProps {
-  userId: string;
-  token: string;
-  userRole: string;
+  userId?: string;
+  token?: string;
+  userRole?: string;
   onClose?: () => void;
 }
 
 export const AIAssistant: React.FC<AIAssistantProps> = ({
-  userId,
-  token,
-  userRole,
+  userId = '',
+  token = '',
+  
   onClose
 }) => {
 

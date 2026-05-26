@@ -41,11 +41,12 @@ export const GlassmorphicCard: React.FC<GlassmorphicCardProps> = ({
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Magnetic / Tilt
+  // Magnetic / Tilt effect
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const springX = useSpring(mouseX, { stiffness: 150, damping: 15 });
   const springY = useSpring(mouseY, { stiffness: 150, damping: 15 });
+
   const rotateX = useTransform(springY, [-0.5, 0.5], ['8deg', '-8deg']);
   const rotateY = useTransform(springX, [-0.5, 0.5], ['-8deg', '8deg']);
   const glareX = useTransform(springX, [-0.5, 0.5], ['0%', '100%']);
@@ -61,9 +62,12 @@ export const GlassmorphicCard: React.FC<GlassmorphicCardProps> = ({
     mouseY.set(y);
   };
 
-  const handleMouseLeave = () => { mouseX.set(0); mouseY.set(0); };
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
 
-  // Variants
+  // Variant styles
   const variantStyles: Record<string, string> = {
     glass: 'bg-white/[0.03] backdrop-blur-xl border-white/[0.06]',
     gradient: 'bg-gradient-to-br from-indigo-500/[0.05] via-purple-500/[0.05] to-pink-500/[0.05] backdrop-blur-xl border-white/[0.08]',
@@ -76,21 +80,25 @@ export const GlassmorphicCard: React.FC<GlassmorphicCardProps> = ({
     cyber: 'bg-black/[0.4] backdrop-blur-xl border-cyan-400/20 shadow-[0_0_40px_rgba(6,182,212,0.15),inset_0_0_40px_rgba(6,182,212,0.05)]',
     holographic: 'bg-gradient-to-br from-cyan-500/[0.06] via-purple-500/[0.06] via-pink-500/[0.06] to-cyan-500/[0.06] backdrop-blur-2xl border-white/[0.1] shadow-[0_0_50px_rgba(139,92,246,0.15)]',
     midnight: 'bg-gradient-to-br from-slate-900/[0.6] via-indigo-950/[0.6] to-slate-900/[0.6] backdrop-blur-2xl border-white/[0.05] shadow-[0_0_60px_rgba(0,0,0,0.5)]',
-    aurora: 'bg-gradient-to-br from-teal-500/[0.05] via-cyan-500/[0.05] via-indigo-500/[0.05] to-purple-500/[0.05] backdrop-blur-2xl border-white/[0.08] shadow-[0_0_40px_rgba(6,182,212,0.1)] animate-gradient bg-[length:200%_200%]',
+    aurora: 'bg-gradient-to-br from-teal-500/[0.05] via-cyan-500/[0.05] via-indigo-500/[0.05] to-purple-500/[0.05] backdrop-blur-2xl border-white/[0.08] shadow-[0_0_40px_rgba(6,182,212,0.1)] animate-gradient',
   };
 
+  // Padding styles
   const paddingStyles: Record<string, string> = {
     none: 'p-0', sm: 'p-3 sm:p-4', md: 'p-4 sm:p-5 md:p-6', lg: 'p-6 sm:p-8', xl: 'p-8 sm:p-10 md:p-12',
   };
 
+  // Rounded styles
   const roundedStyles: Record<string, string> = {
     sm: 'rounded-lg', md: 'rounded-xl', lg: 'rounded-2xl', xl: 'rounded-3xl', '2xl': 'rounded-[2rem]', '3xl': 'rounded-[2.5rem]', full: 'rounded-[3rem]',
   };
 
+  // Border styles
   const borderStyles: Record<string, string> = {
     none: 'border-0', subtle: 'border', visible: 'border-2', glow: 'border border-white/[0.08] hover:border-white/[0.15]', animated: 'border border-white/[0.06] hover:border-cyan-400/30',
   };
 
+  // Hover effect styles
   const hoverStyles: Record<string, string> = {
     lift: 'hover:-translate-y-1.5 hover:shadow-2xl',
     glow: 'hover:shadow-[0_0_40px_rgba(6,182,212,0.2)] hover:border-cyan-500/30',
@@ -108,16 +116,24 @@ export const GlassmorphicCard: React.FC<GlassmorphicCardProps> = ({
     ${borderStyles[border]}
     ${onClick ? 'cursor-pointer' : ''}
     ${hoverStyles[hover]}
+    ${variant === 'aurora' ? 'animate-gradient bg-[length:200%_200%]' : ''}
     ${className}
   `.trim();
 
   const cardContent = (
-    <div ref={cardRef} className={combinedClassName} onClick={onClick} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
+    <div
+      ref={cardRef}
+      className={combinedClassName}
+      onClick={onClick}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Top highlight line for premium */}
+      {variant === 'premium' && (
+        <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+      )}
 
-      {/* Premium top line */}
-      {variant === 'premium' && <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />}
-
-      {/* Neon orbs */}
+      {/* Corner orbs for neon */}
       {variant === 'neon' && (
         <>
           <div className="absolute -top-12 -right-12 w-24 h-24 bg-cyan-500/20 rounded-full blur-3xl" />
@@ -136,37 +152,55 @@ export const GlassmorphicCard: React.FC<GlassmorphicCardProps> = ({
       )}
 
       {/* Holographic shimmer */}
-      {variant === 'holographic' && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-shimmer bg-[length:200%_100%]" />}
+      {variant === 'holographic' && (
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-shimmer bg-[length:200%_100%]" />
+      )}
 
       {/* Midnight particles */}
       {variant === 'midnight' && (
         <div className="absolute inset-0">
           {[...Array(15)].map((_, i) => (
-            <div key={i} className="absolute w-0.5 h-0.5 bg-white/20 rounded-full"
-              style={{ top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%`, animation: `twinkle ${2 + Math.random() * 3}s infinite ${Math.random() * 2}s` }} />
+            <div
+              key={i}
+              className="absolute w-0.5 h-0.5 bg-white/20 rounded-full"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animation: `twinkle ${2 + Math.random() * 3}s infinite ${Math.random() * 2}s`,
+              }}
+            />
           ))}
         </div>
       )}
 
-      {/* Noise */}
+      {/* Grain texture */}
       {noise && (
-        <div className="absolute inset-0 opacity-[0.02] pointer-events-none"
-          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")` }} />
+        <div
+          className="absolute inset-0 opacity-[0.02] pointer-events-none"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")`,
+          }}
+        />
       )}
 
-      {/* Scanline */}
+      {/* Scanline effect */}
       {scanline && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.03]">
           <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.5) 2px, rgba(255,255,255,0.5) 3px)' }} />
         </div>
       )}
 
-      {/* Spotlight */}
+      {/* Spotlight effect */}
       {spotlight && (
-        <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[inherit]"
-          style={{ background: `radial-gradient(400px circle at ${glareX.get()} ${glareY.get()}, rgba(255,255,255,0.05), transparent 40%)` }} />
+        <div
+          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[inherit]"
+          style={{
+            background: `radial-gradient(400px circle at ${glareX.get()} ${glareY.get()}, rgba(255,255,255,0.05), transparent 40%)`,
+          }}
+        />
       )}
 
+      {/* Content */}
       <div className="relative z-10">{children}</div>
     </div>
   );

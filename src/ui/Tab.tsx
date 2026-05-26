@@ -15,6 +15,7 @@ interface Tab {
 
 interface TabsProps {
   tabs: Tab[];
+  activeTab?: string;
   defaultTab?: string;
   onChange?: (tabId: string) => void;
   variant?: 'underline' | 'pill' | 'box';
@@ -27,16 +28,20 @@ interface TabsProps {
 // ============================================
 export const Tabs: React.FC<TabsProps> = ({
   tabs,
+  activeTab: controlledActiveTab,
   defaultTab,
   onChange,
   variant = 'underline',
   children,
   className,
 }) => {
-  const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id);
+  const [internalActiveTab, setInternalActiveTab] = useState(defaultTab || tabs[0]?.id);
+  const activeTab = controlledActiveTab ?? internalActiveTab;
 
   const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId);
+    if (controlledActiveTab === undefined) {
+      setInternalActiveTab(tabId);
+    }
     onChange?.(tabId);
   };
 

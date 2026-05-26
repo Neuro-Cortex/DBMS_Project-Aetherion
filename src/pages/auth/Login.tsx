@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { login } from '../../store/slices/authSlice';
+import { login, type User, type AccountRole } from '../../store/slices/authSlice';
 import toast from 'react-hot-toast';
 import {
   Eye, EyeOff, Mail, Lock, ArrowRight, UserPlus,
@@ -40,7 +40,7 @@ interface RegisterFormData {
 // ============================================
 const roleConfig: Record<UserRole, {
   label: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
   gradient: string;
   description: string;
@@ -112,7 +112,7 @@ interface StoredUser {
   phone: string;
   isApproved: boolean;
   createdAt: string;
-  additionalData?: any;
+  additionalData?: Record<string, unknown>;
 }
 
 class AuthService {
@@ -211,16 +211,16 @@ class AuthService {
 
   async register(userData: Omit<StoredUser, 'id' | 'createdAt' | 'isApproved'> & { confirmPassword: string }): Promise<StoredUser> {
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     const existingUser = this.users.find(u => u.email === userData.email && u.role === userData.role);
     if (existingUser) {
       throw new Error('User with this email already exists for this role');
     }
-    
+
     if (userData.password !== userData.confirmPassword) {
       throw new Error('Passwords do not match');
     }
-    
+
     const newUser: StoredUser = {
       id: `${userData.role}-${Date.now()}`,
       email: userData.email,
@@ -232,7 +232,7 @@ class AuthService {
       createdAt: new Date().toISOString(),
       additionalData: {}
     };
-    
+
     this.users.push(newUser);
     this.saveUsers();
     return newUser;
@@ -248,10 +248,10 @@ class AuthService {
     return false;
   }
 
-  // Reset all users to default
   resetAllUsers(): void {
     localStorage.removeItem('aetherion_users');
     localStorage.removeItem('aetherion_session');
+    sessionStorage.removeItem('auth_token');
     this.users = [];
     this.initializeDemoUsers();
     console.log('All users reset to default');
@@ -292,37 +292,34 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  // ============================================
+  // ✅ FIX: sessionStorage check - NO auto-login
+  // ============================================
   useEffect(() => {
-    const savedSession = localStorage.getItem('aetherion_session');
-    if (savedSession) {
-      try {
-        const session = JSON.parse(savedSession);
-        if (session.expiresAt > Date.now()) {
-          handleAutoLogin(session.user);
-        }
-      } catch (e) {
-        console.error('Invalid session');
-      }
+    // localStorage theke kono session check korbo na
+    // Browser close hole sessionStorage auto clear hoye jabe
+    const sessionToken = sessionStorage.getItem('auth_token');
+    
+    // Token na thakle kichu korbo na - user ke login korte hobe
+    if (!sessionToken) {
+      // Cleanup any leftover localStorage
+      localStorage.removeItem('aetherion_session');
+      return;
     }
+    // Token expired check (optional)
   }, []);
-
-  const handleAutoLogin = async (user: any) => {
-    dispatch(login(user));
-    const roleConfigItem = roleConfig[user.role as UserRole];
-    navigate(roleConfigItem.dashboardPath);
-  };
 
   const validateLogin = (): boolean => {
     const errors: Partial<Record<keyof LoginFormData, string>> = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
     if (!emailRegex.test(formData.email)) {
       errors.email = 'Please enter a valid email address';
     }
     if (formData.password.length < 6) {
       errors.password = 'Password must be at least 6 characters';
     }
-    
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -330,8 +327,8 @@ const Login: React.FC = () => {
   const validateRegister = (): boolean => {
     const errors: Partial<Record<keyof RegisterFormData, string>> = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,5}[-\s\.]?[0-9]{1,5}$/;
-    
+    const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,5}[-\s.]?[0-9]{1,5}$/;
+
     if (!registerData.fullName.trim()) {
       errors.fullName = 'Full name is required';
     }
@@ -350,7 +347,7 @@ const Login: React.FC = () => {
     if (!registerData.agreeToTerms) {
       errors.agreeToTerms = 'You must agree to the terms and conditions';
     }
-    
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -358,46 +355,63 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateLogin()) return;
-    
+
     setError('');
     setIsLoading(true);
-    
+
     try {
       const user = await authService.login(formData.email, formData.password, selectedRole);
-      
+
       if (user) {
-        const userForRedux = {
+        const userForRedux: User = {
           id: user.id,
           email: user.email,
           fullName: user.fullName,
-          role: user.role,
+          role: user.role as AccountRole,
           phone: user.phone,
           isAuthenticated: true,
+          roles: [user.role as AccountRole],
+          primaryRole: user.role as AccountRole,
+          upgrades: [],
+          createdAt: user.createdAt,
           ...user.additionalData
         };
-        
+
         dispatch(login(userForRedux));
-        
+
+        // ============================================
+        // ✅ FIX: sessionStorage use kora (browser close = auto delete)
+        // ============================================
+        sessionStorage.setItem('auth_token', 'active_session');
+        sessionStorage.setItem('user_role', selectedRole);
+        sessionStorage.setItem('user_name', user.fullName);
+
+        // localStorage ONLY for "Remember Me"
         if (formData.rememberMe) {
           localStorage.setItem('aetherion_session', JSON.stringify({
             user: userForRedux,
-            expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000
+            expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000)
           }));
+        } else {
+          // Remember me off = kono localStorage save hobe na
+          localStorage.removeItem('aetherion_session');
         }
-        
+         
+
         toast.success(`Welcome back, ${user.fullName}!`, {
           icon: '🎉',
           style: { background: '#1a1a2e', color: '#fff', border: '1px solid rgba(6,182,212,0.3)' }
         });
-        
-        setTimeout(() => navigate(roleConfig[selectedRole].dashboardPath), 500);
+                
+        setTimeout(() => navigate(roleConfig[selectedRole].dashboardPath, { replace: true }), 500);
       } else {
         setError('Invalid email or password for the selected role');
         toast.error('Login failed. Please check your credentials.');
       }
-    } catch (err: any) {
-      setError(err.message || 'Login failed. Please try again.');
-      toast.error(err.message || 'Login failed');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -406,10 +420,10 @@ const Login: React.FC = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateRegister()) return;
-    
+
     setError('');
     setIsLoading(true);
-    
+
     try {
       const newUser = await authService.register({
         fullName: registerData.fullName,
@@ -419,7 +433,7 @@ const Login: React.FC = () => {
         phone: registerData.phone,
         role: registerData.role
       });
-      
+
       if (newUser.isApproved) {
         toast.success('Registration successful! Please login.', {
           icon: '✅',
@@ -434,15 +448,16 @@ const Login: React.FC = () => {
         });
         setIsRegistering(false);
       }
-    } catch (err: any) {
-      setError(err.message || 'Registration failed');
-      toast.error(err.message || 'Registration failed');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Registration failed';
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDemoLogin = async (role: UserRole) => {
+  const handleDemoLogin = (role: UserRole) => {
     const config = roleConfig[role];
     setFormData({
       email: config.demoEmail,
@@ -451,9 +466,9 @@ const Login: React.FC = () => {
       rememberMe: false
     });
     setSelectedRole(role);
-    
+
     setTimeout(() => {
-      handleLogin(new Event('submit') as any);
+      handleLogin(new Event('submit') as unknown as React.FormEvent);
     }, 100);
   };
 
@@ -476,7 +491,7 @@ const Login: React.FC = () => {
       {/* Animated Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-[#050508]/95 via-[#050508]/85 to-[#050508]/95" />
-        
+
         <motion.div
           className="absolute top-20 -left-20 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl"
           animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
@@ -500,7 +515,6 @@ const Login: React.FC = () => {
           onClick={() => {
             if (window.confirm('Reset all user data to default? You will need to login again.')) {
               authService.resetAllUsers();
-              localStorage.removeItem('aetherion_session');
               toast.success('Data reset! Using default credentials');
               setTimeout(() => window.location.reload(), 1000);
             }
@@ -735,6 +749,7 @@ const Login: React.FC = () => {
                   {fieldErrors.password && <p className="text-red-400 text-[11px] mt-1.5">{fieldErrors.password}</p>}
                 </div>
 
+                {/* ✅ Remember Me Checkbox */}
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"

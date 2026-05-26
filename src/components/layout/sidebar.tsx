@@ -13,12 +13,10 @@ import {
   Baby,
   FileText,
   Settings,
-  LogOut,
-  Menu
+  LogOut
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 
 // ============================================

@@ -39,7 +39,27 @@ import { Loader } from 'src/ui/Loader';
 // ============================================
 
 export const PharmacyAccount: React.FC = () => {
-  // ... (all state same as before)
+  const [activeTab, setActiveTab] = useState('medicines');
+  const [showAddMedicine, setShowAddMedicine] = useState(false);
+
+  // ============================================
+  // MEDICINES DATA
+  // ============================================
+  const [medicines] = useState([
+    { id: '1', name: 'Paracetamol 500mg', genericName: 'Acetaminophen', category: 'Analgesic', manufacturer: 'PharmaCorp', type: 'otc' as const, stock: 250, minStock: 50, price: 5.99, expiryDate: '2026-06-15', isAvailable: true },
+    { id: '2', name: 'Amoxicillin 250mg', genericName: 'Amoxicillin', category: 'Antibiotic', manufacturer: 'MediLab', type: 'prescription' as const, stock: 8, minStock: 30, price: 12.50, expiryDate: '2025-09-20', isAvailable: true },
+    { id: '3', name: 'Ibuprofen 400mg', genericName: 'Ibuprofen', category: 'NSAID', manufacturer: 'HealthPlus', type: 'otc' as const, stock: 0, minStock: 40, price: 7.25, expiryDate: '2026-01-10', isAvailable: false },
+    { id: '4', name: 'Omeprazole 20mg', genericName: 'Omeprazole', category: 'PPI', manufacturer: 'GastroMed', type: 'prescription' as const, stock: 120, minStock: 25, price: 15.00, expiryDate: '2025-04-01', isAvailable: true },
+    { id: '5', name: 'Cetirizine 10mg', genericName: 'Cetirizine', category: 'Antihistamine', manufacturer: 'AllerCare', type: 'otc' as const, stock: 15, minStock: 60, price: 4.50, expiryDate: '2026-12-31', isAvailable: true },
+  ]);
+
+  const medicineColumns = [
+    { key: 'name', title: 'Medicine Name', sortable: true },
+    { key: 'category', title: 'Category', sortable: true },
+    { key: 'stock', title: 'Stock', sortable: true },
+    { key: 'price', title: 'Price', sortable: true },
+    { key: 'expiryDate', title: 'Expiry' },
+  ];
 
   // ============================================
   // NEW: SEARCH & FILTER STATE

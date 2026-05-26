@@ -1,7 +1,7 @@
 // src/store/slices/authSlice.ts
-// AUTHENTICATION + MULTI-ROLE MANAGEMENT
+// AUTHENTICATION + MULTI-ROLE MANAGEMENT (No Data Save)
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 
 // ============================================
 // TYPES
@@ -38,8 +38,8 @@ export interface User {
   updatedAt?: string;
   lastLogin?: string;
   
-  // Token
-  token?: string;
+  // ❌ Token সরানো হয়েছে - কোন ডাটা সেভ হবে না
+  // token?: string;
   [key: string]: unknown;
 }
 
@@ -62,6 +62,75 @@ const initialState: AuthState = {
 };
 
 // ============================================
+// ASYNC THUNKS - localStorage সরানো হয়েছে
+// ============================================
+
+// ✅ Login thunk - কোন ডাটা সেভ করে না
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async ({ email, password }: { email: string; password: string }) => {
+    // সিমুলেটেড API কল
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    if (!email || !password) {
+      throw new Error('Email and password required');
+    }
+    
+    // টেম্পোরারি ইউজার - শুধু মেমোরিতে থাকবে
+    const mockUser: User = {
+      id: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: email.split('@')[0],
+      fullName: email.split('@')[0],
+      email: email,
+      role: 'client',
+      roles: ['client', 'normal_user'],
+      primaryRole: 'client',
+      upgrades: [],
+      isVerified: true,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    
+    // ❌ localStorage.setItem সরানো হয়েছে
+    return mockUser;
+  }
+);
+
+// ✅ Register thunk - কোন ডাটা সেভ করে না
+export const registerUser = createAsyncThunk(
+  'auth/registerUser',
+  async (userData: Partial<User> & { password: string }) => {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const mockUser: User = {
+      id: `session_${Date.now()}`,
+      name: userData.name || userData.email?.split('@')[0] || 'User',
+      email: userData.email || '',
+      role: 'client',
+      roles: ['client', 'normal_user'],
+      primaryRole: 'client',
+      upgrades: [],
+      isVerified: true,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    
+    // ❌ localStorage.setItem সরানো হয়েছে
+    return mockUser;
+  }
+);
+
+// ✅ Logout thunk - localStorage পরিষ্কার করার দরকার নেই
+export const logoutUser = createAsyncThunk('auth/logoutUser', async () => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // ❌ localStorage.removeItem সরানো হয়েছে
+  return null;
+});
+
+// ❌ getCurrentUser সম্পূর্ণ সরিয়ে দেওয়া হয়েছে - কারণ কোন ডাটা সেভ নেই
+// export const getCurrentUser = createAsyncThunk(...) - এই পুরো অংশ ডিলিট করুন
+
+// ============================================
 // SLICE
 // ============================================
 
@@ -69,7 +138,6 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // Login
     loginStart: (state) => {
       state.isLoading = true;
       state.error = null;
@@ -91,80 +159,121 @@ const authSlice = createSlice({
       state.error = action.payload;
     },
 
-    // Logout
     logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
       state.isLoading = false;
       state.error = null;
-      localStorage.removeItem('token');
+      // ❌ localStorage.removeItem('token'); সরানো হয়েছে
     },
 
-    // Update Profile
     updateProfile: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
       }
     },
-
-    // ============================================
-    // MULTI-ROLE MANAGEMENT
-    // ============================================
     
-    // Add a new role
+    // Multi-role management
     addRole: (state, action: PayloadAction<AccountRole>) => {
       if (state.user && !state.user.roles.includes(action.payload)) {
         state.user.roles.push(action.payload);
       }
     },
-
-    // Remove a role
     removeRole: (state, action: PayloadAction<AccountRole>) => {
       if (state.user) {
         state.user.roles = state.user.roles.filter(r => r !== action.payload);
-        // If primary role is removed, set to first available
         if (state.user.primaryRole === action.payload) {
           state.user.primaryRole = state.user.roles[0] || 'normal_user';
         }
       }
     },
-
-    // Set primary (active) role
     setPrimaryRole: (state, action: PayloadAction<AccountRole>) => {
       if (state.user && state.user.roles.includes(action.payload)) {
         state.user.primaryRole = action.payload;
       }
     },
-
-    // Add profile upgrade
     addUpgrade: (state, action: PayloadAction<ProfileUpgrade>) => {
       if (state.user && !state.user.upgrades.includes(action.payload)) {
         state.user.upgrades.push(action.payload);
       }
     },
-
-    // Remove profile upgrade
     removeUpgrade: (state, action: PayloadAction<ProfileUpgrade>) => {
       if (state.user) {
         state.user.upgrades = state.user.upgrades.filter(u => u !== action.payload);
       }
     },
-
-    // Switch role (convenience)
     switchRole: (state, action: PayloadAction<AccountRole>) => {
       if (state.user && state.user.roles.includes(action.payload)) {
         state.user.primaryRole = action.payload;
       }
     },
-
-    // Set online status
     setOnlineStatus: (state, action: PayloadAction<boolean>) => {
       if (state.user) {
         state.user.isOnline = action.payload;
       }
     },
+    clearError: (state) => {
+      state.error = null;
+    },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
+  },
+  
+  extraReducers: (builder) => {
+    builder
+      // Login User
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Login failed';
+      })
+      // Register User
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Registration failed';
+      })
+      // Logout User
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+        state.isLoading = false;
+        state.error = null;
+      });
+      // ❌ getCurrentUser এর কেসগুলি সরানো হয়েছে
   },
 });
+
+// ============================================
+// SELECTORS
+// ============================================
+
+export const selectUser = (state: { auth: AuthState }) => state.auth.user;
+export const selectIsAuthenticated = (state: { auth: AuthState }) => state.auth.isAuthenticated;
+export const selectIsLoading = (state: { auth: AuthState }) => state.auth.isLoading;
+export const selectAuthError = (state: { auth: AuthState }) => state.auth.error;
+export const selectUserRoles = (state: { auth: AuthState }) => state.auth.user?.roles || [];
+export const selectPrimaryRole = (state: { auth: AuthState }) => state.auth.user?.primaryRole || 'normal_user';
+export const selectUserUpgrades = (state: { auth: AuthState }) => state.auth.user?.upgrades || [];
 
 // ============================================
 // EXPORTS
@@ -184,7 +293,8 @@ export const {
   removeUpgrade,
   switchRole,
   setOnlineStatus,
+  clearError,
+  setLoading,
 } = authSlice.actions;
 
 export default authSlice.reducer;
-

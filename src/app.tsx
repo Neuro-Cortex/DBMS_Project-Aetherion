@@ -1,98 +1,44 @@
+// src/App.tsx
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { Toaster } from 'react-hot-toast';
+import { store, persistor } from './store';
+import { AppRoutes } from './app/routes/AppRoutes';
 
-// Auth Pages
-import Login from './pages/auth/Login';
+// ==========================
+// PAGE LOADER
+// ==========================
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen bg-[#030508]">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500" />
+  </div>
+);
 
-// Dashboard Pages
-import PatientDashboard from './pages/patient/PatientDashboard';
-import DoctorDashboard from './pages/doctor/DoctorDashboard';
-import HospitalDashboard from './pages/hospital/HospitalDashboard';
-import PharmacyDashboard from './pages/pharmacy/PharmacyDashboard';
-import AdminDashboard from './pages/admin/AdminDashboard';
-
-// Legal Pages
-import TermsOfService from './pages/TermsOfService';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-
-// ============================================
-// PROTECTED ROUTE
-// ============================================
-const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactElement; allowedRoles?: string[] }) => {
-  const { isAuthenticated, user } = useSelector((state: any) => state.auth);
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  const role = user?.primaryRole || user?.role;
-  
-  if (allowedRoles && role && !allowedRoles.includes(role)) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return children;
-};
-
-// ============================================
-// APP ROUTES
-// ============================================
-const AppRoutes: React.FC = () => {
-  const { isAuthenticated } = useSelector((state: any) => state.auth);
-
+// ==========================
+// ROOT APP
+// ==========================
+function App() {
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/patient/dashboard" replace /> : <Login />} />
-      <Route path="/terms" element={<TermsOfService />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      
-      {/* Root redirect */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      
-      {/* Protected Dashboard Routes */}
-      <Route path="/patient/dashboard" element={
-        <ProtectedRoute allowedRoles={['patient', 'client', 'normal_user']}>
-          <PatientDashboard />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/doctor/dashboard" element={
-        <ProtectedRoute allowedRoles={['doctor']}>
-          <DoctorDashboard />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/hospital/dashboard" element={
-        <ProtectedRoute allowedRoles={['hospital', 'hospital_admin', 'hospital_authority']}>
-          <HospitalDashboard />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/pharmacy/dashboard" element={
-        <ProtectedRoute allowedRoles={['pharmacy', 'pharmacy_admin']}>
-          <PharmacyDashboard />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/admin/dashboard" element={
-        <ProtectedRoute allowedRoles={['admin']}>
-          <AdminDashboard />
-        </ProtectedRoute>
-      } />
-      
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+    <Provider store={store}>
+      <PersistGate loading={<PageLoader />} persistor={persistor}>
+        <BrowserRouter>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: '#1e293b',
+                color: '#fff',
+                border: '1px solid rgba(255,255,255,0.1)',
+              },
+            }}
+          />
+          <AppRoutes />
+        </BrowserRouter>
+      </PersistGate>
+    </Provider>
   );
-};
-
-// ============================================
-// MAIN APP
-// ============================================
-const App: React.FC = () => {
-  return <AppRoutes />;
-};
+}
 
 export default App;

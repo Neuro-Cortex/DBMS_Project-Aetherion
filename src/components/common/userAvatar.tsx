@@ -101,18 +101,18 @@ const statusLabels = {
 // BADGE VARIANT FUNCTION - FIXED
 // ============================================
 
-const getBadgeVariant = (status: string): 'success' | 'danger' | 'warning' | 'secondary' => {
+const getBadgeVariant = (status: string): 'success' | 'danger' | 'warning' | 'default' => {
   switch (status) {
     case 'online': 
-      return 'success';  // green
+      return 'success';
     case 'busy': 
-      return 'danger';   // red
+      return 'danger';
     case 'away': 
-      return 'warning';  // yellow
+      return 'warning';
     case 'offline': 
-      return 'secondary'; // purple
+      return 'default';
     default: 
-      return 'secondary';
+      return 'default';
   }
 };
 

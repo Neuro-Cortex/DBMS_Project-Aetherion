@@ -2,8 +2,8 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Star, TrendingUp, Filter, ArrowUpDown, DollarSign, MapPin,
-  Award, Users, Search, Shield, List, Grid, X
+  Star, Filter,  DollarSign, MapPin,
+   Search, Shield, List, Grid, X
 } from 'lucide-react';
 import { DoctorCard } from 'src/components/doctors/DoctorCard';
 import { Badge } from '@/components/ui/Badge';
@@ -72,7 +72,6 @@ function calculateScore(doctor: Doctor): number {
 // ============================================
 export const DoctorRanking: React.FC<DoctorRankingProps> = ({
   doctors: initialDoctors = [],
-  filters: filterOptions,
   onDoctorSelect,
   className = '',
 }) => {
@@ -91,6 +90,7 @@ export const DoctorRanking: React.FC<DoctorRankingProps> = ({
 
   // Filter and sort
   const filteredAndSortedDoctors = useMemo(() => {
+    // eslint-disable-next-line prefer-const
     let filtered = doctors.filter(doctor => {
       if (searchQuery && !doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
           !doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase())) return false;

@@ -26,7 +26,7 @@ import { Button } from '../../ui/Button';
 import { Badge } from '../../ui/Badge';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';
-import { DoctorCard } from '../doctor/DoctorCard';
+import { DoctorCard } from '../doctors/DoctorCard';
 
 // ============================================
 // TYPES & INTERFACES

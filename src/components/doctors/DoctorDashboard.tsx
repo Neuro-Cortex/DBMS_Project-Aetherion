@@ -1,656 +1,635 @@
-// src/components/doctors/DoctorDashboard.tsx
-// ORIGINAL CODE PRESERVED - Only export fixed
-
+// src/pages/Doctor/DoctorDashboard.tsx
+// COMPLETE DOCTOR DASHBOARD - ALL FEATURES
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
-  Calendar, Users, Video,
-  TrendingUp, DollarSign, Activity,
-  Clock, AlertCircle, FileText, Pill,
-  Star, Bell, CheckCircle,
-  Phone, MessageCircle
+  // Core
+  Search, Bell, Settings, Calendar, Clock, 
+  ChevronRight, Plus,
+  Brain,  Baby,  Activity,Truck,
+  Pill,  Microscope
+, Download,  Send, Video, Phone, MessageCircle,
+  Users, TrendingUp,  AlertCircle, 
+  // Systems Truck, 
+  CheckCircle2, XCircle, 
+  // Navigation
+  Home, MapPin,
+  FileText
 } from 'lucide-react';
 
+
+
+import { Card } from 'src/ui/Card';
+import { GlassmorphicCard } from 'src/ui/GlassmorphicCard';
+import { Button } from 'src/ui/Button';
+import { Badge } from 'src/ui/Badge';
+import { Avatar } from 'src/ui/Avatar';
+import { Input } from 'src/ui/Input';
+import { Modal } from 'src/ui/Modal';
+
+
 // ============================================
-// TYPES (Local - No external dependency)
+// TYPES
 // ============================================
-
-export interface Appointment {
+interface PatientData {
   id: string;
-  patientId: string;
-  patientName: string;
-  patientPhone: string;
-  patientEmail: string;
-  date: string;
-  time: string;
-  duration: number;
-  type: 'in-person' | 'video' | 'phone';
-  status: 'scheduled' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled' | 'no-show';
-  reason: string;
-  symptoms?: string[];
-  isEmergency: boolean;
-  isFirstVisit: boolean;
-  notes?: string;
-  prescriptionId?: string;
-  followUpDate?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface DoctorActivity {
-  id: string;
-  type: 'appointment' | 'prescription' | 'consultation' | 'review' | 'emergency';
-  description: string;
-  patientName?: string;
-  time: string;
-  status: 'completed' | 'pending' | 'cancelled';
-}
-
-export interface DoctorDashboardData {
-  todayAppointments: Appointment[];
-  upcomingAppointments: Appointment[];
-  emergencyRequests: EmergencyRequest[];
-  pendingPrescriptions: any[];
-  videoConsultations: VideoConsultation[];
-  recentPatients: any[];
-  earnings: EarningsData;
-  stats: DoctorStats;
-  activities: DoctorActivity[];
-  notifications: DoctorNotification[];
-}
-
-export interface EmergencyRequest {
-  id: string;
-  patientId: string;
-  patientName: string;
+  name: string;
+  age: number;
+  gender: string;
   bloodGroup: string;
-  units: number;
-  hospital: string;
-  urgency: 'normal' | 'urgent' | 'emergency';
-  status: 'pending' | 'approved' | 'rejected' | 'fulfilled';
-  requestDate: string;
-  requiredDate: string;
-  reason: string;
-  approvedBy?: string;
-  approvalDate?: string;
+  condition: string;
+  lastVisit: string;
+  nextAppointment: string;
+  priority: 'normal' | 'urgent' | 'emergency';
+  allergies: string[];
+  chronicDiseases: string[];
+  avatar: string;
 }
 
-export interface VideoConsultation {
+interface AppointmentData {
   id: string;
-  appointmentId: string;
-  doctorId: string;
-  patientId: string;
+  patientName: string;
+  patientAvatar: string;
+  type: 'in-person' | 'video' | 'phone';
+  date: string;
+  time: string;
+  status: 'confirmed' | 'pending' | 'completed' | 'cancelled';
+  reason: string;
+  priority: 'normal' | 'urgent';
+}
+
+interface PrescriptionData {
+  id: string;
   patientName: string;
   date: string;
-  startTime: string;
-  endTime?: string;
-  status: 'scheduled' | 'waiting' | 'in-progress' | 'completed' | 'missed';
-  roomId: string;
-  recordingUrl?: string;
-  notes?: string;
+  medicines: { name: string; dosage: string; duration: string }[];
+  diagnosis: string;
+  status: 'draft' | 'issued';
 }
 
-export interface EarningsData {
-  today: number;
-  thisWeek: number;
-  thisMonth: number;
-  total: number;
-  breakdown: {
-    consultations: number;
-    videoConsultations: number;
-    followUps: number;
-  };
-  chartData: {
-    labels: string[];
-    values: number[];
-  };
-}
-
-export interface DoctorStats {
-  totalPatients: number;
-  todayPatients: number;
-  completedAppointments: number;
-  cancelledAppointments: number;
-  averageRating: number;
-  totalReviews: number;
-  prescriptionCount: number;
-  videoConsultCount: number;
-}
-
-export interface DoctorNotification {
+interface LabReport {
   id: string;
-  type: 'appointment' | 'emergency' | 'prescription' | 'review' | 'system';
-  title: string;
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-  actionUrl?: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  patientName: string;
+  type: string;
+  date: string;
+  status: 'normal' | 'abnormal' | 'critical';
+  fileType: string;
+}
+
+interface EmergencyCase {
+  id: string;
+  patientName: string;
+  condition: string;
+  severity: 'critical' | 'severe' | 'moderate';
+  time: string;
+  location: string;
 }
 
 // ============================================
-// PROPS
+// MOCK DATA
 // ============================================
+const patientsData: PatientData[] = [
+  { id: '1', name: 'Rahima Khatun', age: 32, gender: 'Female', bloodGroup: 'A+', condition: 'Hypertension', lastVisit: '2026-05-20', nextAppointment: '2026-06-05', priority: 'normal', allergies: ['Penicillin'], chronicDiseases: ['Hypertension'], avatar: 'RK' },
+  { id: '2', name: 'Kamal Hossain', age: 45, gender: 'Male', bloodGroup: 'O+', condition: 'Diabetes Type 2', lastVisit: '2026-05-18', nextAppointment: '2026-06-02', priority: 'urgent', allergies: [], chronicDiseases: ['Diabetes', 'Hypertension'], avatar: 'KH' },
+  { id: '3', name: 'Nasrin Sultana', age: 28, gender: 'Female', bloodGroup: 'B+', condition: 'Pregnancy - Week 24', lastVisit: '2026-05-22', nextAppointment: '2026-06-10', priority: 'normal', allergies: [], chronicDiseases: [], avatar: 'NS' },
+  { id: '4', name: 'Rafiqul Islam', age: 58, gender: 'Male', bloodGroup: 'AB+', condition: 'Cardiac Arrest Risk', lastVisit: '2026-05-15', nextAppointment: '2026-05-28', priority: 'emergency', allergies: ['Aspirin'], chronicDiseases: ['Heart Disease', 'Diabetes'], avatar: 'RI' },
+];
 
-interface DoctorDashboardProps {
-  doctorId?: string;
-  onNavigate?: (page: string) => void;
-}
+const appointmentsData: AppointmentData[] = [
+  { id: '1', patientName: 'Rahima Khatun', patientAvatar: 'RK', type: 'in-person', date: '2026-05-25', time: '10:00 AM', status: 'confirmed', reason: 'Blood pressure checkup', priority: 'normal' },
+  { id: '2', patientName: 'Kamal Hossain', patientAvatar: 'KH', type: 'video', date: '2026-05-25', time: '11:30 AM', status: 'pending', reason: 'Diabetes follow-up', priority: 'urgent' },
+  { id: '3', patientName: 'Nasrin Sultana', patientAvatar: 'NS', type: 'in-person', date: '2026-05-25', time: '2:00 PM', status: 'confirmed', reason: 'Pregnancy checkup', priority: 'normal' },
+  { id: '4', patientName: 'Rafiqul Islam', patientAvatar: 'RI', type: 'phone', date: '2026-05-25', time: '4:00 PM', status: 'confirmed', reason: 'Cardiac review', priority: 'urgent' },
+];
 
-// ============================================
-// CONSTANTS
-// ============================================
+const prescriptionsData: PrescriptionData[] = [
+  { id: '1', patientName: 'Rahima Khatun', date: '2026-05-20', medicines: [{ name: 'Losartan 50mg', dosage: '1 tablet daily', duration: '30 days' }, { name: 'Amlodipine 5mg', dosage: '1 tablet daily', duration: '30 days' }], diagnosis: 'Hypertension Stage 1', status: 'issued' },
+  { id: '2', patientName: 'Kamal Hossain', date: '2026-05-18', medicines: [{ name: 'Metformin 500mg', dosage: '1 tablet twice daily', duration: '30 days' }], diagnosis: 'Diabetes Type 2', status: 'issued' },
+];
 
-const statsIconBg: Record<string, string> = {
-  blue: 'bg-blue-100',
-  green: 'bg-green-100',
-  yellow: 'bg-yellow-100',
-  purple: 'bg-purple-100',
+const labReports: LabReport[] = [
+  { id: '1', patientName: 'Rafiqul Islam', type: 'ECG', date: '2026-05-22', status: 'abnormal', fileType: 'PDF' },
+  { id: '2', patientName: 'Nasrin Sultana', type: 'Ultrasound', date: '2026-05-20', status: 'normal', fileType: 'Image' },
+  { id: '3', patientName: 'Kamal Hossain', type: 'Blood Test', date: '2026-05-19', status: 'normal', fileType: 'PDF' },
+];
+
+const emergencyCases: EmergencyCase[] = [
+  { id: '1', patientName: 'Rafiqul Islam', condition: 'Cardiac Arrest Risk', severity: 'critical', time: '30 min ago', location: 'ICU Room 3' },
+  { id: '2', patientName: 'Emergency Patient', condition: 'Severe Allergic Reaction', severity: 'severe', time: '1 hour ago', location: 'ER Bay 2' },
+];
+
+const quickStats = [
+  { icon: Users, label: 'Total Patients', value: '1,250', color: 'blue', trend: '+12%' },
+  { icon: Calendar, label: "Today's Appointments", value: '8', color: 'teal', trend: '4 remaining' },
+  { icon: FileText, label: 'Prescriptions', value: '45', color: 'purple', trend: 'This month' },
+  { icon: TrendingUp, label: 'Success Rate', value: '98%', color: 'emerald', trend: '+2%' },
+];
+
+const colorMap: Record<string, string> = {
+  blue: 'bg-blue-500/10 text-blue-400', teal: 'bg-teal-500/10 text-teal-400',
+  purple: 'bg-purple-500/10 text-purple-400', emerald: 'bg-emerald-500/10 text-emerald-400',
+  red: 'bg-red-500/10 text-red-400', amber: 'bg-amber-500/10 text-amber-400',
+  green: 'bg-green-500/10 text-green-400', cyan: 'bg-cyan-500/10 text-cyan-400',
+  pink: 'bg-pink-500/10 text-pink-400', indigo: 'bg-indigo-500/10 text-indigo-400',
+  rose: 'bg-rose-500/10 text-rose-400',
 };
 
 // ============================================
-// MAIN COMPONENT
+// MAIN DOCTOR DASHBOARD
 // ============================================
+const DoctorDashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const [greeting, setGreeting] = useState('');
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [selectedPatient, setSelectedPatient] = useState<PatientData | null>(null);
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [sosModalOpen, setSosModalOpen] = useState(false);
 
-export const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ doctorId = 'default-doctor', onNavigate = () => {} }) => {
-  const [dashboardData, setDashboardData] = useState<DoctorDashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const user = useSelector((state: any) => state?.auth?.user) || { name: 'Dr. Doctor', specialty: 'Cardiologist' };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [doctorId]);
+    const hour = new Date().getHours();
+    setGreeting(hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening');
+  }, []);
 
-  const fetchDashboardData = async () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      const mockData: DoctorDashboardData = {
-        todayAppointments: [
-          {
-            id: 'a1',
-            patientId: 'p1',
-            patientName: 'John Doe',
-            patientPhone: '+1 (555) 123-4567',
-            patientEmail: 'john@email.com',
-            date: '2024-02-15',
-            time: '10:00 AM',
-            duration: 30,
-            type: 'in-person',
-            status: 'confirmed',
-            reason: 'Regular checkup',
-            symptoms: ['Headache', 'Fatigue'],
-            isEmergency: false,
-            isFirstVisit: false,
-            createdAt: '2024-02-10',
-            updatedAt: '2024-02-10',
-          },
-          {
-            id: 'a2',
-            patientId: 'p2',
-            patientName: 'Sarah Johnson',
-            patientPhone: '+1 (555) 987-6543',
-            patientEmail: 'sarah@email.com',
-            date: '2024-02-15',
-            time: '11:00 AM',
-            duration: 45,
-            type: 'video',
-            status: 'scheduled',
-            reason: 'Skin rash consultation',
-            isEmergency: false,
-            isFirstVisit: true,
-            createdAt: '2024-02-12',
-            updatedAt: '2024-02-12',
-          },
-          {
-            id: 'a3',
-            patientId: 'p3',
-            patientName: 'Mike Wilson',
-            patientPhone: '+1 (555) 456-7890',
-            patientEmail: 'mike@email.com',
-            date: '2024-02-15',
-            time: '2:30 PM',
-            duration: 30,
-            type: 'in-person',
-            status: 'scheduled',
-            reason: 'Blood pressure check',
-            isEmergency: false,
-            isFirstVisit: false,
-            createdAt: '2024-02-11',
-            updatedAt: '2024-02-11',
-          },
-        ],
-        upcomingAppointments: [],
-        emergencyRequests: [
-          {
-            id: 'er1',
-            patientId: 'p4',
-            patientName: 'Emma Davis',
-            bloodGroup: 'O-',
-            units: 2,
-            hospital: 'City General Hospital',
-            urgency: 'urgent',
-            status: 'pending',
-            requestDate: '2024-02-15',
-            requiredDate: '2024-02-15',
-            reason: 'Emergency surgery',
-          },
-        ],
-        pendingPrescriptions: [],
-        videoConsultations: [
-          {
-            id: 'vc1',
-            appointmentId: 'a2',
-            doctorId: doctorId,
-            patientId: 'p2',
-            patientName: 'Sarah Johnson',
-            date: '2024-02-15',
-            startTime: '11:00 AM',
-            status: 'scheduled',
-            roomId: 'room-123',
-          },
-        ],
-        recentPatients: [],
-        earnings: {
-          today: 450,
-          thisWeek: 2800,
-          thisMonth: 12500,
-          total: 156000,
-          breakdown: {
-            consultations: 350,
-            videoConsultations: 100,
-            followUps: 0,
-          },
-          chartData: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            values: [450, 600, 550, 700, 500, 0, 0],
-          },
-        },
-        stats: {
-          totalPatients: 1250,
-          todayPatients: 15,
-          completedAppointments: 8,
-          cancelledAppointments: 2,
-          averageRating: 4.8,
-          totalReviews: 245,
-          prescriptionCount: 890,
-          videoConsultCount: 156,
-        },
-        activities: [
-          {
-            id: 'act1',
-            type: 'appointment',
-            description: 'Appointment completed with John Doe',
-            patientName: 'John Doe',
-            time: '09:30 AM',
-            status: 'completed',
-          },
-          {
-            id: 'act2',
-            type: 'prescription',
-            description: 'New prescription created for Sarah Johnson',
-            patientName: 'Sarah Johnson',
-            time: '10:45 AM',
-            status: 'completed',
-          },
-        ],
-        notifications: [
-          {
-            id: 'n1',
-            type: 'emergency',
-            title: 'Emergency Blood Request',
-            message: 'Urgent blood request from Emma Davis - O- blood group needed',
-            isRead: false,
-            createdAt: '2024-02-15T08:30:00',
-            priority: 'urgent',
-          },
-          {
-            id: 'n2',
-            type: 'appointment',
-            title: 'New Appointment',
-            message: 'New video consultation scheduled with Sarah Johnson at 11:00 AM',
-            isRead: false,
-            createdAt: '2024-02-15T07:00:00',
-            priority: 'medium',
-          },
-        ],
-      };
-
-      setDashboardData(mockData);
-      setIsLoading(false);
-    }, 1500);
-  };
-
-  if (isLoading || !dashboardData) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500" />
-      </div>
-    );
-  }
+  const sidebarLinks = [
+    { icon: Home, label: 'Dashboard', path: 'dashboard' },
+    { icon: Users, label: 'Patients', path: 'patients' },
+    { icon: Calendar, label: 'Appointments', path: 'appointments' },
+    { icon: FileText, label: 'Prescriptions', path: 'prescriptions' },
+    { icon: Baby, label: 'Women Care', path: 'women' },
+    { icon: Activity, label: 'Reports', path: 'reports' },
+    { icon: AlertCircle, label: 'Emergency', path: 'emergency' },
+    { icon: Pill, label: 'Pharmacy', path: 'pharmacy' },
+    { icon: Brain, label: 'AI Assistant', path: 'ai' },
+    { icon: TrendingUp, label: 'Analytics', path: 'analytics' },
+    { icon: MessageCircle, label: 'Messages', path: 'messages' },
+    { icon: Settings, label: 'Settings', path: 'settings' },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">Doctor Dashboard</h1>
-          <p className="text-gray-600 mt-2">
-            Welcome back, Dr. Smith |
-            <span className="text-green-600 font-medium"> Online</span>
-          </p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Bell className="w-6 h-6 text-gray-600 cursor-pointer" />
-            <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-              {dashboardData.notifications.filter((n) => !n.isRead).length}
-            </span>
+    <div className="min-h-screen bg-[#030508] flex">
+      
+      {/* ============================================ */}
+      {/* SIDEBAR */}
+      {/* ============================================ */}
+      <aside className="hidden lg:flex flex-col w-72 bg-slate-900/50 border-r border-white/[0.04] h-screen sticky top-0">
+        {/* Doctor Profile */}
+        <div className="p-6 border-b border-white/[0.04]">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-xl" />
+              <Avatar name={user?.name || 'DR'} size="lg" className="relative ring-2 ring-cyan-500/20" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900 shadow-lg shadow-emerald-400/50" />
+            </div>
+            <div>
+              <h3 className="text-white font-bold text-sm">{user?.name || 'Dr. Doctor'}</h3>
+              <p className="text-cyan-400 text-xs">{user?.specialty || 'Cardiologist'}</p>
+            </div>
           </div>
-          <button
-            onClick={() => onNavigate('profile')}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            View Profile
-          </button>
+          <div className="flex items-center justify-between">
+            <Badge variant="success" className="text-[10px]">🟢 Available</Badge>
+            <Badge variant="info" className="text-[10px]">⭐ 4.8</Badge>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatsCard
-          icon={<Calendar className="w-6 h-6 text-blue-500" />}
-          title="Today's Appointments"
-          value={dashboardData.todayAppointments.length.toString()}
-          subtitle={`${dashboardData.stats.completedAppointments} completed`}
-          color="blue"
-        />
-        <StatsCard
-          icon={<Users className="w-6 h-6 text-green-500" />}
-          title="Total Patients"
-          value={dashboardData.stats.totalPatients.toString()}
-          subtitle={`${dashboardData.stats.todayPatients} today`}
-          color="green"
-        />
-        <StatsCard
-          icon={<DollarSign className="w-6 h-6 text-yellow-500" />}
-          title="Today's Earnings"
-          value={`$${dashboardData.earnings.today}`}
-          subtitle={`$${dashboardData.earnings.thisWeek} this week`}
-          color="yellow"
-        />
-        <StatsCard
-          icon={<Star className="w-6 h-6 text-purple-500" />}
-          title="Rating"
-          value={dashboardData.stats.averageRating.toString()}
-          subtitle={`${dashboardData.stats.totalReviews} reviews`}
-          color="purple"
-        />
-      </div>
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          {sidebarLinks.map((link) => {
+            const Icon = link.icon;
+            const isActive = activeTab === link.path;
+            return (
+              <motion.button key={link.path} whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}
+                onClick={() => setActiveTab(link.path)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
+                  isActive
+                    ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-500/20 shadow-lg'
+                    : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
+                }`}>
+                <Icon className="w-5 h-5" />
+                {link.label}
+                {link.path === 'emergency' && (
+                  <Badge variant="danger" className="text-[9px] ml-auto">2</Badge>
+                )}
+              </motion.button>
+            );
+          })}
+        </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-blue-500" />
-                Today's Appointments
-              </h2>
-              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                View All
+        {/* Bottom */}
+        <div className="p-4 border-t border-white/[0.04]">
+          <Button variant="ghost" className="w-full text-slate-400 hover:text-red-400 justify-start">
+            <XCircle className="w-4 h-4 mr-2" /> Sign Out
+          </Button>
+        </div>
+      </aside>
+
+      {/* ============================================ */}
+      {/* MAIN CONTENT */}
+      {/* ============================================ */}
+      <div className="flex-1 min-w-0">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          
+          {/* TOP HEADER */}
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white">
+                {greeting}, <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">{user?.name?.split(' ')[1] || 'Doctor'}</span>
+              </h1>
+              <p className="text-slate-400 text-sm">Doctor Dashboard • {user?.specialty || 'Cardiologist'}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Input placeholder="Search patients..." leftIcon={Search} className="w-64" />
+              <button className="relative p-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all">
+                <Bell className="w-5 h-5 text-slate-400" />
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gradient-to-r from-red-500 to-rose-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold">5</span>
               </button>
+              <Button variant="danger" size="sm" onClick={() => setSosModalOpen(true)}
+                className="animate-pulse bg-gradient-to-r from-red-500 to-rose-500 shadow-lg">
+                <AlertCircle className="w-4 h-4 mr-1.5" /> Emergency
+              </Button>
             </div>
+          </motion.div>
 
-            <div className="space-y-4">
-              {dashboardData.todayAppointments.map((appointment) => (
-                <AppointmentRow
-                  key={appointment.id}
-                  appointment={appointment}
-                  onStartVideoConsultation={() => onNavigate('video-consultation')}
-                  onCreatePrescription={() => onNavigate('prescription')}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-6 flex items-center">
-              <Activity className="w-5 h-5 mr-2 text-green-500" />
-              Recent Activities
-            </h2>
-            <div className="space-y-4">
-              {dashboardData.activities.map((activity) => (
-                <ActivityItem key={activity.id} activity={activity} />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold flex items-center">
-                <AlertCircle className="w-5 h-5 mr-2" />
-                Emergency Requests
-              </h3>
-              <span className="bg-white text-red-600 text-xs px-2 py-1 rounded-full font-medium">
-                {dashboardData.emergencyRequests.length} Pending
-              </span>
-            </div>
-
-            {dashboardData.emergencyRequests.map((request) => (
-              <div key={request.id} className="bg-red-400/30 rounded-lg p-4 mb-3">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="font-medium">{request.patientName}</p>
-                    <p className="text-sm opacity-90">Blood Group: {request.bloodGroup}</p>
+          {/* QUICK STATS */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {quickStats.map((stat, i) => {
+              const Icon = stat.icon;
+              const colors = colorMap[stat.color] || '';
+              const [bg, text] = colors.split(' ');
+              return (
+                <Card key={i} className="p-4 text-center hover:shadow-lg transition-all group">
+                  <div className={`inline-flex p-2.5 rounded-xl ${bg} mb-3 group-hover:scale-110 transition-transform`}>
+                    <Icon className={`w-5 h-5 ${text}`} />
                   </div>
-                  <span className="bg-red-200 text-red-800 text-xs px-2 py-1 rounded-full">
-                    {request.urgency}
-                  </span>
-                </div>
-                <p className="text-sm mb-3">{request.reason}</p>
-                <div className="flex space-x-2">
-                  <button className="flex-1 bg-white text-red-600 px-3 py-1 rounded text-sm font-medium hover:bg-red-50">
-                    Approve
-                  </button>
-                  <button className="flex-1 bg-red-400/50 px-3 py-1 rounded text-sm hover:bg-red-400/70">
-                    Decline
-                  </button>
-                </div>
-              </div>
-            ))}
+                  <p className="text-2xl font-black text-white">{stat.value}</p>
+                  <p className="text-xs text-slate-400">{stat.label}</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">{stat.trend}</p>
+                </Card>
+              );
+            })}
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-semibold mb-4 flex items-center">
-              <Video className="w-5 h-5 mr-2 text-blue-500" />
-              Video Consultations
-            </h3>
-            {dashboardData.videoConsultations.map((consultation) => (
-              <div
-                key={consultation.id}
-                className="flex items-center justify-between bg-blue-50 p-3 rounded-lg mb-3"
-              >
-                <div>
-                  <p className="font-medium text-sm">{consultation.patientName}</p>
-                  <p className="text-xs text-gray-600">{consultation.startTime}</p>
+          {/* MAIN GRID */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* LEFT: Patient Queue + Appointments */}
+            <div className="lg:col-span-2 space-y-6">
+              
+              {/* PATIENT QUEUE */}
+              <GlassmorphicCard className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                    <Users className="w-5 h-5 text-cyan-400" /> Patient Queue
+                  </h3>
+                  <Button variant="ghost" size="xs" onClick={() => setActiveTab('patients')} className="text-cyan-400">
+                    View All <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
                 </div>
-                <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
-                  Join
-                </button>
-              </div>
-            ))}
-          </div>
+                <div className="space-y-2">
+                  {patientsData.map((patient) => (
+                    <motion.div key={patient.id} whileHover={{ x: 3 }} onClick={() => setSelectedPatient(patient)}
+                      className="flex items-center gap-4 p-3.5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-transparent hover:border-white/[0.08] transition-all cursor-pointer">
+                      <Avatar name={patient.avatar} size="md" className="ring-2 ring-white/5" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-white text-sm font-bold">{patient.name}</h4>
+                          <span className="text-slate-500 text-xs">{patient.age}y • {patient.gender}</span>
+                        </div>
+                        <p className="text-slate-500 text-xs">{patient.condition}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={patient.priority === 'emergency' ? 'danger' : patient.priority === 'urgent' ? 'warning' : 'info'} className="text-[10px]">
+                          {patient.priority}
+                        </Badge>
+                        <ChevronRight className="w-4 h-4 text-slate-600" />
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </GlassmorphicCard>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-semibold mb-4 flex items-center">
-              <DollarSign className="w-5 h-5 mr-2 text-green-500" />
-              Earnings Overview
-            </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Consultations</span>
-                <span className="font-medium">${dashboardData.earnings.breakdown.consultations}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Video Consults</span>
-                <span className="font-medium">
-                  ${dashboardData.earnings.breakdown.videoConsultations}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Follow-ups</span>
-                <span className="font-medium">${dashboardData.earnings.breakdown.followUps}</span>
-              </div>
-              <div className="border-t pt-3 flex justify-between">
-                <span className="font-semibold">Total Today</span>
-                <span className="font-bold text-green-600">${dashboardData.earnings.today}</span>
-              </div>
+              {/* APPOINTMENTS */}
+              <GlassmorphicCard className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-purple-400" /> Today's Appointments
+                  </h3>
+                  <Badge variant="info">{appointmentsData.length} scheduled</Badge>
+                </div>
+                <div className="space-y-2">
+                  {appointmentsData.map((apt) => (
+                    <div key={apt.id} className="flex items-center gap-4 p-3.5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] transition-all">
+                      <Avatar name={apt.patientAvatar} size="md" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-white text-sm font-bold">{apt.patientName}</h4>
+                        <p className="text-slate-500 text-xs">{apt.reason}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-white text-sm font-bold">{apt.time}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant={apt.type === 'video' ? 'info' : apt.type === 'phone' ? 'warning' : 'default'} className="text-[10px]">
+                            {apt.type}
+                          </Badge>
+                          <Badge variant={apt.status === 'confirmed' ? 'success' : 'warning'} className="text-[10px]">{apt.status}</Badge>
+                        </div>
+                      </div>
+                      {apt.type === 'video' && (
+                        <Button variant="primary" size="xs" className="bg-green-500">
+                          <Video className="w-3.5 h-3.5 mr-1" /> Join
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </GlassmorphicCard>
+
+              {/* LAB REPORTS */}
+              <GlassmorphicCard className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                    <Microscope className="w-5 h-5 text-teal-400" /> Lab Reports
+                  </h3>
+                  <Button variant="ghost" size="xs" onClick={() => setActiveTab('reports')} className="text-teal-400">
+                    View All <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {labReports.map((report) => (
+                    <div key={report.id} className="flex items-center gap-3 p-3 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] transition-all cursor-pointer">
+                      <FileText className="w-5 h-5 text-cyan-400" />
+                      <div className="flex-1">
+                        <h4 className="text-white text-sm font-bold">{report.type} - {report.patientName}</h4>
+                        <p className="text-xs text-slate-500">{report.date}</p>
+                      </div>
+                      <Badge variant={report.status === 'normal' ? 'success' : report.status === 'abnormal' ? 'warning' : 'danger'} className="text-[10px]">
+                        {report.status}
+                      </Badge>
+                      <Button variant="ghost" size="xs"><Download className="w-4 h-4" /></Button>
+                    </div>
+                  ))}
+                </div>
+              </GlassmorphicCard>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="font-semibold mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => onNavigate('patients')}
-                className="flex flex-col items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100"
-              >
-                <Users className="w-6 h-6 text-blue-600 mb-1" />
-                <span className="text-xs text-gray-700">Patient List</span>
-              </button>
-              <button
-                onClick={() => onNavigate('prescription')}
-                className="flex flex-col items-center p-3 bg-green-50 rounded-lg hover:bg-green-100"
-              >
-                <Pill className="w-6 h-6 text-green-600 mb-1" />
-                <span className="text-xs text-gray-700">Prescription</span>
-              </button>
-              <button
-                onClick={() => onNavigate('schedule')}
-                className="flex flex-col items-center p-3 bg-purple-50 rounded-lg hover:bg-purple-100"
-              >
-                <Clock className="w-6 h-6 text-purple-600 mb-1" />
-                <span className="text-xs text-gray-700">Schedule</span>
-              </button>
-              <button
-                onClick={() => onNavigate('messages')}
-                className="flex flex-col items-center p-3 bg-orange-50 rounded-lg hover:bg-orange-100"
-              >
-                <MessageCircle className="w-6 h-6 text-orange-600 mb-1" />
-                <span className="text-xs text-gray-700">Messages</span>
-              </button>
+            {/* RIGHT: Prescriptions + Emergency + Quick Actions */}
+            <div className="space-y-6">
+              
+              {/* PRESCRIPTIONS */}
+              <GlassmorphicCard className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                    <Pill className="w-5 h-5 text-amber-400" /> Recent Prescriptions
+                  </h3>
+                  <Button variant="primary" size="xs" className="bg-amber-500" onClick={() => setShowPrescriptionModal(true)}>
+                    <Plus className="w-3.5 h-3.5 mr-1" /> New
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {prescriptionsData.map((pres) => (
+                    <div key={pres.id} className="p-3 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] transition-all cursor-pointer">
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="text-white text-sm font-bold">{pres.patientName}</h4>
+                        <Badge variant={pres.status === 'issued' ? 'success' : 'warning'} className="text-[10px]">{pres.status}</Badge>
+                      </div>
+                      <p className="text-slate-500 text-xs">{pres.diagnosis}</p>
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {pres.medicines.slice(0, 2).map((med, i) => (
+                          <span key={i} className="text-[10px] text-amber-400">{med.name}</span>
+                        ))}
+                        {pres.medicines.length > 2 && (
+                          <span className="text-[10px] text-slate-500">+{pres.medicines.length - 2} more</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </GlassmorphicCard>
+
+              {/* EMERGENCY CASES */}
+              <GlassmorphicCard className="p-6 bg-gradient-to-br from-red-500/5 to-transparent border-red-500/10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 text-red-400 animate-pulse" /> Emergency Cases
+                  </h3>
+                  <Badge variant="danger">{emergencyCases.length} Active</Badge>
+                </div>
+                <div className="space-y-2">
+                  {emergencyCases.map((em) => (
+                    <div key={em.id} className="p-3 rounded-2xl bg-red-500/5 border border-red-500/10 hover:border-red-500/20 transition-all cursor-pointer">
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="text-white text-sm font-bold">{em.patientName}</h4>
+                        <Badge variant={em.severity === 'critical' ? 'danger' : 'warning'} className="text-[10px]">{em.severity}</Badge>
+                      </div>
+                      <p className="text-slate-400 text-xs">{em.condition}</p>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                        <Clock className="w-3 h-3" /> {em.time}
+                        <span>•</span>
+                        <MapPin className="w-3 h-3" /> {em.location}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button variant="danger" size="sm" className="w-full mt-4 bg-gradient-to-r from-red-500 to-rose-500">
+                  <Phone className="w-4 h-4 mr-2" /> Respond to Emergency
+                </Button>
+              </GlassmorphicCard>
+
+              {/* QUICK ACTIONS */}
+              <GlassmorphicCard className="p-6">
+                <h3 className="text-white font-bold text-lg mb-4">Quick Actions</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { icon: FileText, label: 'Write Prescription', color: 'amber', action: () => setShowPrescriptionModal(true) },
+                    { icon: Calendar, label: 'Schedule', color: 'blue', action: () => setShowScheduleModal(true) },
+                    { icon: Video, label: 'Video Call', color: 'green', action: () => {} },
+                    { icon: MessageCircle, label: 'Messages', color: 'indigo', action: () => setActiveTab('messages') },
+                    { icon: Brain, label: 'AI Assistant', color: 'purple', action: () => navigate('/ai-assistant') },
+                    { icon: Pill, label: 'Pharmacy', color: 'teal', action: () => navigate('/pharmacy') },
+                    { icon: Baby, label: 'Women Care', color: 'pink', action: () => navigate('/women-care') },
+                    { icon: TrendingUp, label: 'Analytics', color: 'cyan', action: () => setActiveTab('analytics') },
+                  ].map((action, i) => {
+                    const Icon = action.icon;
+                    const colors = colorMap[action.color] || '';
+                    const [bg, text] = colors.split(' ');
+                    return (
+                      <motion.button key={i} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                        onClick={action.action}
+                        className={`flex flex-col items-center gap-2 p-3 rounded-2xl ${bg} hover:shadow-lg transition-all text-center`}>
+                        <Icon className={`w-5 h-5 ${text}`} />
+                        <span className="text-white text-xs font-bold">{action.label}</span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </GlassmorphicCard>
             </div>
           </div>
         </div>
       </div>
+
+      {/* ============================================ */}
+      {/* PRESCRIPTION MODAL */}
+      {/* ============================================ */}
+      <AnimatePresence>
+        {showPrescriptionModal && (
+          <Modal isOpen={true} onClose={() => setShowPrescriptionModal(false)} size="lg">
+            <div className="p-6">
+              <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-2">
+                <FileText className="w-6 h-6 text-amber-400" /> Write Prescription
+              </h2>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Patient Name</label>
+                    <input type="text" className="w-full p-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-white text-sm" placeholder="Search patient..." />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Diagnosis</label>
+                    <input type="text" className="w-full p-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-white text-sm" placeholder="Enter diagnosis..." />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-slate-400 mb-2 block">Medicines</label>
+                  <div className="space-y-2">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="grid grid-cols-3 gap-3">
+                        <input type="text" className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-white text-sm" placeholder="Medicine name" />
+                        <input type="text" className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-white text-sm" placeholder="Dosage" />
+                        <input type="text" className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-white text-sm" placeholder="Duration" />
+                      </div>
+                    ))}
+                  </div>
+                  <Button variant="ghost" size="xs" className="mt-2 text-amber-400">
+                    <Plus className="w-3.5 h-3.5 mr-1" /> Add Medicine
+                  </Button>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="primary" className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500">
+                    <Send className="w-4 h-4 mr-2" /> Issue Prescription
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Download className="w-4 h-4 mr-2" /> Save as Draft
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      {/* ============================================ */}
+      {/* SCHEDULE MODAL */}
+      {/* ============================================ */}
+      <AnimatePresence>
+        {showScheduleModal && (
+          <Modal isOpen={true} onClose={() => setShowScheduleModal(false)} size="md">
+            <div className="p-6">
+              <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-2">
+                <Calendar className="w-6 h-6 text-cyan-400" /> Manage Schedule
+              </h2>
+              <div className="space-y-3">
+                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                  <div key={day} className="flex items-center gap-3 p-3 rounded-2xl bg-white/[0.03]">
+                    <span className="text-white font-bold w-10">{day}</span>
+                    <input type="text" className="flex-1 p-2 rounded-xl bg-white/[0.05] text-white text-sm" placeholder="9:00 AM - 5:00 PM" />
+                    <Button variant="outline" size="xs" className="text-emerald-400 border-emerald-500/30">Available</Button>
+                  </div>
+                ))}
+              </div>
+              <Button variant="primary" className="w-full mt-6 bg-gradient-to-r from-cyan-500 to-blue-500">
+                <CheckCircle2 className="w-4 h-4 mr-2" /> Save Schedule
+              </Button>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      {/* ============================================ */}
+      {/* PATIENT DETAIL MODAL */}
+      {/* ============================================ */}
+      <AnimatePresence>
+        {selectedPatient && (
+          <Modal isOpen={true} onClose={() => setSelectedPatient(null)} size="md">
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <Avatar name={selectedPatient.avatar} size="lg" />
+                <div>
+                  <h2 className="text-2xl font-black text-white">{selectedPatient.name}</h2>
+                  <p className="text-slate-400 text-sm">{selectedPatient.age}y • {selectedPatient.gender} • {selectedPatient.bloodGroup}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="p-3 rounded-2xl bg-white/[0.03]">
+                  <p className="text-xs text-slate-400">Condition</p>
+                  <p className="text-white font-bold">{selectedPatient.condition}</p>
+                </div>
+                <div className="p-3 rounded-2xl bg-white/[0.03]">
+                  <p className="text-xs text-slate-400">Last Visit</p>
+                  <p className="text-white font-bold">{selectedPatient.lastVisit}</p>
+                </div>
+                <div className="p-3 rounded-2xl bg-white/[0.03]">
+                  <p className="text-xs text-slate-400">Allergies</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {selectedPatient.allergies.length > 0 ? selectedPatient.allergies.map(a => (
+                      <Badge key={a} variant="danger" className="text-[10px]">{a}</Badge>
+                    )) : <span className="text-slate-500 text-xs">None</span>}
+                  </div>
+                </div>
+                <div className="p-3 rounded-2xl bg-white/[0.03]">
+                  <p className="text-xs text-slate-400">Chronic Diseases</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {selectedPatient.chronicDiseases.map(d => (
+                      <Badge key={d} variant="warning" className="text-[10px]">{d}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="primary" className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500">
+                  <FileText className="w-4 h-4 mr-2" /> Write Prescription
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  <Calendar className="w-4 h-4 mr-2" /> Schedule Appointment
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      {/* ============================================ */}
+      {/* SOS MODAL */}
+      {/* ============================================ */}
+      <AnimatePresence>
+        {sosModalOpen && (
+          <Modal isOpen={true} onClose={() => setSosModalOpen(false)} size="sm">
+            <div className="text-center p-8">
+              <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}
+                className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center">
+                <AlertCircle className="w-12 h-12 text-red-400" />
+              </motion.div>
+              <h2 className="text-2xl font-black text-white mb-2">Emergency Protocol</h2>
+              <p className="text-slate-400 text-sm mb-6">Activate emergency response for critical patients</p>
+              <div className="space-y-3">
+                <Button variant="danger" size="lg" className="w-full bg-gradient-to-r from-red-500 to-rose-500">
+                  <Phone className="w-5 h-5 mr-2" /> Call Emergency Team
+                </Button>
+                <Button variant="outline" size="lg" className="w-full border-amber-500/30 text-amber-400">
+                  <Truck className="w-5 h-5 mr-2" /> Request Ambulance
+                </Button>
+                <Button variant="ghost" size="sm" className="w-full" onClick={() => setSosModalOpen(false)}>Cancel</Button>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
-
-// ============================================
-// SUB-COMPONENTS (Exported)
-// ============================================
-
-export const StatsCard: React.FC<{
-  icon: React.ReactNode;
-  title: string;
-  value: string;
-  subtitle: string;
-  color: string;
-}> = ({ icon, title, value, subtitle, color }) => (
-  <div className="bg-white rounded-lg shadow p-6">
-    <div className="flex items-center justify-between mb-4">
-      <div className={`p-2 rounded-lg ${statsIconBg[color] ?? 'bg-gray-100'}`}>{icon}</div>
-      <TrendingUp className="w-5 h-5 text-green-500" />
-    </div>
-    <h3 className="text-2xl font-bold">{value}</h3>
-    <p className="text-sm text-gray-600 mt-1">{title}</p>
-    <p className="text-xs text-gray-500 mt-2">{subtitle}</p>
-  </div>
-);
-
-export const AppointmentRow: React.FC<{
-  appointment: Appointment;
-  onStartVideoConsultation: () => void;
-  onCreatePrescription: () => void;
-}> = ({ appointment, onStartVideoConsultation, onCreatePrescription }) => (
-  <div className="flex items-center justify-between border rounded-lg p-4 hover:bg-gray-50">
-    <div className="flex items-center space-x-4">
-      <div
-        className={`w-12 h-12 rounded-full flex items-center justify-center ${
-          appointment.type === 'video'
-            ? 'bg-blue-100'
-            : appointment.type === 'phone'
-              ? 'bg-green-100'
-              : 'bg-purple-100'
-        }`}
-      >
-        {appointment.type === 'video' ? (
-          <Video className="w-6 h-6 text-blue-600" />
-        ) : appointment.type === 'phone' ? (
-          <Phone className="w-6 h-6 text-green-600" />
-        ) : (
-          <Users className="w-6 h-6 text-purple-600" />
-        )}
-      </div>
-      <div>
-        <p className="font-semibold">{appointment.patientName}</p>
-        <p className="text-sm text-gray-600">{appointment.reason}</p>
-        <div className="flex items-center space-x-3 mt-1">
-          <span className="text-xs text-gray-500">{appointment.time}</span>
-          <span className="text-xs text-gray-500">•</span>
-          <span className="text-xs text-gray-500 capitalize">{appointment.type}</span>
-          {appointment.isEmergency && (
-            <>
-              <span className="text-xs text-gray-500">•</span>
-              <span className="text-xs text-red-600 font-medium">Emergency</span>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-    <div className="flex items-center space-x-2">
-      {appointment.type === 'video' && (
-        <button
-          onClick={onStartVideoConsultation}
-          className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-        >
-          Start Call
-        </button>
-      )}
-      <button
-        onClick={onCreatePrescription}
-        className="px-3 py-1 border border-blue-600 text-blue-600 text-sm rounded hover:bg-blue-50"
-      >
-        Prescription
-      </button>
-      <select className="border rounded px-2 py-1 text-sm">
-        <option value="scheduled">Scheduled</option>
-        <option value="in-progress">In Progress</option>
-        <option value="completed">Completed</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
-    </div>
-  </div>
-);
-
-export const ActivityItem: React.FC<{ activity: DoctorActivity }> = ({ activity }) => (
-  <div className="flex items-start space-x-3">
-    <div
-      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-        activity.status === 'completed' ? 'bg-green-100' : 'bg-yellow-100'
-      }`}
-    >
-      {activity.type === 'prescription' ? (
-        <FileText className="w-4 h-4 text-green-600" />
-      ) : activity.type === 'appointment' ? (
-        <Calendar className="w-4 h-4 text-blue-600" />
-      ) : (
-        <CheckCircle className="w-4 h-4 text-purple-600" />
-      )}
-    </div>
-    <div className="flex-1">
-      <p className="text-sm">{activity.description}</p>
-      <p className="text-xs text-gray-500">{activity.time}</p>
-    </div>
-  </div>
-);
 
 export default DoctorDashboard;

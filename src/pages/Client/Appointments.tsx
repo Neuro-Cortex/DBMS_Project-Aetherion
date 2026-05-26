@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Calendar, Clock, MapPin, Video, Phone, User,
-  Search, Filter, Star, ChevronRight, ChevronLeft,
-  Plus, X, CheckCircle, AlertCircle, CreditCard,
-  Stethoscope, Building2, DollarSign, Heart
-} from 'lucide-react';
+  Calendar, Clock,Video,   User,
+  Search,  Star,  
+  Plus,  CheckCircle, X,
+  Stethoscope, Building2, DollarSign, } from 'lucide-react';
 
 // Types
 interface Doctor {
@@ -329,7 +328,7 @@ export const ClientAppointments: React.FC = () => {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={() => setActiveTab(tab.id as typeof activeTab)}
                     className={`flex items-center py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
                       activeTab === tab.id
                         ? 'border-blue-600 text-blue-600'
@@ -378,7 +377,7 @@ export const ClientAppointments: React.FC = () => {
                 </select>
                 <select
                   value={consultationType}
-                  onChange={(e) => setConsultationType(e.target.value as any)}
+                  onChange={(e) => setConsultationType(e.target.value as typeof consultationType)}
                   className="border rounded-lg px-4 py-2"
                 >
                   <option value="all">All Types</option>
@@ -610,7 +609,7 @@ export const ClientAppointments: React.FC = () => {
                 onClick={() => setShowBookingModal(false)}
                 className="p-2 hover:bg-gray-100 rounded-full"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-gray-600" />
               </button>
             </div>
 
@@ -715,7 +714,7 @@ export const ClientAppointments: React.FC = () => {
                     <label className="block text-sm font-medium mb-1">Payment Method</label>
                     <select
                       value={bookingData.paymentMethod}
-                      onChange={(e) => setBookingData({ ...bookingData, paymentMethod: e.target.value as any })}
+                      onChange={(e) => setBookingData({ ...bookingData, paymentMethod: e.target.value as typeof bookingData.paymentMethod })}
                       className="w-full border rounded-lg px-4 py-2"
                     >
                       <option value="card">Credit/Debit Card</option>

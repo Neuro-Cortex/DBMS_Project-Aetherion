@@ -3,10 +3,8 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Pill, Calendar, User, Stethoscope, Building2,
-  Clock, DollarSign, FileText, AlertCircle,
-  CheckCircle, Download, Eye, Search, ChevronRight,
-  Printer, Share2, RefreshCw
+  Pill,  FileText,  Download,  Search, 
+  Printer,
 } from 'lucide-react';
 
 // ============================================
