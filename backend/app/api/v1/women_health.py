@@ -2,7 +2,7 @@
 Women's Health API Routes — Aetherion Healthcare
 """
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Body
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -192,18 +192,20 @@ async def get_growth_records(
 
 
 # ============================================
-# GYNECOLOGIST CONSULTATIONS
+# CONSULTATIONS
 # ============================================
 
 @router.get("/consultations", response_model=APIResponse)
 async def get_consultations(
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
+    status: Optional[str] = Query(None),
     current_user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """Get women's health consultations."""
     service = WomenHealthService(db)
-    result = service.get_consultations(current_user.id, page=page, size=size)
+    result = service.get_consultations(current_user.id, status=status, page=page, size=size)
     return APIResponse(success=True, message="Consultations retrieved", data=result)
 
 
@@ -213,9 +215,66 @@ async def create_consultation(
     current_user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """Create a new consultation booking."""
     service = WomenHealthService(db)
     result = service.create_consultation(current_user.id, data.model_dump())
     return APIResponse(success=True, message="Consultation created", data=result)
+
+
+@router.get("/consultations/{consultation_id}", response_model=APIResponse)
+async def get_consultation(
+    consultation_id: str,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get consultation details."""
+    service = WomenHealthService(db)
+    result = service.get_consultation(consultation_id, current_user.id)
+    return APIResponse(success=True, message="Consultation retrieved", data=result)
+
+
+@router.put("/consultations/{consultation_id}", response_model=APIResponse)
+async def update_consultation(
+    consultation_id: str,
+    data: ConsultationUpdateRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update consultation details."""
+    service = WomenHealthService(db)
+    result = service.update_consultation(consultation_id, current_user.id, data.model_dump(exclude_unset=True))
+    return APIResponse(success=True, message="Consultation updated", data=result)
+
+
+@router.delete("/consultations/{consultation_id}", response_model=APIResponse)
+async def cancel_consultation(
+    consultation_id: str,
+    reason: Optional[str] = Body(None, embed=True),
+    current_user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Cancel a consultation."""
+    service = WomenHealthService(db)
+    service.cancel_consultation(consultation_id, current_user.id, reason)
+    return APIResponse(success=True, message="Consultation cancelled")
+
+
+# ============================================
+# HEALTH TIPS
+# ============================================
+
+@router.get("/health-tips", response_model=APIResponse)
+async def get_health_tips(
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    category: Optional[str] = Query(None),
+    current_user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get personalized health tips based on pregnancy week or menstrual cycle."""
+    service = WomenHealthService(db)
+    result = service.get_health_tips(current_user.id, category=category, page=page, size=size)
+    return APIResponse(success=True, message="Health tips retrieved", data=result)
 
 
 @router.put("/consultations/{consultation_id}", response_model=APIResponse)

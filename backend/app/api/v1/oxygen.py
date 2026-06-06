@@ -13,18 +13,47 @@ from ...core.permissions import CurrentUser
 router = APIRouter(prefix="/oxygen", tags=["Oxygen"])
 
 
+# ============================================
+# GET ALL OXYGEN STOCKS (PUBLIC)
+# ============================================
 @router.get("/stocks", response_model=APIResponse)
-async def get_all_stocks(page: int = Query(1, ge=1), size: int = Query(20, ge=1, le=100), db: Session = Depends(get_db)):
+async def get_all_stocks(
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """Get all oxygen stocks across all centers."""
     service = OxygenServiceLayer(db)
     result = service.get_all_stocks(page=page, size=size)
     return APIResponse(success=True, message="Oxygen stocks retrieved", data=result)
 
 
+# ============================================
+# GET HOSPITAL OXYGEN STOCK
+# ============================================
 @router.get("/stocks/{hospital_id}", response_model=APIResponse)
 async def get_hospital_stock(hospital_id: str, db: Session = Depends(get_db)):
+    """Get oxygen stock for a specific hospital/center."""
     service = OxygenServiceLayer(db)
     result = service.get_hospital_stock(hospital_id)
     return APIResponse(success=True, message="Stock retrieved", data=result)
+
+
+# ============================================
+# OXYGEN CENTERS SEARCH (PUBLIC)
+# ============================================
+@router.get("/centers/search", response_model=APIResponse)
+async def search_oxygen_centers(
+    q: str = Query(..., min_length=1, max_length=100),
+    city: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """Search oxygen centers by name or location."""
+    service = OxygenServiceLayer(db)
+    result = service.search_centers(q, city=city, page=page, size=size)
+    return APIResponse(success=True, message="Centers found", data=result)
 
 
 @router.put("/stocks/{stock_id}", response_model=APIResponse)

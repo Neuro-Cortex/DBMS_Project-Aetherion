@@ -172,14 +172,111 @@ async def get_blood_requests(
 @router.get("/camps", response_model=APIResponse)
 async def get_donation_camps(
     status: Optional[str] = Query(None),
+    city: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
-    """Get blood donation camps."""
+    """Get blood donation camps with filtering."""
     service = BloodDonationServiceLayer(db)
-    result = service.get_donation_camps(status=status, page=page, size=size)
+    result = service.get_donation_camps(status=status, city=city, page=page, size=size)
     return APIResponse(success=True, message="Camps retrieved", data=result)
+
+
+# ============================================
+# GET CAMP DETAILS
+# ============================================
+@router.get("/camps/{camp_id}", response_model=APIResponse)
+async def get_camp_details(
+    camp_id: str,
+    db: Session = Depends(get_db),
+):
+    """Get details of a specific donation camp."""
+    service = BloodDonationServiceLayer(db)
+    result = service.get_camp_details(camp_id)
+    return APIResponse(success=True, message="Camp details retrieved", data=result)
+
+
+# ============================================
+# REGISTER FOR DONATION CAMP
+# ============================================
+@router.post("/camps/{camp_id}/register", response_model=APIResponse)
+async def register_for_camp(
+    camp_id: str,
+    data: dict,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Register for a blood donation camp."""
+    service = BloodDonationServiceLayer(db)
+    result = service.register_for_camp(current_user.id, camp_id, data)
+    return APIResponse(success=True, message="Registered for camp", data=result)
+
+
+# ============================================
+# EMERGENCY BLOOD ALERT
+# ============================================
+@router.post("/emergency-alert", response_model=APIResponse)
+async def create_emergency_alert(
+    data: dict,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Create an emergency blood alert."""
+    service = BloodDonationServiceLayer(db)
+    result = service.create_emergency_alert(current_user.id, data)
+    return APIResponse(success=True, message="Emergency alert created", data=result)
+
+
+# ============================================
+# GET EMERGENCY ALERTS
+# ============================================
+@router.get("/emergency-alerts", response_model=APIResponse)
+async def get_emergency_alerts(
+    blood_group: Optional[str] = Query(None),
+    city: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """Get emergency blood alerts with filtering."""
+    service = BloodDonationServiceLayer(db)
+    result = service.get_emergency_alerts(blood_group=blood_group, city=city, page=page, size=size)
+    return APIResponse(success=True, message="Emergency alerts retrieved", data=result)
+
+
+# ============================================
+# BLOOD STOCK (PUBLIC)
+# ============================================
+@router.get("/stock", response_model=APIResponse)
+async def get_blood_stock(
+    blood_group: Optional[str] = Query(None),
+    city: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Get blood stock across all centers."""
+    service = BloodDonationServiceLayer(db)
+    result = service.get_blood_stock(blood_group=blood_group, city=city)
+    return APIResponse(success=True, message="Blood stock retrieved", data=result)
+
+
+# ============================================
+# NEARBY DONORS
+# ============================================
+@router.get("/nearby-donors", response_model=APIResponse)
+async def get_nearby_donors(
+    lat: float = Query(...),
+    lng: float = Query(...),
+    blood_group: Optional[str] = Query(None),
+    radius: float = Query(10, ge=1, le=100),
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """Get nearby blood donors based on geolocation."""
+    service = BloodDonationServiceLayer(db)
+    result = service.get_nearby_donors(lat=lat, lng=lng, blood_group=blood_group, radius=radius, page=page, size=size)
+    return APIResponse(success=True, message="Nearby donors retrieved", data=result)
 
 
 @router.post("/camps/{camp_id}/register", response_model=APIResponse)
