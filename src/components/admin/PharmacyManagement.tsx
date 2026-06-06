@@ -1,5 +1,6 @@
+import { getAuthToken } from '../../services/api';
 // src/components/admin/PharmacyManagement.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -66,10 +67,45 @@ const PharmacyManagement: React.FC = () => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [pharmacies, setPharmacies] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredPharmacies = mockPharmacies.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.city.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
+  useEffect(() => {
+    const fetchPharmacies = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/pharmacies`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const data = await res.json();
+        setPharmacies(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch pharmacies:', err);
+        setPharmacies([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPharmacies();
+  }, []);
+
+  const handleVerify = async (pharmacyId: string) => {
+    try {
+      const token = getAuthToken();
+      await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/pharmacies/${pharmacyId}/verify`,
+        { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+      );
+      setPharmacies(pharmacies.map(p => p.id === pharmacyId ? { ...p, is_verified: true } : p));
+    } catch (err) {
+      console.error('Failed to verify pharmacy:', err);
+    }
+  };
+
+  const filteredPharmacies = pharmacies.filter(p => {
+    const matchesSearch = p.name?.toLowerCase().includes(searchQuery.toLowerCase()) || p.city?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' ? p.is_active : !p.is_active);
     return matchesSearch && matchesStatus;
   });
 
@@ -130,11 +166,11 @@ const PharmacyManagement: React.FC = () => {
           </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { icon: Pill, label: 'Total Pharmacies', value: mockPharmacies.length, color: 'amber', change: '+5%' },
-              { icon: Package, label: 'Total Medicines', value: mockPharmacies.reduce((a, p) => a + p.totalMedicines, 0).toLocaleString(), color: 'blue', change: '+12%' },
-              { icon: ShoppingCart, label: 'Total Orders', value: mockPharmacies.reduce((a, p) => a + p.totalOrders, 0).toLocaleString(), color: 'teal', change: '+18%' },
-              { icon: CheckCircle, label: 'Verified', value: mockPharmacies.filter(p => p.verified).length, color: 'emerald', change: '+2%' },
+            {[ 
+              { icon: Pill, label: 'Total Pharmacies', value: pharmacies.length, color: 'amber', change: '+5%' },
+              { icon: Package, label: 'Total Orders', value: pharmacies.reduce((a: number, p: any) => a + (p.total_orders || 0), 0).toLocaleString(), color: 'teal', change: '+18%' },
+              { icon: ShoppingCart, label: 'Active', value: pharmacies.filter((p: any) => p.is_active).length, color: 'blue', change: '+12%' },
+              { icon: CheckCircle, label: 'Verified', value: pharmacies.filter((p: any) => p.is_verified).length, color: 'emerald', change: '+2%' },
             ].map((stat, i) => {
               const Icon = stat.icon;
               const [bg, text] = (colorMap[stat.color] || '').split(' ');
@@ -159,7 +195,7 @@ const PharmacyManagement: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredPharmacies.map((pharmacy, i) => (
+            {filteredPharmacies.map((pharmacy: any, i: number) => (
               <motion.div key={pharmacy.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                 <Card className="p-5 hover:border-amber-500/30 transition-all">
                   <div className="flex items-start justify-between mb-3">
@@ -167,20 +203,25 @@ const PharmacyManagement: React.FC = () => {
                       <div className="p-3 rounded-xl bg-amber-500/10"><Pill className="w-6 h-6 text-amber-400" /></div>
                       <div>
                         <h3 className="text-white font-bold">{pharmacy.name}</h3>
-                        <p className="text-xs text-slate-400 flex items-center gap-1"><MapPin className="w-3 h-3" /> {pharmacy.city}</p>
+                        <p className="text-xs text-slate-400 flex items-center gap-1"><MapPin className="w-3 h-3" /> {pharmacy.city || 'N/A'}</p>
                       </div>
                     </div>
-                    <Badge variant={pharmacy.status === 'active' ? 'success' : pharmacy.status === 'inactive' ? 'default' : 'warning'} className="text-[10px]">{pharmacy.status}</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={pharmacy.is_verified ? 'success' : 'warning'} className="text-[10px]">{pharmacy.is_verified ? 'Verified' : 'Unverified'}</Badge>
+                      <Badge variant={pharmacy.is_active !== false ? 'success' : 'default'} className="text-[10px]">{pharmacy.is_active !== false ? 'Active' : 'Inactive'}</Badge>
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-3 mb-3">
-                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><Package className="w-4 h-4 text-blue-400 mx-auto mb-1" /><p className="text-white font-bold text-sm">{pharmacy.totalMedicines}</p><p className="text-[10px] text-slate-500">Medicines</p></div>
-                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><ShoppingCart className="w-4 h-4 text-cyan-400 mx-auto mb-1" /><p className="text-white font-bold text-sm">{pharmacy.totalOrders}</p><p className="text-[10px] text-slate-500">Orders</p></div>
-                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><Clock className="w-4 h-4 text-green-400 mx-auto mb-1" /><p className="text-white font-bold text-sm">{pharmacy.deliveryTime}</p><p className="text-[10px] text-slate-500">Delivery</p></div>
+                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><Package className="w-4 h-4 text-blue-400 mx-auto mb-1" /><p className="text-white font-bold text-sm">{pharmacy.pharmacist_name || 'N/A'}</p><p className="text-[10px] text-slate-500">Pharmacist</p></div>
+                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><ShoppingCart className="w-4 h-4 text-cyan-400 mx-auto mb-1" /><p className="text-white font-bold text-sm">{pharmacy.total_orders || 0}</p><p className="text-[10px] text-slate-500">Orders</p></div>
+                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><Clock className="w-4 h-4 text-green-400 mx-auto mb-1" /><p className="text-white font-bold text-sm">{pharmacy.rating || 0}</p><p className="text-[10px] text-slate-500">Rating</p></div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-400 mb-3"><Phone className="w-3 h-3" /> {pharmacy.phone}<span className="mx-1">•</span><Mail className="w-3 h-3" /> {pharmacy.email}<span className="mx-1">•</span>License: {pharmacy.license}</div>
+                  <div className="flex items-center gap-2 text-xs text-slate-400 mb-3"><Phone className="w-3 h-3" /> {pharmacy.phone || 'N/A'}<span className="mx-1">•</span><Mail className="w-3 h-3" /> {pharmacy.email || 'N/A'}</div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" className="flex-1 border-amber-500/30 text-amber-400"><Eye className="w-3.5 h-3.5 mr-1" /> View</Button>
-                    <Button variant="outline" size="sm" className="flex-1 border-blue-500/30 text-blue-400"><Edit3 className="w-3.5 h-3.5 mr-1" /> Edit</Button>
+                    {!pharmacy.is_verified && (
+                      <Button variant="outline" size="sm" className="flex-1 border-emerald-500/30 text-emerald-400" onClick={() => handleVerify(pharmacy.id)}><CheckCircle className="w-3.5 h-3.5 mr-1" /> Verify</Button>
+                    )}
                   </div>
                 </Card>
               </motion.div>

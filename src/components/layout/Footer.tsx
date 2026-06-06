@@ -11,9 +11,6 @@ import {
   ExternalLink, Coffee, Calendar, Stethoscope, Pill
 } from 'lucide-react';
 
-// ✅ FIXED IMPORT PATH
-import { Badge } from '../ui/Badge';
-
 // ============================================
 // CONSTANTS
 // ============================================
@@ -175,20 +172,11 @@ export const Footer: React.FC = () => {
   ];
 
   const quickActions = [
-    { icon: Calendar, label: 'Book Appointment', href: '/appointments' },
+    { icon: Calendar, label: 'Book Appointment', href: '/appointments/list' },
     { icon: Zap, label: 'Emergency', href: '/emergency' },
     { icon: Stethoscope, label: 'Find Doctor', href: '/doctors' },
     { icon: Pill, label: 'Order Medicine', href: '/pharmacy' },
   ];
-
-  // ✅ Inline Badge component (fallback if Badge import fails)
-  const RenderBadge: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => {
-    try {
-      return <Badge variant="info" className={`text-[10px] ${className || ''}`}>{children}</Badge>;
-    } catch {
-      return <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 text-[10px] font-medium">{children}</span>;
-    }
-  };
 
   return (
     <footer ref={footerRef} className="relative bg-[#020205] border-t border-white/[0.03] overflow-hidden">
@@ -317,10 +305,10 @@ export const Footer: React.FC = () => {
               {
                 title: 'Navigate',
                 items: [
-                  { label: 'Dashboard', href: '/dashboard' },
-                  { label: 'Appointments', href: '/appointments' },
+                  { label: 'Home', href: '/' },
+                  { label: 'Appointments', href: '/appointments/list' },
                   { label: 'Doctors', href: '/doctors' },
-                  { label: 'Hospitals', href: '/hospitals' },
+                  { label: 'Hospitals', href: '/hospital' },
                   { label: 'Emergency', href: '/emergency' },
                   { label: 'Pharmacy', href: '/pharmacy' },
                 ],
@@ -329,33 +317,30 @@ export const Footer: React.FC = () => {
                 title: 'Resources',
                 items: [
                   { label: 'Help Center', href: '/help' },
-                  { label: 'Documentation', href: '/docs' },
-                  { label: 'API Reference', href: '/api' },
-                  { label: 'System Status', href: '/status' },
-                  { label: 'Community', href: '/community' },
-                  { label: 'Blog', href: '/blog' },
+                  { label: 'Services', href: '/services' },
+                  { label: 'AI Assistant', href: '/ai-assistant' },
+                  { label: 'Feedback', href: '/feedback' },
+                  { label: 'Notifications', href: '/notifications' },
+                  { label: 'Blood Donors', href: '/blood-donors' },
                 ],
               },
               {
                 title: 'Company',
                 items: [
                   { label: 'About', href: '/about' },
-                  { label: 'Careers', href: '/careers', badge: 'Hiring' },
-                  { label: 'Press', href: '/press' },
-                  { label: 'Partners', href: '/partners' },
-                  { label: 'Contact', href: '/contact' },
-                  { label: 'Investors', href: '/investors' },
+                  { label: 'Oxygen Services', href: '/oxygen' },
+                  { label: 'Women Care', href: '/women-care' },
+                  { label: 'QR Medical Card', href: '/qrcode' },
+                  { label: 'Immersive Preview', href: '/immersive-preview' },
                 ],
               },
               {
                 title: 'Legal',
                 items: [
-                  { label: 'Privacy', href: '/privacy' },
-                  { label: 'Terms', href: '/terms' },
-                  { label: 'Cookies', href: '/cookies' },
-                  { label: 'GDPR', href: '/gdpr' },
-                  { label: 'HIPAA', href: '/hipaa' },
-                  { label: 'Security', href: '/security' },
+                  { label: 'Privacy Policy', href: '/privacy-policy' },
+                  { label: 'Terms of Service', href: '/terms-of-service' },
+                  { label: 'Forgot Password', href: '/forgot-password' },
+                  { label: 'Role Selection', href: '/role-selection' },
                 ],
               },
             ].map((column, i) => (
@@ -378,9 +363,6 @@ export const Footer: React.FC = () => {
                       >
                         <span className="w-1 h-1 rounded-full bg-white/10 group-hover:bg-cyan-400 group-hover:w-2 transition-all duration-300" />
                         {link.label}
-                        {link.badge && (
-                          <RenderBadge>{link.badge}</RenderBadge>
-                        )}
                       </Link>
                     </li>
                   ))}

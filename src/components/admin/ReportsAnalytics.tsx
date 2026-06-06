@@ -1,5 +1,6 @@
+import { getAuthToken } from '../../services/api';
 // src/components/admin/ReportsAnalytics.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -21,23 +22,6 @@ import { Button } from 'src/ui/Button';
 import { Badge } from 'src/ui/Badge';
 import { Avatar } from 'src/ui/Avatar';
 import { Input } from 'src/ui/Input';
-
-const revenueData = [
-  { month: 'Jan', revenue: 45000, expenses: 32000, profit: 13000 },
-  { month: 'Feb', revenue: 52000, expenses: 35000, profit: 17000 },
-  { month: 'Mar', revenue: 48000, expenses: 33000, profit: 15000 },
-  { month: 'Apr', revenue: 58000, expenses: 38000, profit: 20000 },
-  { month: 'May', revenue: 65000, expenses: 42000, profit: 23000 },
-  { month: 'Jun', revenue: 72000, expenses: 45000, profit: 27000 },
-];
-
-const serviceData = [
-  { name: 'Consultations', value: 35, color: '#3B82F6' },
-  { name: 'Surgeries', value: 25, color: '#10B981' },
-  { name: 'Emergency', value: 20, color: '#EF4444' },
-  { name: 'Pharmacy', value: 12, color: '#F59E0B' },
-  { name: 'Lab Tests', value: 8, color: '#8B5CF6' },
-];
 
 const reportTypes = [
   { id: 'financial', label: 'Financial Reports', icon: DollarSign, color: 'emerald' },
@@ -68,6 +52,36 @@ const sidebarLinks = [
 const ReportsAnalytics: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [revenueData, setRevenueData] = useState<any[]>([]);
+  const [serviceData, setServiceData] = useState<any[]>([]);
+  const [generatedReports, setGeneratedReports] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/analytics`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const result = await res.json();
+        if (Array.isArray(result)) {
+          setRevenueData(result);
+        } else {
+          setRevenueData(result.revenueData || []);
+          setServiceData(result.serviceData || []);
+          setGeneratedReports(result.generatedReports || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch analytics:', err);
+        setRevenueData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#020408] flex">
@@ -178,13 +192,7 @@ const ReportsAnalytics: React.FC = () => {
             <GlassmorphicCard className="p-6">
               <h3 className="text-white font-bold mb-4">Generated Reports</h3>
               <div className="space-y-3">
-                {[
-                  { name: 'Monthly Financial Summary - June 2024', type: 'Financial', date: '2024-06-30', size: '2.4 MB', status: 'ready' },
-                  { name: 'Patient Admissions Report - Q2 2024', type: 'Clinical', date: '2024-06-28', size: '1.8 MB', status: 'ready' },
-                  { name: 'Doctor Performance Analytics', type: 'Operational', date: '2024-06-25', size: '3.1 MB', status: 'generating' },
-                  { name: 'Compliance Audit Report', type: 'Compliance', date: '2024-06-20', size: '4.2 MB', status: 'ready' },
-                  { name: 'Emergency Response Analysis', type: 'Operational', date: '2024-06-18', size: '1.5 MB', status: 'ready' },
-                ].map((report, i) => (
+                {generatedReports.length > 0 ? generatedReports.map((report: any, i: number) => (
                   <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04]">
                     <div className="flex items-center gap-3">
                       <FileText className="w-5 h-5 text-cyan-400" />
@@ -200,7 +208,9 @@ const ReportsAnalytics: React.FC = () => {
                       )}
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-slate-500 text-sm text-center py-4">No reports generated yet.</p>
+                )}
               </div>
             </GlassmorphicCard>
           </motion.div>

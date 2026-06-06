@@ -3,25 +3,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Pill,
   Plus,
-  X,
+  
   Clock,
   CheckCircle,
-  AlertCircle,
-  Calendar,
+  
+  
   Bell,
   Activity,
-  TrendingUp,
+  
   ChevronDown,
-  ChevronUp,
+  
   RefreshCw,
   Trash2,
-  Edit2,
-  Save
+  AlertTriangle,
+  
 } from 'lucide-react';
 import { clsx } from 'clsx';
-import { GlassmorphicCard } from '../../ui/GlassmorphicCard';
-import { Button } from '../../ui/Button';
-import { Badge } from '../../ui/Badge';
+import { GlassmorphicCard } from 'src/ui/GlassmorphicCard';
+import { Button } from 'src/ui/Button';
+import { Badge } from 'src/ui/Badge';
+import { twMerge } from 'tailwind-merge';
 
 // ============================================
 // TYPES & INTERFACES
@@ -91,7 +92,7 @@ export const MedicineTracker: React.FC<MedicineTrackerProps> = ({
   ],
   variant = 'glass',
   onAddMedication,
-  onUpdateMedication,
+
   onDeleteMedication,
   onMarkTaken,
   className,
@@ -107,7 +108,7 @@ export const MedicineTracker: React.FC<MedicineTrackerProps> = ({
     instructions: '',
     prescribedBy: '',
   });
-  const [editingId, setEditingId] = useState<string | null>(null);
+  
   const [adherenceData, setAdherenceData] = useState<number[]>([95, 88, 92, 85, 90, 94, 87]);
 
   // Simulate real-time updates
@@ -135,19 +136,6 @@ export const MedicineTracker: React.FC<MedicineTrackerProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  const calculateNextDose = (times: string[]) => {
-    const now = new Date();
-    const currentTime = now.getHours() * 60 + now.getMinutes();
-    
-    for (const time of times) {
-      const [hours, minutes] = time.split(':').map(Number);
-      const doseTime = hours * 60 + minutes;
-      if (doseTime > currentTime) {
-        return time;
-      }
-    }
-    return times[0]; // Next day's first dose
-  };
 
   const getTimeUntilNextDose = (time: string) => {
     const now = new Date();

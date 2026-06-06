@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { getAuthToken } from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ClipboardList, Search, 
@@ -11,20 +12,31 @@ import { Button } from 'src/ui/Button';
 import { Badge } from 'src/ui/Badge';
 import { Input } from 'src/ui/Input';
 
-const auditLogs = [
-  { id: 1, user: 'Admin', action: 'User Login', details: 'Admin logged in from IP 192.168.1.1', time: '2 min ago', type: 'auth', severity: 'info' },
-  { id: 2, user: 'Dr. Sarah Johnson', action: 'Prescription Modified', details: 'Updated dosage for patient #1247', time: '15 min ago', type: 'medical', severity: 'warning' },
-  { id: 3, user: 'MediPlus Pharmacy', action: 'Medicine Stock Updated', details: 'Added 500 units of Paracetamol', time: '30 min ago', type: 'inventory', severity: 'info' },
-  { id: 4, user: 'Rahima Khatun', action: 'Profile Edited', details: 'Updated phone number and address', time: '1 hour ago', type: 'user', severity: 'info' },
-  { id: 5, user: 'Admin', action: 'User Suspended', details: 'Suspended account #4521 - fraud detected', time: '2 hours ago', type: 'admin', severity: 'critical' },
-  { id: 6, user: 'Dr. Michael Chen', action: 'Patient Record Accessed', details: 'Viewed medical history of patient #3321', time: '3 hours ago', type: 'medical', severity: 'info' },
-  { id: 7, user: 'System', action: 'Data Export', details: 'Monthly report exported by scheduled task', time: '4 hours ago', type: 'system', severity: 'info' },
-  { id: 8, user: 'HealthCare Pharmacy', action: 'Medicine Price Changed', details: 'Updated price of 15 medicines', time: '5 hours ago', type: 'inventory', severity: 'warning' },
-];
-
 const AuditLogs: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/audit-logs`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const result = await res.json();
+        setAuditLogs(Array.isArray(result) ? result : []);
+      } catch (err) {
+        console.error('Failed to fetch audit logs:', err);
+        setAuditLogs([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const filtered = auditLogs.filter(log => {
     const matchSearch = log.user.toLowerCase().includes(searchTerm.toLowerCase()) || log.action.toLowerCase().includes(searchTerm.toLowerCase());

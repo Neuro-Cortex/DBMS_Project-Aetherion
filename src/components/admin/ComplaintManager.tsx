@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { getAuthToken } from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   FileText,  CheckCircle, 
@@ -25,9 +26,33 @@ const mockComplaints = [
 const ComplaintManager: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [complaints, setComplaints] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredComplaints = mockComplaints.filter(c => {
-    const matchesSearch = c.subject.toLowerCase().includes(searchTerm.toLowerCase()) || c.from.toLowerCase().includes(searchTerm.toLowerCase());
+  useEffect(() => {
+    const fetchComplaints = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/complaints`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const data = await res.json();
+        setComplaints(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch complaints:', err);
+        setComplaints([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchComplaints();
+  }, []);
+
+  const filteredComplaints = complaints.filter((c: any) => {
+    const subject = c.subject || '';
+    const userName = c.user_name || '';
+    const matchesSearch = subject.toLowerCase().includes(searchTerm.toLowerCase()) || userName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || c.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -59,19 +84,19 @@ const ComplaintManager: React.FC = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <Card className="p-4 border-l-4 border-l-red-500">
-                <p className="text-2xl font-black text-white">{mockComplaints.length}</p>
+                <p className="text-2xl font-black text-white">{complaints.length}</p>
                 <p className="text-xs text-slate-400">Total Complaints</p>
               </Card>
               <Card className="p-4 border-l-4 border-l-amber-500">
-                <p className="text-2xl font-black text-white">{mockComplaints.filter(c => c.priority === 'urgent' || c.priority === 'high').length}</p>
+                <p className="text-2xl font-black text-white">{complaints.filter((c: any) => c.priority === 'urgent' || c.priority === 'high').length}</p>
                 <p className="text-xs text-slate-400">Urgent/High</p>
               </Card>
               <Card className="p-4 border-l-4 border-l-emerald-500">
-                <p className="text-2xl font-black text-white">{mockComplaints.filter(c => c.status === 'resolved').length}</p>
+                <p className="text-2xl font-black text-white">{complaints.filter((c: any) => c.status === 'resolved').length}</p>
                 <p className="text-xs text-slate-400">Resolved</p>
               </Card>
               <Card className="p-4 border-l-4 border-l-blue-500">
-                <p className="text-2xl font-black text-white">{mockComplaints.filter(c => c.status === 'pending').length}</p>
+                <p className="text-2xl font-black text-white">{complaints.filter((c: any) => c.status === 'pending').length}</p>
                 <p className="text-xs text-slate-400">Pending</p>
               </Card>
             </div>
@@ -94,29 +119,28 @@ const ComplaintManager: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                {filteredComplaints.map((complaint, i) => (
-                  <motion.div key={complaint.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                {filteredComplaints.map((complaint: any, i: number) => (
+                  <motion.div key={complaint.id || i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                     className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04] hover:border-cyan-500/20 transition-all">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-start gap-3">
-                        <div className={`p-2.5 rounded-xl ${roleBadge(complaint.role)}`}>
+                        <div className={`p-2.5 rounded-xl ${roleBadge(complaint.type || 'patient')}`}>
                           <Flag className="w-4 h-4" />
                         </div>
                         <div>
-                          <h4 className="text-white font-bold text-sm">{complaint.subject}</h4>
-                          <p className="text-xs text-slate-400 mt-0.5">{complaint.description}</p>
+                          <h4 className="text-white font-bold text-sm">{complaint.subject || 'No Subject'}</h4>
+                          <p className="text-xs text-slate-400 mt-0.5">{complaint.message || complaint.description || ''}</p>
                         </div>
                       </div>
                       <Badge variant={complaint.priority === 'urgent' ? 'danger' : complaint.priority === 'high' ? 'warning' : 'info'}
-                        className="text-[10px] shrink-0">{complaint.priority}</Badge>
+                        className="text-[10px] shrink-0">{complaint.priority || 'medium'}</Badge>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-slate-500">
-                      <span>From: <span className="text-white">{complaint.from}</span></span>
-                      <span>Against: <span className="text-white">{complaint.against}</span></span>
+                      <span>From: <span className="text-white">{complaint.user_name || 'Unknown'}</span></span>
                       <Badge variant={complaint.status === 'resolved' ? 'success' : complaint.status === 'investigating' ? 'info' : 'warning'}
-                        className="text-[8px]">{complaint.status}</Badge>
-                      <span className="ml-auto">{complaint.date}</span>
+                        className="text-[8px]">{complaint.status || 'pending'}</Badge>
+                      <span className="ml-auto">{complaint.created_at ? new Date(complaint.created_at).toLocaleDateString() : ''}</span>
                     </div>
                     <div className="flex gap-2 mt-3 pt-3 border-t border-white/[0.04]">
                       <Button variant="primary" size="xs" className="bg-cyan-500"><Eye className="w-3 h-3 mr-1" /> Review</Button>

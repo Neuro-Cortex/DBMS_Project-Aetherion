@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { getAuthToken } from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Calendar, Clock, Video,
@@ -23,9 +24,32 @@ const mockMeetings = [
 const AdminMeetingSystem: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [meetings, setMeetings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filtered = mockMeetings.filter(m => {
-    const matchSearch = m.with.toLowerCase().includes(searchTerm.toLowerCase()) || m.subject.toLowerCase().includes(searchTerm.toLowerCase());
+  useEffect(() => {
+    const fetchMeetings = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/appointments?limit=20`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const data = await res.json();
+        setMeetings(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch meetings:', err);
+        setMeetings([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchMeetings();
+  }, []);
+
+  const filtered = meetings.filter((m: any) => {
+    const name = m.doctor_name || m.patient_name || '';
+    const matchSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchStatus = filterStatus === 'all' || m.status === filterStatus;
     return matchSearch && matchStatus;
   });
@@ -47,10 +71,10 @@ const AdminMeetingSystem: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <Card className="p-4"><p className="text-2xl font-black text-white">{mockMeetings.length}</p><p className="text-xs text-slate-400">Total Meetings</p></Card>
-              <Card className="p-4"><p className="text-2xl font-black text-white">{mockMeetings.filter(m => m.status === 'scheduled').length}</p><p className="text-xs text-slate-400">Scheduled</p></Card>
-              <Card className="p-4"><p className="text-2xl font-black text-white">{mockMeetings.filter(m => m.status === 'completed').length}</p><p className="text-xs text-slate-400">Completed</p></Card>
-              <Card className="p-4"><p className="text-2xl font-black text-white">{mockMeetings.filter(m => m.status === 'pending').length}</p><p className="text-xs text-slate-400">Pending Approval</p></Card>
+              <Card className="p-4"><p className="text-2xl font-black text-white">{meetings.length}</p><p className="text-xs text-slate-400">Total Meetings</p></Card>
+              <Card className="p-4"><p className="text-2xl font-black text-white">{meetings.filter((m: any) => m.status === 'scheduled').length}</p><p className="text-xs text-slate-400">Scheduled</p></Card>
+              <Card className="p-4"><p className="text-2xl font-black text-white">{meetings.filter((m: any) => m.status === 'completed').length}</p><p className="text-xs text-slate-400">Completed</p></Card>
+              <Card className="p-4"><p className="text-2xl font-black text-white">{meetings.filter((m: any) => m.status === 'pending').length}</p><p className="text-xs text-slate-400">Pending Approval</p></Card>
             </div>
 
             <GlassmorphicCard className="p-6">
@@ -68,24 +92,23 @@ const AdminMeetingSystem: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                {filtered.map((meeting, i) => (
-                  <motion.div key={meeting.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                {filtered.map((meeting: any, i: number) => (
+                  <motion.div key={meeting.id || i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                     className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04]">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Avatar name={meeting.with.split(' ').map(n => n[0]).join('')} size="md" />
+                        <Avatar name={(meeting.doctor_name || meeting.patient_name || 'M').split(' ').map((n: string) => n[0]).join('')} size="md" />
                         <div>
-                          <h4 className="text-white font-bold text-sm">{meeting.with}</h4>
-                          <p className="text-xs text-slate-400">{meeting.subject}</p>
+                          <h4 className="text-white font-bold text-sm">{meeting.doctor_name || meeting.patient_name || 'Unknown'}</h4>
+                          <p className="text-xs text-slate-400">{meeting.specialization || meeting.type || ''}</p>
                           <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {meeting.date}</span>
-                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {meeting.time}</span>
-                            <span>{meeting.duration}</span>
+                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {meeting.appointment_date || ''}</span>
+                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {meeting.start_time || ''}</span>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Badge variant={meeting.type === 'video' ? 'info' : 'default'} className="text-[10px]">{meeting.type}</Badge>
+                        <Badge variant={meeting.location === 'video' ? 'info' : 'default'} className="text-[10px]">{meeting.location || 'in-person'}</Badge>
                         <Badge variant={meeting.status === 'completed' ? 'success' : meeting.status === 'scheduled' ? 'info' : 'warning'} className="text-[10px]">{meeting.status}</Badge>
                         {meeting.status === 'scheduled' && (
                           <Button variant="primary" size="xs" className="bg-emerald-500"><Video className="w-3 h-3 mr-1" /> Join</Button>

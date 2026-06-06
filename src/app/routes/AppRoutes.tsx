@@ -22,18 +22,27 @@ const PageLoader: React.FC = () => (
 // ============================================
 const AuthGuard: React.FC<{ route: RouteItem; children: React.ReactNode }> = ({ route, children }) => {
   const auth = useSelector((state: RootState) => state.auth);
-  const sessionToken = sessionStorage.getItem('auth_token');
-  const userRole = sessionStorage.getItem('user_role');
 
-  const isAuthenticated = auth?.isAuthenticated && sessionToken;
-
-  // Not logged in
-  if (!isAuthenticated) {
+  if (!auth?.isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Wrong role
-  if (route.roles && !route.roles.includes(userRole || '')) {
+  const userRole = auth.user?.primaryRole || auth.user?.role || '';
+
+  // Map backend roles to route roles
+  const roleMapping: Record<string, string[]> = {
+    patient: ['client', 'normal_user'],
+    doctor: ['doctor'],
+    hospital: ['hospital_admin', 'hospital_authority', 'hospital'],
+    pharmacy: ['pharmacy_admin', 'pharmacy'],
+    admin: ['admin', 'super_admin'],
+  };
+
+  const mappedRole = Object.entries(roleMapping).find(([_, backendRoles]) =>
+    backendRoles.includes(userRole as string)
+  )?.[0] || userRole;
+
+  if (route.roles && !route.roles.includes(mappedRole as string)) {
     return <Navigate to="/" replace />;
   }
 
@@ -45,11 +54,18 @@ const AuthGuard: React.FC<{ route: RouteItem; children: React.ReactNode }> = ({ 
 // ============================================
 const PublicGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const auth = useSelector((state: RootState) => state.auth);
-  const sessionToken = sessionStorage.getItem('auth_token');
-  const userRole = sessionStorage.getItem('user_role');
 
-  if (auth?.isAuthenticated && sessionToken && userRole) {
-    return <Navigate to={`/${userRole}/dashboard`} replace />;
+  if (auth?.isAuthenticated && auth.user) {
+    const primaryRole = auth.user.primaryRole || auth.user.role || '';
+    const roleMapping: Record<string, string> = {
+      client: 'patient', normal_user: 'patient',
+      doctor: 'doctor',
+      hospital_admin: 'hospital', hospital_authority: 'hospital',
+      pharmacy_admin: 'pharmacy',
+      admin: 'admin', super_admin: 'admin',
+    };
+    const dashboardRole = roleMapping[primaryRole] || 'patient';
+    return <Navigate to={`/${dashboardRole}/dashboard`} replace />;
   }
 
   return <>{children}</>;

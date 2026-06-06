@@ -90,13 +90,98 @@ export const routeConfig: RouteItem[] = [
   { path: '/emergency/bed-availability', component: lazy(() => import('src/components/emergency/BadAvailability')), isProtected: false, title: 'Bed Availability' },
   { path: '/emergency/icu-tracker', component: lazy(() => import('src/components/emergency/ICUTracker')), isProtected: false, title: 'ICU Tracker' },
 
-  // ==================== AI ASSISTANT ====================
-  { path: '/ai-assistant', component: lazy(() => import('src/components/ai-assistent/AIAssistant')), isProtected: false, title: 'AI Assistant' },
-  { path: '/ai-assistant/symptom-checker', component: lazy(() => import('src/components/ai-assistent/SymptomChecker').then(m => ({ default: m.SymptomChecker }))), isProtected: false, title: 'Symptom Checker' },
-  { path: '/ai-assistant/pregnancy-guide', component: lazy(() => import('src/components/ai-assistent/PregnancyGuide').then(m => ({ default: m.PregnancyGuide }))), isProtected: false, title: 'Pregnancy Guide' },
-  { path: '/ai-assistant/baby-care', component: lazy(() => import('src/components/ai-assistent/BabyCareAdvice').then(m => ({ default: m.BabyCareAdvice }))), isProtected: false, title: 'Baby Care Advice' },
-  { path: '/ai-assistant/recommendations', component: lazy(() => import('src/components/ai-assistent/SmartRecommendation')), isProtected: false, title: 'Smart Recommendations' },
+  // ============================================
+  // AI DASHBOARD (MAIN)
+  // ============================================
+  {
+    path: '/ai-assistant',
+    component: lazy(() => import('src/components/ai-assistent/AI-DashBoard')),
+    isProtected: false,
+    title: 'AI Assistant',
+  },
 
+  // ============================================
+  // CORE AI FEATURES
+  // ============================================
+  {
+    path: '/ai-assistant/symptom-checker',
+    component: lazy(() =>
+      import('src/components/ai-assistent/SymptomChecker').then(m => ({
+        default: m.SymptomChecker,
+      }))
+    ),
+    isProtected: false,
+    title: 'Symptom Checker',
+  },
+  {
+    path: '/ai-assistant/pregnancy-guide',
+    component: lazy(() =>
+      import('src/components/ai-assistent/PregnancyGuide').then(m => ({
+        default: m.PregnancyGuide,
+      }))
+    ),
+    isProtected: false,
+    title: 'Pregnancy Guide',
+  },
+  {
+    path: '/ai-assistant/baby-care',
+    component: lazy(() =>
+      import('src/components/ai-assistent/BabyCareAdvice').then(m => ({
+        default: m.BabyCareAdvice,
+      }))
+    ),
+    isProtected: false,
+    title: 'Baby Care Advice',
+  },
+  {
+    path: '/ai-assistant/recommendations',
+    component: lazy(() => import('src/components/ai-assistent/SmartRecommendation')),
+    isProtected: false,
+    title: 'Smart Recommendations',
+  },
+
+  {
+    path: '/ai-assistant/chat',
+    component: lazy(() =>
+      import('src/components/ai-assistent/ChatBot').then(m => ({ default: m.ChatBot }))
+    ),
+    isProtected: false,
+    title: 'AI Chat',
+  },
+
+  
+  
+  // ============================================
+  // EXTRA FEATURES
+  // ============================================
+  {
+    path: '/ai-assistant/voice',
+    component: lazy(() =>
+      import('src/components/ai-assistent/AIVoiceButton').then(m => ({ default: m.AIVoiceButton }))
+    ),
+    isProtected: false,
+    title: 'Voice Assistant',
+  },
+  {
+    path: '/ai-assistant/suggestions',
+    component: lazy(() =>
+      import('src/components/ai-assistent/AISuggestionChips').then(m => ({ default: m.AISuggestionChips }))
+    ),
+    isProtected: false,
+    title: 'AI Suggestions',
+  },
+
+
+
+
+
+
+
+
+
+
+
+  
   // ==================== OXYGEN ====================
   { path: '/oxygen', component: lazy(() => import('src/components/oxygen/OxygenDashboard')), isProtected: false, title: 'Oxygen Dashboard' },
 
@@ -117,6 +202,29 @@ export const routeConfig: RouteItem[] = [
   { path: '/women-care/vaccine-schedule', component: lazy(() => import('src/components/women/VaccineSchedule')), isProtected: true, roles: ['patient'], title: 'Vaccine Schedule' },
   { path: '/women-care/health', component: lazy(() => import('src/components/women/WomenHealth')), isProtected: true, roles: ['patient'], title: 'Women Health' },
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   // ==================== PATIENT (Protected) ====================
   { path: '/patient/dashboard', component: lazy(() => import('../../pages/Client/ClientDashboard')), isProtected: true, roles: ['patient'], title: 'Dashboard' },
   { path: '/patient/appointments', component: lazy(() => import('../../pages/Client/Appointments')), isProtected: true, roles: ['patient'], title: 'Appointments' },
@@ -138,10 +246,27 @@ export const routeConfig: RouteItem[] = [
   { path: '/patient/medicine-tracker', component: lazy(() => import('../../pages/Client/patients/MedicineTracker')), isProtected: true, roles: ['patient'], title: 'Medicine Tracker' },
   { path: '/patient/vaccination-tracker', component: lazy(() => import('../../pages/Client/patients/VaccinationTracker')), isProtected: true, roles: ['patient'], title: 'Vaccination Tracker' },
 
+  // ==================== PATIENT WELLNESS (Protected) ====================
+  { path: '/patient/mental-health', component: lazy(() => import('../../pages/Client/MentalHealth')), isProtected: true, roles: ['patient'], title: 'Mental Health' },
+  { path: '/patient/nutrition', component: lazy(() => import('../../pages/Client/Nutrition')), isProtected: true, roles: ['patient'], title: 'Nutrition' },
+  { path: '/patient/sleep', component: lazy(() => import('../../pages/Client/Sleep')), isProtected: true, roles: ['patient'], title: 'Sleep' },
+  { path: '/patient/fitness', component: lazy(() => import('../../pages/Client/Fitness')), isProtected: true, roles: ['patient'], title: 'Fitness' },
+
   // ==================== SHARED (All roles) ====================
   { path: '/profile', component: lazy(() => import('../../pages/Client/Clientprofile')), isProtected: true, roles: ['patient', 'doctor', 'hospital', 'pharmacy', 'admin', 'super_admin'], title: 'Profile' },
   { path: '/settings', component: lazy(() => import('../../pages/Client/Settings')), isProtected: true, roles: ['patient', 'doctor', 'hospital', 'pharmacy', 'admin', 'super_admin'], title: 'Settings' },
   { path: '/security', component: lazy(() => import('../../pages/Client/Security')), isProtected: true, roles: ['patient', 'doctor', 'hospital', 'pharmacy', 'admin', 'super_admin'], title: 'Security' },
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -168,86 +293,22 @@ export const routeConfig: RouteItem[] = [
   { path: '/admin/security', component: lazy(() => import('src/components/admin/SecurityManager')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Security Manager' },
   { path: '/admin/hospitals', component: lazy(() => import('src/components/admin/HospitalManagement')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Hospital Management' },
   { path: '/admin/pharmacy', component: lazy(() => import('src/components/admin/PharmacyManagement')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Pharmacy Management' },
-  
-  
 
-
-
-
-
-
-  
   { path: '/admin/women-care-management', component: lazy(() => import('src/components/admin/WomenCareManagement')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Women Care Management' },
   { path: '/admin/messages', component: lazy(() => import('src/components/admin/MessagesCenter')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Messages' },
   { path: '/admin/complaints', component: lazy(() => import('src/components/admin/ComplaintManager')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Complaints' },
   { path: '/admin/revenue', component: lazy(() => import('src/components/admin/RevenueManager')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Revenue' },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   { path: '/admin/reports', component: lazy(() => import('src/components/admin/ReportsAnalytics')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Reports' },
   { path: '/admin/analytics', component: lazy(() => import('src/components/admin/ReportsAnalytics')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Analytics' },
   { path: '/admin/ai-system', component: lazy(() => import('src/components/admin/AIControlPanel')), isProtected: true, roles: ['admin', 'super_admin'], title: 'AI System' },
   { path: '/admin/verification', component: lazy(() => import('src/components/admin/VerificationCenter')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Verification' },
   { path: '/admin/notifications', component: lazy(() => import('src/components/admin/AdminNotifications')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Notifications' },
-  
-  
-  
-  
+
   { path: '/admin/audit-logs', component: lazy(() => import('src/components/admin/AuditLogs')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Audit Logs' },
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   { path: '/admin/appointments', component: lazy(() => import('src/components/admin/AdminAppointments')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Admin Appointments' },
-  
-  
-  
   { path: '/admin/meetings', component: lazy(() => import('src/components/admin/AdminMeetingSystem')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Admin Meetings' },
-
-
-
-
-
-
   { path: '/admin/heatmap', component: lazy(() => import('src/components/admin/HealthHeatmap')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Health Heatmap' },
-
-
-
-
-
   { path: '/admin/settings', component: lazy(() => import('src/components/admin/SecurityManager')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Settings' },
   { path: '/admin/blood-bank', component: lazy(() => import('src/components/admin/EmergencyMonitor')), isProtected: true, roles: ['admin', 'super_admin'], title: 'Blood Bank' },
 

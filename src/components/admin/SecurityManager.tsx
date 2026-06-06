@@ -1,3 +1,4 @@
+import { getAuthToken } from '../../services/api';
 // src/components/admin/SecurityManager.tsx
 // SUPER NICE UI - Using All Common Components
 // Realistic Security Dashboard
@@ -159,62 +160,20 @@ export const SecurityManager: React.FC = () => {
 
   const fetchSecurityLogs = async () => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const mockLogs: SecurityLog[] = [
-      {
-        id: '1', event: 'Failed Login Attempt', userId: 'u1', userName: 'Unknown',
-        ipAddress: '192.168.1.100', userAgent: 'Mozilla/5.0 (Windows NT 10.0)',
-        timestamp: '2024-02-16T10:15:00', status: 'blocked',
-        details: '5 failed attempts - IP temporarily blocked',
-        location: 'New York, USA', device: 'Desktop'
-      },
-      {
-        id: '2', event: 'Admin Login', userId: 'admin1', userName: 'Super Admin',
-        ipAddress: '10.0.0.1', userAgent: 'Chrome/120.0',
-        timestamp: '2024-02-16T09:00:00', status: 'success',
-        details: 'Successful admin login with 2FA',
-        location: 'San Francisco, USA', device: 'Desktop'
-      },
-      {
-        id: '3', event: 'User Blocked', userId: 'u2', userName: 'Mike Wilson',
-        ipAddress: '10.0.0.2', userAgent: 'Admin Panel',
-        timestamp: '2024-02-16T08:30:00', status: 'success',
-        details: 'User blocked due to multiple policy violations',
-        location: 'Chicago, USA', device: 'Mobile'
-      },
-      {
-        id: '4', event: 'SSL Certificate Renewed', userName: 'System',
-        ipAddress: '127.0.0.1', userAgent: 'System Cron',
-        timestamp: '2024-02-16T07:00:00', status: 'success',
-        details: 'SSL certificate auto-renewed for next 90 days',
-        location: 'Server', device: 'Server'
-      },
-      {
-        id: '5', event: 'Firewall Rule Updated', userName: 'Security Bot',
-        ipAddress: '127.0.0.1', userAgent: 'AI Security',
-        timestamp: '2024-02-16T06:30:00', status: 'success',
-        details: 'Blocked 3 suspicious IP ranges',
-        location: 'Server', device: 'Server'
-      },
-      {
-        id: '6', event: 'Unauthorized API Access', userId: 'u5', userName: 'Unknown',
-        ipAddress: '45.33.32.156', userAgent: 'Python/3.9',
-        timestamp: '2024-02-16T05:45:00', status: 'blocked',
-        details: 'Attempted to access restricted endpoint',
-        location: 'Russia', device: 'Bot'
-      },
-      {
-        id: '7', event: 'Password Changed', userId: 'u3', userName: 'Sarah Johnson',
-        ipAddress: '192.168.1.50', userAgent: 'Chrome/121.0',
-        timestamp: '2024-02-16T04:20:00', status: 'success',
-        details: 'Password changed successfully with email verification',
-        location: 'Boston, USA', device: 'Desktop'
-      }
-    ];
-    
-    setSecurityLogs(mockLogs);
-    setIsLoading(false);
+    try {
+      const token = getAuthToken();
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/security/logs`,
+        { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+      );
+      const result = await res.json();
+      setSecurityLogs(Array.isArray(result) ? result : []);
+    } catch (err) {
+      console.error('Failed to fetch security logs:', err);
+      setSecurityLogs([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filteredLogs = securityLogs.filter(log => {

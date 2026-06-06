@@ -1,6 +1,6 @@
 // src/services/authService.ts
 
-import api, { simulateDelay } from './api';
+import api, { saveUser, clearUser, getCurrentUser } from './api';
 
 // ============================================
 // TYPES & INTERFACES
@@ -9,16 +9,26 @@ import api, { simulateDelay } from './api';
 export interface User {
   id: string;
   name: string;
+  fullName?: string;
   email: string;
-  phone: string;
-  role: 'patient' | 'doctor' | 'admin';
+  phone?: string;
+  role?: string;
+  roles?: string[];
+  primaryRole?: string;
+  upgrades?: string[];
   avatar?: string;
+  profileImage?: string;
+  bloodGroup?: string;
+  gender?: string;
   token?: string;
   createdAt?: string;
   updatedAt?: string;
   isActive?: boolean;
+  isVerified?: boolean;
   emailVerified?: boolean;
   phoneVerified?: boolean;
+  isAdminApproved?: boolean;
+  isOnline?: boolean;
   preferences?: UserPreferences;
 }
 
@@ -28,170 +38,65 @@ export interface UserPreferences {
     sms: boolean;
     push: boolean;
   };
-  language: 'en' | 'bn';
-  theme: 'light' | 'dark' | 'system';
+  language: string;
+  theme: string;
   timezone: string;
 }
 
 export interface LoginCredentials {
   email: string;
   password: string;
+  role?: string;
   rememberMe?: boolean;
 }
 
 export interface RegisterData {
   name: string;
+  full_name: string;
   email: string;
   phone: string;
   password: string;
   confirmPassword?: string;
-  role: 'patient' | 'doctor';
+  confirm_password?: string;
+  role: string;
+  gender?: string;
   acceptTerms?: boolean;
 }
 
 export interface AuthResponse {
   user: User;
   token: string;
+  accessToken?: string;
   refreshToken?: string;
   expiresIn?: number;
 }
 
 export interface ChangePasswordData {
   currentPassword: string;
+  current_password: string;
   newPassword: string;
+  new_password: string;
   confirmNewPassword: string;
+  confirm_new_password: string;
 }
 
 export interface ResetPasswordData {
-  email: string;
+  email?: string;
   token: string;
   newPassword: string;
+  new_password: string;
   confirmNewPassword: string;
+  confirm_password: string;
 }
 
 export interface ForgotPasswordResponse {
   message: string;
-  resetToken?: string; // Only in development
 }
 
 export interface VerifyEmailResponse {
   verified: boolean;
   message: string;
 }
-
-// ============================================
-// MOCK DATABASE (will be replaced by real API)
-// ============================================
-
-interface MockUser extends User {
-  password: string;
-  refreshToken?: string;
-}
-
-const mockUsers: MockUser[] = [
-  {
-    id: 'usr_001',
-    name: 'Admin User',
-    email: 'admin@medicare.com',
-    phone: '+1 (555) 000-0000',
-    role: 'admin',
-    password: 'Admin@123',
-    token: 'mock_admin_token_123',
-    refreshToken: 'mock_admin_refresh_123',
-    isActive: true,
-    emailVerified: true,
-    phoneVerified: true,
-    createdAt: new Date().toISOString(),
-    preferences: {
-      notifications: { email: true, sms: true, push: true },
-      language: 'en',
-      theme: 'dark',
-      timezone: 'Asia/Dhaka'
-    }
-  },
-  {
-    id: 'usr_002',
-    name: 'Dr. Sarah Wilson',
-    email: 'sarah@hospital.com',
-    phone: '+1 (555) 111-2222',
-    role: 'doctor',
-    password: 'Doctor@123',
-    token: 'mock_doctor_token_456',
-    refreshToken: 'mock_doctor_refresh_456',
-    isActive: true,
-    emailVerified: true,
-    phoneVerified: true,
-    createdAt: new Date().toISOString(),
-    preferences: {
-      notifications: { email: true, sms: false, push: true },
-      language: 'en',
-      theme: 'system',
-      timezone: 'Asia/Dhaka'
-    }
-  },
-  {
-    id: 'usr_003',
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '+1 (555) 333-4444',
-    role: 'patient',
-    password: 'Patient@123',
-    token: 'mock_patient_token_789',
-    refreshToken: 'mock_patient_refresh_789',
-    isActive: true,
-    emailVerified: false,
-    phoneVerified: true,
-    createdAt: new Date().toISOString(),
-    preferences: {
-      notifications: { email: true, sms: true, push: false },
-      language: 'bn',
-      theme: 'light',
-      timezone: 'Asia/Dhaka'
-    }
-  },
-];
-
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
-
-const generateToken = (userId: string, role: string): string => {
-  // In production, this would be a JWT signed by the server
-  return `jwt_${Date.now()}_${userId}_${role}_${Math.random().toString(36).substr(2, 9)}`;
-};
-
-const generateRefreshToken = (userId: string): string => {
-  return `refresh_${Date.now()}_${userId}_${Math.random().toString(36).substr(2, 9)}`;
-};
-
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
-  return emailRegex.test(email);
-};
-
-const validatePhone = (phone: string): boolean => {
-  const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,5}[-\s\.]?[0-9]{1,5}$/;
-  return phoneRegex.test(phone);
-};
-
-const validatePassword = (password: string): { valid: boolean; message: string } => {
-  if (password.length < 8) {
-    return { valid: false, message: 'Password must be at least 8 characters long' };
-  }
-  if (!/[A-Z]/.test(password)) {
-    return { valid: false, message: 'Password must contain at least one uppercase letter' };
-  }
-  if (!/[a-z]/.test(password)) {
-    return { valid: false, message: 'Password must contain at least one lowercase letter' };
-  }
-  if (!/[0-9]/.test(password)) {
-    return { valid: false, message: 'Password must contain at least one number' };
-  }
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    return { valid: false, message: 'Password must contain at least one special character' };
-  }
-  return { valid: true, message: 'Password is valid' };
-};
 
 // ============================================
 // AUTH SERVICE
@@ -202,508 +107,331 @@ export const authService = {
    * Login user with email and password
    */
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    await simulateDelay(1200);
+    const response = await api.post<any>('/auth/login', {
+      email: credentials.email,
+      password: credentials.password,
+      role: credentials.role,
+    });
 
-    try {
-      // TODO: Uncomment for real API
-      // const response = await api.post<AuthResponse>('/auth/login', credentials);
-      // if (response.success && response.data) {
-      //   const { user, token, refreshToken, expiresIn } = response.data;
-      //   const userData = { ...user, token };
-      //   localStorage.setItem('medicare_user', JSON.stringify(userData));
-      //   if (credentials.rememberMe) {
-      //     localStorage.setItem('medicare_refresh_token', refreshToken || '');
-      //   }
-      //   return { user: userData, token, refreshToken, expiresIn };
-      // }
-      // throw new Error(response.message);
+    if (response.success && response.data) {
+      const tokenData = response.data;
+      const accessToken = tokenData.access_token;
+      const refreshToken = tokenData.refresh_token;
+      const userData = tokenData.user || {};
 
-      // Mock implementation (remove in production)
-      const user = mockUsers.find(
-        u => u.email === credentials.email && u.password === credentials.password
-      );
+      // Normalize user object
+      const user: User = {
+        id: userData.id,
+        name: userData.full_name || userData.name || credentials.email.split('@')[0],
+        fullName: userData.full_name,
+        email: userData.email || credentials.email,
+        phone: userData.phone,
+        role: userData.primary_role || userData.role || 'patient',
+        roles: userData.roles || [userData.primary_role || 'patient'],
+        primaryRole: userData.primary_role,
+        upgrades: userData.upgrades || [],
+        avatar: userData.profile_image,
+        profileImage: userData.profile_image,
+        bloodGroup: userData.blood_group,
+        gender: userData.gender,
+        token: accessToken,
+        isVerified: userData.is_verified,
+        emailVerified: userData.is_verified,
+        isAdminApproved: userData.is_admin_approved,
+        isActive: userData.is_active,
+        isOnline: userData.is_online,
+        createdAt: userData.created_at,
+      };
 
-      if (!user) {
-        throw new Error('Invalid email or password');
-      }
-
-      if (!user.isActive) {
-        throw new Error('Your account has been deactivated. Please contact support.');
-      }
-
-      const { password, refreshToken: oldRefreshToken, ...userWithoutPassword } = user;
-      const token = generateToken(user.id, user.role);
-      const refreshToken = credentials.rememberMe ? generateRefreshToken(user.id) : undefined;
-      
-      const userData = { ...userWithoutPassword, token };
-      
       // Persist auth data
-      localStorage.setItem('medicare_user', JSON.stringify(userData));
-      if (refreshToken) {
+      saveUser({ ...user, token: accessToken });
+      if (credentials.rememberMe && refreshToken) {
         localStorage.setItem('medicare_refresh_token', refreshToken);
-      }
-      
-      // Update mock user's refresh token
-      if (refreshToken) {
-        user.refreshToken = refreshToken;
       }
 
       return {
-        user: userData,
-        token,
+        user,
+        token: accessToken,
         refreshToken,
-        expiresIn: 7 * 24 * 60 * 60 // 7 days in seconds
+        expiresIn: tokenData.expires_in,
       };
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
     }
+
+    throw new Error(response.message || 'Login failed');
   },
 
   /**
    * Register new user
    */
   register: async (data: RegisterData): Promise<AuthResponse> => {
-    await simulateDelay(1500);
+    const response = await api.post<any>('/auth/register', {
+      full_name: data.full_name || data.name,
+      email: data.email,
+      phone: data.phone,
+      password: data.password,
+      confirm_password: data.confirm_password || data.confirmPassword,
+      role: data.role,
+      gender: data.gender,
+    });
 
-    try {
-      // TODO: Uncomment for real API
-      // const response = await api.post<AuthResponse>('/auth/register', data);
-      // if (response.success && response.data) {
-      //   const { user, token, refreshToken } = response.data;
-      //   const userData = { ...user, token };
-      //   localStorage.setItem('medicare_user', JSON.stringify(userData));
-      //   return { user: userData, token, refreshToken };
-      // }
-      // throw new Error(response.message);
+    if (response.success && response.data) {
+      const tokenData = response.data;
+      const accessToken = tokenData.access_token;
+      const refreshToken = tokenData.refresh_token;
+      const userData = tokenData.user || {};
 
-      // Validation
-      if (!data.name || data.name.trim().length < 2) {
-        throw new Error('Name must be at least 2 characters long');
-      }
-
-      if (!validateEmail(data.email)) {
-        throw new Error('Please enter a valid email address');
-      }
-
-      if (!validatePhone(data.phone)) {
-        throw new Error('Please enter a valid phone number');
-      }
-
-      const passwordValidation = validatePassword(data.password);
-      if (!passwordValidation.valid) {
-        throw new Error(passwordValidation.message);
-      }
-
-      if (data.password !== data.confirmPassword) {
-        throw new Error('Passwords do not match');
-      }
-
-      if (!data.acceptTerms) {
-        throw new Error('You must accept the terms and conditions');
-      }
-
-      // Check if email already exists
-      const existingUser = mockUsers.find(u => u.email === data.email);
-      if (existingUser) {
-        throw new Error('Email already registered. Please login or use a different email.');
-      }
-
-      // Create new user
-      const newUser: MockUser = {
-        id: `usr_${Date.now()}`,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        role: data.role,
-        password: data.password,
-        isActive: true,
-        emailVerified: false,
-        phoneVerified: false,
-        createdAt: new Date().toISOString(),
-        preferences: {
-          notifications: { email: true, sms: true, push: true },
-          language: 'en',
-          theme: 'system',
-          timezone: 'Asia/Dhaka'
-        }
+      const user: User = {
+        id: userData.id,
+        name: userData.full_name || data.name,
+        fullName: userData.full_name,
+        email: userData.email || data.email,
+        phone: userData.phone || data.phone,
+        role: userData.primary_role || data.role,
+        roles: userData.roles || [data.role],
+        primaryRole: userData.primary_role,
+        upgrades: userData.upgrades || [],
+        avatar: userData.profile_image,
+        profileImage: userData.profile_image,
+        token: accessToken,
+        isVerified: userData.is_verified || false,
+        emailVerified: userData.is_verified || false,
+        isActive: userData.is_active ?? true,
+        isAdminApproved: userData.is_admin_approved || false,
+        createdAt: userData.created_at,
       };
 
-      // Add to mock database
-      mockUsers.push(newUser);
-
-      const token = generateToken(newUser.id, newUser.role);
-      const refreshToken = generateRefreshToken(newUser.id);
-      
-      const { password, ...userWithoutPassword } = newUser;
-      const userData = { ...userWithoutPassword, token };
-      
-      localStorage.setItem('medicare_user', JSON.stringify(userData));
-      localStorage.setItem('medicare_refresh_token', refreshToken);
+      saveUser({ ...user, token: accessToken });
 
       return {
-        user: userData,
-        token,
+        user,
+        token: accessToken,
         refreshToken,
-        expiresIn: 7 * 24 * 60 * 60
+        expiresIn: tokenData.expires_in,
       };
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
     }
+
+    throw new Error(response.message || 'Registration failed');
   },
 
   /**
    * Logout user
    */
   logout: async (): Promise<void> => {
-    await simulateDelay(300);
-    
     try {
-      // TODO: Uncomment for real API
-      // await api.post('/auth/logout');
-      
       const refreshToken = localStorage.getItem('medicare_refresh_token');
-      if (refreshToken) {
-        // Invalidate refresh token on server
-        // await api.post('/auth/logout', { refreshToken });
-      }
+      await api.post('/auth/logout', { refresh_token: refreshToken });
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Clear local storage regardless of API response
-      localStorage.removeItem('medicare_user');
-      localStorage.removeItem('medicare_refresh_token');
+      clearUser();
     }
   },
 
   /**
-   * Get current authenticated user
+   * Get current authenticated user from localStorage
    */
   getCurrentUser: (): User | null => {
-    try {
-      const stored = localStorage.getItem('medicare_user');
-      if (!stored) return null;
-      return JSON.parse(stored);
-    } catch {
-      return null;
-    }
+    return getCurrentUser() as User | null;
   },
 
   /**
    * Get user profile from server
    */
   getProfile: async (): Promise<User> => {
-    await simulateDelay(800);
+    const response = await api.get<any>('/auth/profile');
 
-    try {
-      // TODO: Uncomment for real API
-      // const response = await api.get<User>('/auth/profile');
-      // if (response.success && response.data) {
-      //   return response.data;
-      // }
-      // throw new Error(response.message);
+    if (response.success && response.data) {
+      const userData = response.data;
+      const currentUser = getCurrentUser() as User | null;
+      const token = currentUser?.token;
 
-      const stored = localStorage.getItem('medicare_user');
-      if (!stored) throw new Error('Not authenticated');
-      
-      const user = JSON.parse(stored) as User;
-      
-      // Get latest user data from mock database
-      const mockUser = mockUsers.find(u => u.id === user.id);
-      if (mockUser) {
-        const { password, ...userWithoutPassword } = mockUser;
-        return { ...userWithoutPassword, token: user.token };
-      }
-      
+      const user: User = {
+        id: userData.id,
+        name: userData.full_name || userData.name,
+        fullName: userData.full_name,
+        email: userData.email,
+        phone: userData.phone,
+        role: userData.primary_role || userData.role,
+        roles: userData.roles,
+        primaryRole: userData.primary_role,
+        upgrades: userData.upgrades || [],
+        avatar: userData.profile_image,
+        profileImage: userData.profile_image,
+        bloodGroup: userData.blood_group,
+        gender: userData.gender,
+        token,
+        isVerified: userData.is_verified,
+        emailVerified: userData.is_verified,
+        isAdminApproved: userData.is_admin_approved,
+        isActive: userData.is_active,
+        isOnline: userData.is_online,
+        createdAt: userData.created_at,
+        updatedAt: userData.updated_at,
+      };
+
+      saveUser({ ...user, token });
       return user;
-    } catch (error) {
-      console.error('Get profile error:', error);
-      throw error;
     }
+
+    throw new Error(response.message || 'Failed to fetch profile');
   },
 
   /**
    * Update user profile
    */
   updateProfile: async (updates: Partial<User>): Promise<User> => {
-    await simulateDelay(1000);
+    const response = await api.put<any>('/auth/profile', {
+      full_name: updates.fullName || updates.name,
+      phone: updates.phone,
+      gender: updates.gender,
+      profile_image: updates.avatar || updates.profileImage,
+      blood_group: updates.bloodGroup,
+    });
 
-    try {
-      // TODO: Uncomment for real API
-      // const response = await api.put<User>('/auth/profile', updates);
-      // if (response.success && response.data) {
-      //   const updatedUser = { ...response.data, token: getCurrentUser()?.token };
-      //   localStorage.setItem('medicare_user', JSON.stringify(updatedUser));
-      //   return updatedUser;
-      // }
-      // throw new Error(response.message);
-
-      const stored = localStorage.getItem('medicare_user');
-      if (!stored) throw new Error('Not authenticated');
-
-      const currentUser = JSON.parse(stored) as User;
-      
-      // Prevent updating sensitive fields
-      const allowedUpdates = ['name', 'phone', 'avatar', 'preferences'];
-      const filteredUpdates: Partial<User> = {};
-      
-      Object.keys(updates).forEach(key => {
-        if (allowedUpdates.includes(key)) {
-          filteredUpdates[key as keyof User] = updates[key as keyof User];
-        }
-      });
-      
-      const updatedUser = { ...currentUser, ...filteredUpdates, updatedAt: new Date().toISOString() };
-      
-      // Update in mock database
-      const mockUserIndex = mockUsers.findIndex(u => u.id === currentUser.id);
-      if (mockUserIndex !== -1) {
-        mockUsers[mockUserIndex] = { ...mockUsers[mockUserIndex], ...filteredUpdates };
-      }
-      
-      localStorage.setItem('medicare_user', JSON.stringify(updatedUser));
-      
+    if (response.success) {
+      const currentUser = getCurrentUser() as User;
+      const updatedUser = {
+        ...currentUser,
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+      saveUser(updatedUser);
       return updatedUser;
-    } catch (error) {
-      console.error('Update profile error:', error);
-      throw error;
     }
+
+    throw new Error(response.message || 'Failed to update profile');
   },
 
   /**
    * Change user password
    */
   changePassword: async (data: ChangePasswordData): Promise<{ message: string }> => {
-    await simulateDelay(1200);
+    const response = await api.post<any>('/auth/change-password', {
+      current_password: data.currentPassword || data.current_password,
+      new_password: data.newPassword || data.new_password,
+      confirm_new_password: data.confirmNewPassword || data.confirm_new_password,
+    });
 
-    try {
-      // TODO: Uncomment for real API
-      // const response = await api.post<{ message: string }>('/auth/change-password', data);
-      // if (response.success) {
-      //   return { message: response.message };
-      // }
-      // throw new Error(response.message);
-
-      const currentUser = authService.getCurrentUser();
-      if (!currentUser) throw new Error('Not authenticated');
-
-      const mockUser = mockUsers.find(u => u.id === currentUser.id);
-      if (!mockUser) throw new Error('User not found');
-
-      if (mockUser.password !== data.currentPassword) {
-        throw new Error('Current password is incorrect');
-      }
-
-      const passwordValidation = validatePassword(data.newPassword);
-      if (!passwordValidation.valid) {
-        throw new Error(passwordValidation.message);
-      }
-
-      if (data.newPassword !== data.confirmNewPassword) {
-        throw new Error('New passwords do not match');
-      }
-
-      // Update password in mock database
-      mockUser.password = data.newPassword;
-
-      return { message: 'Password changed successfully' };
-    } catch (error) {
-      console.error('Change password error:', error);
-      throw error;
+    if (response.success) {
+      return { message: response.message || 'Password changed successfully' };
     }
+
+    throw new Error(response.message || 'Failed to change password');
   },
 
   /**
    * Request password reset
    */
   forgotPassword: async (email: string): Promise<ForgotPasswordResponse> => {
-    await simulateDelay(1000);
+    const response = await api.post<any>('/auth/forgot-password', { email });
 
-    try {
-      // TODO: Uncomment for real API
-      // const response = await api.post<ForgotPasswordResponse>('/auth/forgot-password', { email });
-      // return response.data!;
-
-      const user = mockUsers.find(u => u.email === email);
-      if (!user) {
-        // Don't reveal if user exists or not for security
-        return {
-          message: 'If an account exists with this email, you will receive a password reset link.'
-        };
-      }
-
-      // Generate reset token (in production, this would be stored in database)
-      const resetToken = `reset_${Date.now()}_${user.id}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Store reset token (in mock, store in memory)
-      (global as any).resetTokens = (global as any).resetTokens || {};
-      (global as any).resetTokens[resetToken] = user.id;
-
-      return {
-        message: 'Password reset email sent. Please check your inbox.',
-        resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
-      };
-    } catch (error) {
-      console.error('Forgot password error:', error);
-      throw error;
+    if (response.success) {
+      return { message: response.message || 'Password reset email sent.' };
     }
+
+    throw new Error(response.message || 'Failed to request password reset');
   },
 
   /**
    * Reset password using token
    */
   resetPassword: async (data: ResetPasswordData): Promise<{ message: string }> => {
-    await simulateDelay(1000);
+    const response = await api.post<any>('/auth/reset-password', {
+      token: data.token,
+      new_password: data.newPassword || data.new_password,
+      confirm_password: data.confirmNewPassword || data.confirm_password,
+    });
 
-    try {
-      // TODO: Uncomment for real API
-      // const response = await api.post<{ message: string }>('/auth/reset-password', data);
-      // return response.data!;
-
-      const resetTokens = (global as any).resetTokens || {};
-      const userId = resetTokens[data.token];
-      
-      if (!userId) {
-        throw new Error('Invalid or expired reset token');
-      }
-
-      const user = mockUsers.find(u => u.id === userId);
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      const passwordValidation = validatePassword(data.newPassword);
-      if (!passwordValidation.valid) {
-        throw new Error(passwordValidation.message);
-      }
-
-      if (data.newPassword !== data.confirmNewPassword) {
-        throw new Error('Passwords do not match');
-      }
-
-      // Update password
-      user.password = data.newPassword;
-      
-      // Delete used token
-      delete resetTokens[data.token];
-
-      return { message: 'Password reset successfully. Please login with your new password.' };
-    } catch (error) {
-      console.error('Reset password error:', error);
-      throw error;
+    if (response.success) {
+      return { message: response.message || 'Password reset successfully' };
     }
+
+    throw new Error(response.message || 'Failed to reset password');
   },
 
   /**
    * Verify email address
    */
   verifyEmail: async (token: string): Promise<VerifyEmailResponse> => {
-    await simulateDelay(800);
+    const response = await api.post<any>('/auth/verify-email', { token });
 
-    try {
-      // TODO: Uncomment for real API
-      // const response = await api.post<VerifyEmailResponse>('/auth/verify-email', { token });
-      // return response.data!;
-
-      // Mock verification
-      const currentUser = authService.getCurrentUser();
+    if (response.success) {
+      const currentUser = getCurrentUser() as User | null;
       if (currentUser) {
-        const mockUser = mockUsers.find(u => u.id === currentUser.id);
-        if (mockUser) {
-          mockUser.emailVerified = true;
-          
-          const updatedUser = { ...currentUser, emailVerified: true };
-          localStorage.setItem('medicare_user', JSON.stringify(updatedUser));
-        }
+        const updatedUser = { ...currentUser, emailVerified: true, isVerified: true };
+        saveUser(updatedUser);
       }
-
-      return {
-        verified: true,
-        message: 'Email verified successfully'
-      };
-    } catch (error) {
-      console.error('Verify email error:', error);
-      throw error;
+      return { verified: true, message: response.message || 'Email verified successfully' };
     }
+
+    throw new Error(response.message || 'Email verification failed');
   },
 
   /**
    * Resend verification email
    */
   resendVerificationEmail: async (email?: string): Promise<{ message: string }> => {
-    await simulateDelay(800);
+    const response = await api.post<any>('/auth/verify-email', { email });
 
-    try {
-      // TODO: Uncomment for real API
-      // const response = await api.post<{ message: string }>('/auth/resend-verification', { email });
-      // return response.data!;
-
-      const targetEmail = email || authService.getCurrentUser()?.email;
-      if (!targetEmail) {
-        throw new Error('Email is required');
-      }
-
-      const user = mockUsers.find(u => u.email === targetEmail);
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      if (user.emailVerified) {
-        throw new Error('Email is already verified');
-      }
-
-      return {
-        message: 'Verification email sent. Please check your inbox.'
-      };
-    } catch (error) {
-      console.error('Resend verification error:', error);
-      throw error;
-    }
+    return { message: response.message || 'Verification email sent' };
   },
 
   /**
    * Refresh authentication token
    */
   refreshToken: async (): Promise<{ token: string; refreshToken?: string }> => {
-    await simulateDelay(500);
-
-    try {
-      const refreshToken = localStorage.getItem('medicare_refresh_token');
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
-      }
-
-      // TODO: Uncomment for real API
-      // const response = await api.post<{ token: string; refreshToken?: string }>('/auth/refresh', { refreshToken });
-      // return response.data!;
-
-      const currentUser = authService.getCurrentUser();
-      if (!currentUser) {
-        throw new Error('Not authenticated');
-      }
-
-      const newToken = generateToken(currentUser.id, currentUser.role);
-      const newRefreshToken = generateRefreshToken(currentUser.id);
-      
-      const userData = { ...currentUser, token: newToken };
-      localStorage.setItem('medicare_user', JSON.stringify(userData));
-      localStorage.setItem('medicare_refresh_token', newRefreshToken);
-      
-      // Update mock user
-      const mockUser = mockUsers.find(u => u.id === currentUser.id);
-      if (mockUser) {
-        mockUser.refreshToken = newRefreshToken;
-      }
-
-      return {
-        token: newToken,
-        refreshToken: newRefreshToken
-      };
-    } catch (error) {
-      console.error('Refresh token error:', error);
-      throw error;
+    const refreshToken = localStorage.getItem('medicare_refresh_token');
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
     }
+
+    const response = await api.post<any>('/auth/refresh', {
+      refresh_token: refreshToken,
+    });
+
+    if (response.success && response.data) {
+      const newToken = response.data.access_token;
+      const newRefreshToken = response.data.refresh_token;
+      const currentUser = getCurrentUser() as User | null;
+
+      if (currentUser) {
+        const userData = { ...currentUser, token: newToken };
+        saveUser(userData);
+        if (newRefreshToken) {
+          localStorage.setItem('medicare_refresh_token', newRefreshToken);
+        }
+      }
+
+      return { token: newToken, refreshToken: newRefreshToken };
+    }
+
+    throw new Error(response.message || 'Token refresh failed');
+  },
+
+  /**
+   * Switch active role
+   */
+  switchRole: async (role: string): Promise<{ token: string; role: string }> => {
+    const response = await api.post<any>('/auth/switch-role', { role });
+
+    if (response.success && response.data) {
+      const newToken = response.data.access_token;
+      const currentUser = getCurrentUser() as User | null;
+
+      if (currentUser) {
+        const userData = {
+          ...currentUser,
+          token: newToken,
+          primaryRole: role,
+          role,
+        };
+        saveUser(userData);
+      }
+
+      return { token: newToken, role };
+    }
+
+    throw new Error(response.message || 'Role switch failed');
   },
 
   /**
@@ -711,19 +439,19 @@ export const authService = {
    */
   isAuthenticated: (): boolean => {
     const user = authService.getCurrentUser();
-    const token = user?.token;
-    return !!user && !!token;
+    return !!user && !!user.token;
   },
 
   /**
    * Check if user has specific role
    */
-  hasRole: (roles: User['role'] | User['role'][]): boolean => {
+  hasRole: (roles: string | string[]): boolean => {
     const user = authService.getCurrentUser();
     if (!user) return false;
-    
+
     const roleList = Array.isArray(roles) ? roles : [roles];
-    return roleList.includes(user.role);
+    const userRoles = user.roles || [user.role] || [];
+    return roleList.some(r => userRoles.includes(r) || user.primaryRole === r || user.role === r);
   },
 
   /**
@@ -731,7 +459,7 @@ export const authService = {
    */
   isEmailVerified: (): boolean => {
     const user = authService.getCurrentUser();
-    return user?.emailVerified || false;
+    return user?.emailVerified || user?.isVerified || false;
   },
 
   /**
@@ -746,52 +474,46 @@ export const authService = {
    * Update user preferences
    */
   updatePreferences: async (preferences: Partial<UserPreferences>): Promise<UserPreferences> => {
-    await simulateDelay(600);
-    
     const currentUser = authService.getCurrentUser();
     if (!currentUser) {
       throw new Error('Not authenticated');
     }
-    
+
     const updatedPreferences: UserPreferences = {
       ...(currentUser.preferences ?? {
         notifications: { email: true, sms: true, push: true },
         language: 'en',
         theme: 'system',
-        timezone: 'Asia/Dhaka'
+        timezone: 'UTC',
       }),
-      ...preferences
+      ...preferences,
     };
-    
+
     await authService.updateProfile({ preferences: updatedPreferences });
-    
     return updatedPreferences;
-  }
+  },
 };
 
 // ============================================
-// AUTH HOOKS (can be used in components)
+// AUTH HOOK
 // ============================================
 
 export const useAuth = () => {
   return {
     user: authService.getCurrentUser(),
     isAuthenticated: authService.isAuthenticated(),
-    isAdmin: authService.hasRole('admin'),
+    isAdmin: authService.hasRole(['admin', 'super_admin']),
     isDoctor: authService.hasRole('doctor'),
-    isPatient: authService.hasRole('patient'),
+    isPatient: authService.hasRole(['patient', 'client']),
     isEmailVerified: authService.isEmailVerified(),
     login: authService.login,
     register: authService.register,
     logout: authService.logout,
     updateProfile: authService.updateProfile,
     changePassword: authService.changePassword,
-    refreshToken: authService.refreshToken
+    refreshToken: authService.refreshToken,
+    switchRole: authService.switchRole,
   };
 };
-
-// ============================================
-// DEFAULT EXPORT
-// ============================================
 
 export default authService;

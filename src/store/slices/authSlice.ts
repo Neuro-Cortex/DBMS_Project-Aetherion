@@ -65,70 +65,41 @@ const initialState: AuthState = {
 // ASYNC THUNKS - localStorage সরানো হয়েছে
 // ============================================
 
-// ✅ Login thunk - কোন ডাটা সেভ করে না
+// ✅ Login thunk - calls real API
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
-  async ({ email, password }: { email: string; password: string }) => {
-    // সিমুলেটেড API কল
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (!email || !password) {
-      throw new Error('Email and password required');
-    }
-    
-    // টেম্পোরারি ইউজার - শুধু মেমোরিতে থাকবে
-    const mockUser: User = {
-      id: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      name: email.split('@')[0],
-      fullName: email.split('@')[0],
-      email: email,
-      role: 'client',
-      roles: ['client', 'normal_user'],
-      primaryRole: 'client',
-      upgrades: [],
-      isVerified: true,
-      isActive: true,
-      createdAt: new Date().toISOString(),
-    };
-    
-    // ❌ localStorage.setItem সরানো হয়েছে
-    return mockUser;
+  async ({ email, password, role }: { email: string; password: string; role?: string }) => {
+    const { authService } = await import('../../services/authService');
+    const result = await authService.login({ email, password, role });
+    return result.user;
   }
 );
 
-// ✅ Register thunk - কোন ডাটা সেভ করে না
+// ✅ Register thunk - calls real API
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (userData: Partial<User> & { password: string }) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const mockUser: User = {
-      id: `session_${Date.now()}`,
-      name: userData.name || userData.email?.split('@')[0] || 'User',
+    const { authService } = await import('../../services/authService');
+    const result = await authService.register({
+      name: userData.name || userData.fullName || '',
+      full_name: userData.fullName || userData.name || '',
       email: userData.email || '',
-      role: 'client',
-      roles: ['client', 'normal_user'],
-      primaryRole: 'client',
-      upgrades: [],
-      isVerified: true,
-      isActive: true,
-      createdAt: new Date().toISOString(),
-    };
-    
-    // ❌ localStorage.setItem সরানো হয়েছে
-    return mockUser;
+      phone: userData.phone || '',
+      password: userData.password,
+      confirm_password: userData.password,
+      role: userData.primaryRole || userData.role || 'patient',
+      gender: userData.gender,
+    });
+    return result.user;
   }
 );
 
-// ✅ Logout thunk - localStorage পরিষ্কার করার দরকার নেই
+// ✅ Logout thunk - calls real API
 export const logoutUser = createAsyncThunk('auth/logoutUser', async () => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  // ❌ localStorage.removeItem সরানো হয়েছে
+  const { authService } = await import('../../services/authService');
+  await authService.logout();
   return null;
 });
-
-// ❌ getCurrentUser সম্পূর্ণ সরিয়ে দেওয়া হয়েছে - কারণ কোন ডাটা সেভ নেই
-// export const getCurrentUser = createAsyncThunk(...) - এই পুরো অংশ ডিলিট করুন
 
 // ============================================
 // SLICE
@@ -230,7 +201,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.user = action.payload;
+        state.user = action.payload as any;
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -245,7 +216,7 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.user = action.payload;
+        state.user = action.payload as any;
         state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
@@ -259,7 +230,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = null;
       });
-      // ❌ getCurrentUser এর কেসগুলি সরানো হয়েছে
+      // getCurrentUser extraReducers can be added when needed
   },
 });
 

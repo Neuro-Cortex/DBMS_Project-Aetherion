@@ -4,14 +4,14 @@
 
 import React, { useState } from 'react';
 import {
-  Layout, User, Calendar, Pill, Droplet,
+   User, Calendar, Pill, Droplet,
   AlertCircle, FileText, Activity, Syringe,
-  Stethoscope, Search, MapPin, ShoppingBag,
-  Heart, Star, Settings, LogOut, ChevronRight,
-  ChevronLeft, Bell, MessageCircle, Video,
-  ClipboardList, TrendingUp, Award,
-  Home, CreditCard, Gift, HelpCircle,
-  Moon, Sun, Zap, Shield
+   Search, MapPin, ShoppingBag,
+  Heart,  Settings, LogOut, ChevronRight,
+  ChevronLeft, 
+  ClipboardList,  Award,
+  Home,  HelpCircle,
+  Moon, Sun,  Shield
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';

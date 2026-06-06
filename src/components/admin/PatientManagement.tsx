@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { getAuthToken } from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Search, UserCheck,
@@ -23,16 +24,38 @@ const mockPatients = [
 const PatientManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [patients, setPatients] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredPatients = mockPatients.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.doctor.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/patients`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const data = await res.json();
+        setPatients(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch patients:', err);
+        setPatients([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPatients();
+  }, []);
+
+  const filteredPatients = patients.filter(p => {
+    const name = p.full_name || '';
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || (p.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' ? p.is_active : !p.is_active);
     return matchesSearch && matchesStatus;
   });
 
-  const emergencyPatients = mockPatients.filter(p => p.emergency);
-  const activePatients = mockPatients.filter(p => p.status === 'active');
-  const suspendedPatients = mockPatients.filter(p => p.status === 'suspended');
+  const activePatients = patients.filter(p => p.is_active);
+  const emergencyPatients: any[] = [];
 
   return (
     <div className="min-h-screen bg-[#020408] flex">
@@ -51,7 +74,7 @@ const PatientManagement: React.FC = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <Card className="p-4 border-l-4 border-l-blue-500">
-                <p className="text-2xl font-black text-white">{mockPatients.length}</p>
+                <p className="text-2xl font-black text-white">{patients.length}</p>
                 <p className="text-xs text-slate-400">Total Patients</p>
               </Card>
               <Card className="p-4 border-l-4 border-l-emerald-500">
@@ -63,8 +86,8 @@ const PatientManagement: React.FC = () => {
                 <p className="text-xs text-slate-400">Emergency Detected</p>
               </Card>
               <Card className="p-4 border-l-4 border-l-amber-500">
-                <p className="text-2xl font-black text-white">{suspendedPatients.length}</p>
-                <p className="text-xs text-slate-400">Suspended</p>
+                <p className="text-2xl font-black text-white">{patients.filter(p => !p.is_active).length}</p>
+                <p className="text-xs text-slate-400">Inactive</p>
               </Card>
             </div>
 
@@ -107,7 +130,7 @@ const PatientManagement: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredPatients.map((patient, i) => (
+                    {filteredPatients.map((patient: any, i: number) => (
                       <motion.tr
                         key={patient.id}
                         initial={{ opacity: 0, y: 10 }}
@@ -117,41 +140,37 @@ const PatientManagement: React.FC = () => {
                       >
                         <td className="py-3 px-2">
                           <div className="flex items-center gap-3">
-                            <Avatar name={patient.name.split(' ').map(n => n[0]).join('')} size="sm" />
+                            <Avatar name={(patient.full_name || '').split(' ').map((n: string) => n[0]).join('')} size="sm" />
                             <div>
-                              <p className="text-white text-sm font-bold">{patient.name}</p>
-                              <p className="text-xs text-slate-500">{patient.age}yrs • {patient.bloodGroup}</p>
+                              <p className="text-white text-sm font-bold">{patient.full_name || 'Unknown'}</p>
+                              <p className="text-xs text-slate-500">{patient.blood_group || 'N/A'}</p>
                             </div>
                           </div>
                         </td>
                         <td className="py-3 px-2">
-                          <p className="text-white text-sm">{patient.doctor}</p>
+                          <p className="text-white text-sm">{patient.email || 'N/A'}</p>
                         </td>
                         <td className="py-3 px-2">
                           <Badge
-                            variant={patient.status === 'active' ? 'success' : patient.status === 'suspended' ? 'danger' : 'warning'}
+                            variant={patient.is_active ? 'success' : 'danger'}
                             className="text-[10px]"
                           >
-                            {patient.status}
+                            {patient.is_active ? 'Active' : 'Inactive'}
                           </Badge>
-                          {patient.emergency && (
-                            <Badge variant="danger" className="text-[10px] ml-1 animate-pulse">EMERGENCY</Badge>
-                          )}
                         </td>
                         <td className="py-3 px-2">
-                          <p className="text-white text-sm">{patient.treatment}</p>
+                          <p className="text-white text-sm">{patient.is_verified ? 'Verified' : 'Unverified'}</p>
                         </td>
                         <td className="py-3 px-2">
-                          <p className="text-slate-400 text-sm">{patient.lastVisit}</p>
+                          <p className="text-slate-400 text-sm">{patient.created_at ? new Date(patient.created_at).toLocaleDateString() : 'N/A'}</p>
                         </td>
                         <td className="py-3 px-2">
-                          <p className="text-slate-400 text-sm">{patient.area}</p>
+                          <p className="text-slate-400 text-sm">{patient.phone || 'N/A'}</p>
                         </td>
                         <td className="py-3 px-2">
                           <div className="flex gap-1">
                             <Button variant="ghost" size="xs" className="text-cyan-400"><Eye className="w-3 h-3" /></Button>
                             <Button variant="ghost" size="xs" className="text-amber-400"><MessageSquare className="w-3 h-3" /></Button>
-                            <Button variant="ghost" size="xs" className="text-red-400"><Trash2 className="w-3 h-3" /></Button>
                           </div>
                         </td>
                       </motion.tr>

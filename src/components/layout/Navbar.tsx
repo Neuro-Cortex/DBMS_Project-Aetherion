@@ -228,13 +228,45 @@ export const Navbar: React.FC<NavbarProps> = ({
     { label: 'AI Assistant', path: '/ai-assistant', icon: Bot },
   ];
 
-  const authenticatedLinks = [
-    { label: 'Dashboard', path: '/patient/dashboard', icon: LayoutDashboard },
-    { label: 'Appointments', path: '/patient/appointments', icon: Calendar },
-    { label: 'Messages', path: '/patient/messages', icon: MessageCircle },
-    { label: 'Health Records', path: '/patient/records', icon: FileText },
-    { label: 'Billing', path: '/patient/billing', icon: CreditCardIcon }
-  ];
+  const getAuthenticatedLinks = () => {
+    const primaryRole = user?.role || user?.primaryRole || 'patient';
+    
+    const roleLinks: Record<string, { label: string; path: string; icon: React.ElementType }[]> = {
+      patient: [
+        { label: 'Dashboard', path: '/patient/dashboard', icon: LayoutDashboard },
+        { label: 'Appointments', path: '/patient/appointments', icon: Calendar },
+        { label: 'Messages', path: '/patient/messages', icon: MessageCircle },
+        { label: 'Health Records', path: '/patient/records', icon: FileText },
+        { label: 'Billing', path: '/patient/billing', icon: CreditCardIcon }
+      ],
+      doctor: [
+        { label: 'Dashboard', path: '/doctor/dashboard', icon: LayoutDashboard },
+        { label: 'Appointments', path: '/doctor/appointments', icon: Calendar },
+        { label: 'Patients', path: '/doctor/patients', icon: User },
+        { label: 'Schedule', path: '/doctor/schedule', icon: Calendar },
+        { label: 'Messages', path: '/doctor/messages', icon: MessageCircle },
+      ],
+      hospital: [
+        { label: 'Dashboard', path: '/hospital/dashboard', icon: LayoutDashboard },
+        { label: 'Account', path: '/hospital/account', icon: Settings },
+        { label: 'Admin', path: '/hospital/admin', icon: Building2 },
+      ],
+      pharmacy: [
+        { label: 'Dashboard', path: '/pharmacy/dashboard', icon: LayoutDashboard },
+        { label: 'Account', path: '/pharmacy/account', icon: Settings },
+        { label: 'Stock', path: '/pharmacy/stock', icon: FileText },
+      ],
+      admin: [
+        { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+        { label: 'Users', path: '/admin/users', icon: User },
+        { label: 'Doctors', path: '/admin/doctor-verification', icon: Stethoscope },
+        { label: 'Hospitals', path: '/admin/hospitals', icon: Building2 },
+        { label: 'Analytics', path: '/admin/analytics', icon: FileText },
+      ],
+    };
+
+    return roleLinks[primaryRole] || roleLinks['patient'];
+  };
 
   const handleNavigate = (path: string) => {
     setMobileMenuOpen(false);
@@ -628,7 +660,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                   {/* Authenticated Links - Desktop */}
                   <div className="hidden xl:flex items-center gap-1">
-                    {authenticatedLinks.map((item) => {
+                    {getAuthenticatedLinks().map((item) => {
                       const Icon = item.icon;
                       return (
                         <button
@@ -946,7 +978,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <p className="px-3 py-1 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Your Account
                     </p>
-                    {authenticatedLinks.map((item) => {
+                    {getAuthenticatedLinks().map((item) => {
                       const Icon = item.icon;
                       return (
                         <Link

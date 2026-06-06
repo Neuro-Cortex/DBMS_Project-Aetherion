@@ -1,3 +1,4 @@
+import { getAuthToken } from '../../services/api';
 // src/components/admin/AdminDashboard.tsx
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -103,12 +104,45 @@ const AdminDashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedChart, setSelectedChart] = useState<'users'|'appointments'|'revenue'>('users');
   const [activeTab, setActiveTab] = useState<'overview'|'smart'>('overview');
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const hour = new Date().getHours();
     setGreeting(hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening');
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/dashboard`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const data = await res.json();
+        if (data.stats) {
+          setDashboardData(data);
+          // Update stat cards with real data
+          const s = data.stats;
+          statCards[0].value = (s.total_users || 0).toLocaleString();
+          statCards[1].value = s.total_doctors || 0;
+          statCards[2].value = (s.total_users || 0).toLocaleString();
+          statCards[3].value = s.total_pharmacies || 0;
+          statCards[4].value = s.total_hospitals || 0;
+          statCards[5].value = (s.total_appointments || 0).toLocaleString();
+          statCards[6].value = `$${((s.total_appointments || 0) * 50).toLocaleString()}`;
+          statCards[7].value = (data.active_emergencies?.length || 0);
+        }
+      } catch (err) {
+        console.error('Failed to fetch dashboard:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDashboard();
   }, []);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;

@@ -7,7 +7,7 @@ import {
   BloodStock, AmbulanceRequest as AmbulanceRequestType, HospitalAnalytics as HospitalAnalyticsType
 } from '../types/hospital';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 class HospitalServiceAPI {
   private token: string = '';
@@ -187,7 +187,7 @@ class HospitalServiceAPI {
     });
   }
 
-  async getAmbulanceRequests(): Promise<AmbulanceRequest[]> {
+  async getAmbulanceRequests(): Promise<AmbulanceRequestType[]> {
     const response = await fetch(`${API_BASE_URL}/hospital/ambulance-requests`, {
       headers: this.getHeaders()
     });
@@ -259,7 +259,7 @@ class HospitalServiceAPI {
   }
 
   // Analytics
-  async getAnalytics(period: string): Promise<HospitalAnalytics> {
+  async getAnalytics(period: string): Promise<HospitalAnalyticsType> {
     const response = await fetch(`${API_BASE_URL}/hospital/analytics?period=${period}`, {
       headers: this.getHeaders()
     });
@@ -276,7 +276,7 @@ class HospitalServiceAPI {
   }
 }
 
-import api, { simulateDelay } from './api';
+import api from './api';
 
 // ============================================
 // TYPES & INTERFACES
@@ -363,6 +363,8 @@ export interface BedBookingRequest {
   insuranceInfo?: string;
   reason?: string;
   expectedStay?: number;
+  admissionDate?: string;
+  department?: string;
 }
 
 export interface HospitalFilter {
@@ -377,6 +379,8 @@ export interface HospitalFilter {
   ambulanceAvailable?: boolean;
   oxygenAvailable?: boolean;
   searchQuery?: string;
+  search?: string;
+  specialty?: string;
   sortBy?: 'rating' | 'distance' | 'availableBeds' | 'name';
   sortOrder?: 'asc' | 'desc';
   page?: number;
@@ -394,340 +398,46 @@ export interface HospitalStats {
   topRatedHospital: string;
 }
 
-// ============================================
-// ENHANCED MOCK DATA
-// ============================================
-
-const mockHospitals: Hospital[] = [
-  {
-    id: 'hosp_001',
-    name: 'City General Hospital',
-    type: 'general',
-    location: {
-      address: '123 Main Street',
-      city: 'New York',
-      state: 'NY',
-      zipCode: '10001',
-      coordinates: { lat: 40.7128, lng: -74.0060 }
-    },
-    rating: 4.8,
-    reviewsCount: 1250,
-    beds: {
-      total: 300,
-      available: 45,
-      icu: { total: 50, available: 5 },
-      emergency: { total: 25, available: 8 }
-    },
-    emergency: true,
-    verified: true,
-    distance: 2.5,
-    eta: 15,
-    phone: '+1 (555) 100-2001',
-    email: 'contact@citygeneral.com',
-    website: 'www.citygeneral.com',
-    established: 1985,
-    accreditation: ['JCI', 'NABH'],
-    facilities: ['24/7 Emergency', 'Pharmacy', 'Lab', 'Radiology', 'ICU', 'Blood Bank'],
-    departments: ['Cardiology', 'Neurology', 'Pediatrics', 'Orthopedics', 'Gynecology'],
-    ambulanceAvailable: true,
-    oxygenAvailable: true,
-    bloodBank: true,
-    pharmacy: true,
-    operatingHours: {
-      emergency: '24/7',
-      general: '9:00 AM - 9:00 PM'
-    }
+// Helper: Map backend hospital response to frontend Hospital interface
+const mapHospitalResponse = (h: any): Hospital => ({
+  id: h.id,
+  name: h.name || '',
+  type: h.type || 'general',
+  location: {
+    address: h.street || h.address || '',
+    city: h.city || '',
+    state: h.state || '',
+    zipCode: h.zip_code,
+    coordinates: h.latitude && h.longitude ? { lat: h.latitude, lng: h.longitude } : undefined,
   },
-  {
-    id: 'hosp_002',
-    name: 'Metro Medical Center',
-    type: 'multispecialty',
-    location: {
-      address: '456 Oak Avenue',
-      city: 'New York',
-      state: 'NY',
-      zipCode: '10002',
-      coordinates: { lat: 40.7580, lng: -73.9855 }
+  rating: h.rating || 0,
+  reviewsCount: h.review_count,
+  beds: {
+    total: h.total_beds || 0,
+    available: h.available_beds || 0,
+    icu: {
+      total: h.icu_total_beds || 0,
+      available: h.icu_available_beds || 0,
     },
-    rating: 4.6,
-    reviewsCount: 980,
-    beds: {
-      total: 200,
-      available: 30,
-      icu: { total: 30, available: 3 },
-      emergency: { total: 20, available: 5 }
-    },
-    emergency: true,
-    verified: true,
-    distance: 4.0,
-    eta: 25,
-    phone: '+1 (555) 200-2002',
-    email: 'info@metromedical.com',
-    website: 'www.metromedical.com',
-    established: 1992,
-    accreditation: ['JCI'],
-    facilities: ['24/7 Emergency', 'Pharmacy', 'ICU', 'Blood Bank', 'MRI Center'],
-    departments: ['Cardiology', 'Neurology', 'Oncology', 'Urology'],
-    ambulanceAvailable: true,
-    oxygenAvailable: true,
-    bloodBank: true,
-    pharmacy: true,
-    operatingHours: {
-      emergency: '24/7',
-      general: '8:00 AM - 8:00 PM'
-    }
+    emergency: h.emergency_service ? { total: 0, available: 0 } : undefined,
   },
-  {
-    id: 'hosp_003',
-    name: 'Sun Community Hospital',
-    type: 'community',
-    location: {
-      address: '789 Pine Road',
-      city: 'Brooklyn',
-      state: 'NY',
-      zipCode: '11201',
-      coordinates: { lat: 40.6782, lng: -73.9442 }
-    },
-    rating: 4.5,
-    reviewsCount: 750,
-    beds: {
-      total: 150,
-      available: 60,
-      icu: { total: 20, available: 8 },
-      emergency: { total: 15, available: 10 }
-    },
-    emergency: false,
-    verified: true,
-    distance: 5.5,
-    eta: 35,
-    phone: '+1 (555) 300-2003',
-    email: 'care@suncommunity.com',
-    website: 'www.suncommunity.com',
-    established: 2000,
-    accreditation: ['NABH'],
-    facilities: ['Pharmacy', 'Lab', 'General Ward'],
-    departments: ['General Medicine', 'Pediatrics', 'Gynecology'],
-    ambulanceAvailable: false,
-    oxygenAvailable: true,
-    bloodBank: false,
-    pharmacy: true,
-    operatingHours: {
-      emergency: '8:00 AM - 8:00 PM',
-      general: '9:00 AM - 6:00 PM'
-    }
-  }
-];
-
-const mockBeds: Record<string, BedInfo[]> = {
-  'hosp_001': [
-    {
-      type: 'general',
-      total: 300,
-      occupied: 255,
-      available: 45,
-      price: 500,
-      waitingList: 12,
-      lastUpdated: new Date().toISOString()
-    },
-    {
-      type: 'icu',
-      total: 50,
-      occupied: 45,
-      available: 5,
-      price: 2000,
-      waitingList: 3,
-      lastUpdated: new Date().toISOString()
-    },
-    {
-      type: 'pediatric',
-      total: 30,
-      occupied: 20,
-      available: 10,
-      price: 800,
-      waitingList: 5,
-      lastUpdated: new Date().toISOString()
-    },
-    {
-      type: 'emergency',
-      total: 25,
-      occupied: 17,
-      available: 8,
-      price: 1000,
-      lastUpdated: new Date().toISOString()
-    },
-    {
-      type: 'cardiac',
-      total: 20,
-      occupied: 15,
-      available: 5,
-      price: 1500,
-      waitingList: 2,
-      lastUpdated: new Date().toISOString()
-    }
-  ],
-  'hosp_002': [
-    {
-      type: 'general',
-      total: 200,
-      occupied: 170,
-      available: 30,
-      price: 600,
-      waitingList: 8,
-      lastUpdated: new Date().toISOString()
-    },
-    {
-      type: 'icu',
-      total: 30,
-      occupied: 27,
-      available: 3,
-      price: 2500,
-      waitingList: 2,
-      lastUpdated: new Date().toISOString()
-    },
-    {
-      type: 'emergency',
-      total: 20,
-      occupied: 15,
-      available: 5,
-      price: 1200,
-      lastUpdated: new Date().toISOString()
-    }
-  ],
-  'hosp_003': [
-    {
-      type: 'general',
-      total: 150,
-      occupied: 90,
-      available: 60,
-      price: 400,
-      waitingList: 0,
-      lastUpdated: new Date().toISOString()
-    },
-    {
-      type: 'icu',
-      total: 20,
-      occupied: 12,
-      available: 8,
-      price: 1800,
-      waitingList: 1,
-      lastUpdated: new Date().toISOString()
-    },
-    {
-      type: 'pediatric',
-      total: 15,
-      occupied: 8,
-      available: 7,
-      price: 600,
-      lastUpdated: new Date().toISOString()
-    }
-  ]
-};
+  emergency: h.emergency_service === 'active',
+  verified: h.is_verified || false,
+  distance: h.distance || 0,
+  eta: parseInt(h.emergency_response_time) || 15,
+  phone: h.phone || h.emergency_phone,
+  email: h.email,
+  website: h.website,
+  established: h.established_year,
+});
 
 // ============================================
-// HELPER FUNCTIONS
-// ============================================
+// MOCK DATA REMOVED - Using real API
 
+// Helper for generating IDs
 const generateId = (): string => {
-  return `BK_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 };
-
-const filterHospitals = (hospitals: Hospital[], filters: HospitalFilter): Hospital[] => {
-  let filtered = [...hospitals];
-
-  // Search query
-  if (filters.searchQuery) {
-    const query = filters.searchQuery.toLowerCase();
-    filtered = filtered.filter(h =>
-      h.name.toLowerCase().includes(query) ||
-      h.location.city.toLowerCase().includes(query) ||
-      h.location.address.toLowerCase().includes(query)
-    );
-  }
-
-  // Emergency filter
-  if (filters.emergency !== undefined) {
-    filtered = filtered.filter(h => h.emergency === filters.emergency);
-  }
-
-  // City filter
-  if (filters.city) {
-    filtered = filtered.filter(h =>
-      h.location.city.toLowerCase().includes(filters.city!.toLowerCase())
-    );
-  }
-
-  // State filter
-  if (filters.state) {
-    filtered = filtered.filter(h =>
-      h.location.state.toLowerCase() === filters.state!.toLowerCase()
-    );
-  }
-
-  // Hospital type filter
-  if (filters.type) {
-    filtered = filtered.filter(h => h.type === filters.type);
-  }
-
-  // Minimum rating filter
-  if (filters.minRating) {
-    filtered = filtered.filter(h => h.rating >= filters.minRating!);
-  }
-
-  // Maximum distance filter
-  if (filters.maxDistance) {
-    filtered = filtered.filter(h => h.distance <= filters.maxDistance!);
-  }
-
-  // Available beds filter
-  if (filters.availableBeds) {
-    filtered = filtered.filter(h => h.beds.available > 0);
-  }
-
-  // ICU available filter
-  if (filters.icuAvailable) {
-    filtered = filtered.filter(h => h.beds.icu.available > 0);
-  }
-
-  // Ambulance available filter
-  if (filters.ambulanceAvailable) {
-    filtered = filtered.filter(h => h.ambulanceAvailable === true);
-  }
-
-  // Oxygen available filter
-  if (filters.oxygenAvailable) {
-    filtered = filtered.filter(h => h.oxygenAvailable === true);
-  }
-
-  // Sorting
-  if (filters.sortBy) {
-    filtered.sort((a, b) => {
-      let comparison = 0;
-      switch (filters.sortBy) {
-        case 'rating':
-          comparison = a.rating - b.rating;
-          break;
-        case 'distance':
-          comparison = a.distance - b.distance;
-          break;
-        case 'availableBeds':
-          comparison = a.beds.available - b.beds.available;
-          break;
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
-          break;
-        default:
-          comparison = 0;
-      }
-      return filters.sortOrder === 'desc' ? -comparison : comparison;
-    });
-  }
-
-  return filtered;
-};
-
-// ============================================
-// HOSPITAL SERVICE
-// ============================================
 
 export const hospitalService = {
   /**
@@ -739,81 +449,66 @@ export const hospitalService = {
     page: number;
     totalPages: number;
   }> => {
-    await simulateDelay(1000);
+    const params: any = {};
+    if (filters?.search) params.search = filters.search;
+    if (filters?.type) params.type = filters.type;
+    if (filters?.city) params.city = filters.city;
+    if (filters?.page) params.page = filters.page;
+    if (filters?.limit) params.limit = filters.limit;
+    if (filters?.specialty) params.specialty = filters.specialty;
 
-    // TODO: Replace with real API call
-    // const response = await api.get<{ hospitals: Hospital[]; total: number; page: number; totalPages: number }>('/hospitals', { params: filters });
-    // return response.data!;
+    const response = await api.get<any>('/hospitals', params);
+    if (response.success && response.data) {
+      const raw = Array.isArray(response.data) ? response.data : (response.data as any)?.data || (response.data as any)?.hospitals || [];
+      const total = response.data?.total || raw.length;
+      const page = response.data?.page || filters?.page || 1;
+      const totalPages = response.data?.total_pages || response.data?.totalPages || Math.ceil(total / (filters?.limit || 10));
 
-    let filtered = filterHospitals(mockHospitals, filters || {});
-    
-    const page = filters?.page || 1;
-    const limit = filters?.limit || 10;
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    
-    const paginatedHospitals = filtered.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(filtered.length / limit);
-
-    return {
-      hospitals: paginatedHospitals,
-      total: filtered.length,
-      page,
-      totalPages
-    };
+      const hospitals: Hospital[] = raw.map(mapHospitalResponse);
+      return { hospitals, total, page, totalPages };
+    }
+    return { hospitals: [], total: 0, page: 1, totalPages: 0 };
   },
 
   /**
    * Get hospital by ID
    */
   getHospitalById: async (id: string): Promise<Hospital> => {
-    await simulateDelay(500);
-
-    // TODO: Replace with real API call
-    // const response = await api.get<Hospital>(`/hospitals/${id}`);
-    // return response.data!;
-
-    const hospital = mockHospitals.find(h => h.id === id);
-    if (!hospital) {
-      throw new Error(`Hospital not found with ID: ${id}`);
+    const response = await api.get<any>('/hospitals/' + id);
+    if (response.success && response.data) {
+      return mapHospitalResponse(response.data);
     }
-    return hospital;
+    throw new Error(response.message || 'Hospital not found');
   },
 
   /**
    * Get bed availability for a hospital
    */
   getBeds: async (hospitalId: string): Promise<BedInfo[]> => {
-    await simulateDelay(600);
-
-    // TODO: Replace with real API call
-    // const response = await api.get<BedInfo[]>(`/hospitals/${hospitalId}/beds`);
-    // return response.data!;
-
-    // First verify hospital exists
-    await hospitalService.getHospitalById(hospitalId);
-    
-    const beds = mockBeds[hospitalId] || [];
-    if (beds.length === 0) {
-      throw new Error(`No bed information found for hospital: ${hospitalId}`);
+    const response = await api.get<any>('/hospitals/' + hospitalId + '/beds');
+    if (response.success && response.data) {
+      const items = Array.isArray(response.data) ? response.data : response.data?.data || [];
+      return items.map((b: any) => ({
+        type: b.bed_type || b.type || 'general',
+        total: b.total || 0,
+        available: b.available || 0,
+        price: b.price_per_day || b.daily_charge || 0,
+        floor: b.floor || '',
+        ward: b.ward || '',
+      }));
     }
-    
-    return beds;
+    return [];
   },
 
   /**
    * Get specific bed type availability
    */
   getBedByType: async (hospitalId: string, bedType: BedInfo['type']): Promise<BedInfo> => {
-    await simulateDelay(400);
-
     const beds = await hospitalService.getBeds(hospitalId);
     const bed = beds.find(b => b.type === bedType);
-    
     if (!bed) {
       throw new Error(`Bed type '${bedType}' not found in hospital: ${hospitalId}`);
     }
-    
     return bed;
   },
 
@@ -821,37 +516,25 @@ export const hospitalService = {
    * Book a bed
    */
   bookBed: async (request: BedBookingRequest): Promise<BookingResult> => {
-    await simulateDelay(1200);
-
-    // TODO: Replace with real API call
-    // const response = await api.post<BookingResult>(`/hospitals/${request.hospitalId}/beds/book`, request);
-    // return response.data!;
-
-    // Verify hospital exists
-    const hospital = await hospitalService.getHospitalById(request.hospitalId);
-    
-    // Check bed availability
-    const bed = await hospitalService.getBedByType(request.hospitalId, request.bedType);
-    
-    if (bed.available <= 0) {
-      throw new Error(`No ${request.bedType} beds available at ${hospital.name}`);
+    const response = await api.post<any>(`/hospitals/${request.hospitalId}/beds/book`, {
+      bed_type: request.bedType,
+      patient_id: request.patientId,
+      patient_name: request.patientName,
+      admission_date: request.admissionDate,
+      department: request.department,
+    });
+    if (response.success && response.data) {
+      return {
+        success: true,
+        bookingId: response.data.booking_id || response.data.id || generateId(),
+        message: response.data.message || 'Bed booked successfully',
+        bedNumber: response.data.bed_number || '',
+        floor: response.data.floor || '',
+        ward: response.data.ward || '',
+        estimatedWaitTime: response.data.estimated_wait_time || 15,
+      };
     }
-
-    // Generate random bed number and floor
-    const bedNumber = `${request.bedType.substring(0, 2).toUpperCase()}${Math.floor(Math.random() * 100) + 1}`;
-    const floor = Math.floor(Math.random() * 5) + 1;
-    const wardNames = ['A', 'B', 'C', 'D', 'E'];
-    const ward = `Ward ${wardNames[Math.floor(Math.random() * wardNames.length)]}`;
-
-    return {
-      success: true,
-      bookingId: generateId(),
-      message: `${request.bedType.toUpperCase()} bed booked successfully at ${hospital.name}`,
-      bedNumber,
-      floor: `${floor}th Floor`,
-      ward,
-      estimatedWaitTime: Math.floor(Math.random() * 30) + 10
-    };
+    throw new Error(response.message || 'Failed to book bed');
   },
 
   /**
@@ -863,60 +546,49 @@ export const hospitalService = {
     radius?: number,
     filters?: HospitalFilter
   ): Promise<Hospital[]> => {
-    await simulateDelay(800);
+    const params: any = { lat, lng };
+    if (radius) params.radius = radius;
+    if (filters?.type) params.type = filters.type;
+    if (filters?.specialty) params.specialty = filters.specialty;
 
-    // TODO: Replace with real API call
-    // const response = await api.get<Hospital[]>('/hospitals/nearby', { 
-    //   params: { lat, lng, radius, ...filters } 
-    // });
-    // return response.data!;
-
-    let hospitals = [...mockHospitals];
-    
-    // Filter by radius if specified
-    if (radius) {
-      hospitals = hospitals.filter(h => h.distance <= radius);
+    const response = await api.get<any>('/hospitals/nearby', params);
+    if (response.success && response.data) {
+      const items = Array.isArray(response.data) ? response.data : (response.data as any)?.data || [];
+      return (items as any[]).map(mapHospitalResponse).sort((a: any, b: any) => a.distance - b.distance);
     }
-    
-    // Apply additional filters
-    if (filters) {
-      const filtered = filterHospitals(hospitals, filters);
-      hospitals = filtered;
-    }
-    
-    // Sort by distance
-    return hospitals.sort((a, b) => a.distance - b.distance);
+    return [];
   },
 
   /**
    * Get hospital statistics
    */
   getHospitalStats: async (): Promise<HospitalStats> => {
-    await simulateDelay(700);
-
-    // TODO: Replace with real API call
-    // const response = await api.get<HospitalStats>('/hospitals/stats');
-    // return response.data!;
-
-    const totalBeds = mockHospitals.reduce((sum, h) => sum + h.beds.total, 0);
-    const availableBeds = mockHospitals.reduce((sum, h) => sum + h.beds.available, 0);
-    const icuBeds = mockHospitals.reduce((sum, h) => sum + h.beds.icu.total, 0);
-    const availableIcuBeds = mockHospitals.reduce((sum, h) => sum + h.beds.icu.available, 0);
-    const emergencyBeds = mockHospitals.reduce((sum, h) => 
-      sum + (h.beds.emergency?.total || 0), 0
-    );
-    
-    const topRated = [...mockHospitals].sort((a, b) => b.rating - a.rating)[0];
-
+    const response = await api.get<any>('/hospitals/stats');
+    if (response.success && response.data) {
+      return {
+        totalHospitals: response.data.total_hospitals || 0,
+        totalBeds: response.data.total_beds || 0,
+        availableBeds: response.data.available_beds || 0,
+        icuBeds: response.data.icu_beds || 0,
+        availableIcuBeds: response.data.available_icu_beds || 0,
+        emergencyBeds: response.data.emergency_beds || 0,
+        averageResponseTime: response.data.average_response_time || 0,
+        topRatedHospital: response.data.top_rated_hospital || '',
+      };
+    }
+    // Fallback: compute from hospital list
+    const result = await hospitalService.getHospitals();
+    const totalBeds = result.hospitals.reduce((s, h) => s + h.beds.total, 0);
+    const availableBeds = result.hospitals.reduce((s, h) => s + h.beds.available, 0);
     return {
-      totalHospitals: mockHospitals.length,
+      totalHospitals: result.total,
       totalBeds,
       availableBeds,
-      icuBeds,
-      availableIcuBeds,
-      emergencyBeds,
+      icuBeds: result.hospitals.reduce((s, h) => s + h.beds.icu.total, 0),
+      availableIcuBeds: result.hospitals.reduce((s, h) => s + h.beds.icu.available, 0),
+      emergencyBeds: result.hospitals.reduce((s, h) => s + (h.beds.emergency?.total || 0), 0),
       averageResponseTime: 18.5,
-      topRatedHospital: topRated.name
+      topRatedHospital: [...result.hospitals].sort((a, b) => b.rating - a.rating)[0]?.name || '',
     };
   },
 
@@ -924,34 +596,29 @@ export const hospitalService = {
    * Get all unique cities with hospitals
    */
   getHospitalCities: async (): Promise<string[]> => {
-    await simulateDelay(300);
-
-    const cities = [...new Set(mockHospitals.map(h => h.location.city))];
-    return cities.sort();
+    const response = await api.get<any>('/hospitals/cities');
+    if (response.success && response.data) {
+      const cities = Array.isArray(response.data) ? response.data : response.data?.cities || [];
+      return cities.sort();
+    }
+    // Fallback: derive from hospital list
+    const result = await hospitalService.getHospitals({ limit: 100 });
+    return [...new Set(result.hospitals.map(h => h.location.city))].sort();
   },
 
   /**
    * Get all unique hospital types
    */
   getHospitalTypes: async (): Promise<Hospital['type'][]> => {
-    await simulateDelay(300);
-
-    const types = [...new Set(mockHospitals.map(h => h.type))];
-    return types.sort();
+    const result = await hospitalService.getHospitals({ limit: 100 });
+    return [...new Set(result.hospitals.map(h => h.type))].sort() as Hospital['type'][];
   },
 
   /**
    * Search hospitals by name or location
    */
   searchHospitals: async (query: string, filters?: HospitalFilter): Promise<Hospital[]> => {
-    await simulateDelay(600);
-
-    const searchFilters: HospitalFilter = {
-      ...filters,
-      searchQuery: query
-    };
-    
-    const result = await hospitalService.getHospitals(searchFilters);
+    const result = await hospitalService.getHospitals({ ...filters, search: query });
     return result.hospitals;
   },
 
@@ -966,13 +633,13 @@ export const hospitalService = {
     occupancyRate: number;
     icuAvailability: number;
   }>> => {
-    await simulateDelay(500);
-
-    const summary = mockHospitals.map(hospital => {
+    const result = await hospitalService.getHospitals({ limit: 100 });
+    return result.hospitals.map(hospital => {
       const totalBeds = hospital.beds.total;
       const availableBeds = hospital.beds.available;
-      const occupancyRate = ((totalBeds - availableBeds) / totalBeds) * 100;
-      const icuAvailability = (hospital.beds.icu.available / hospital.beds.icu.total) * 100;
+      const occupancyRate = totalBeds > 0 ? ((totalBeds - availableBeds) / totalBeds) * 100 : 0;
+      const icuAvailability = hospital.beds.icu.total > 0
+        ? (hospital.beds.icu.available / hospital.beds.icu.total) * 100 : 0;
 
       return {
         hospitalId: hospital.id,
@@ -980,36 +647,33 @@ export const hospitalService = {
         totalBeds,
         availableBeds,
         occupancyRate: Math.round(occupancyRate),
-        icuAvailability: Math.round(icuAvailability)
+        icuAvailability: Math.round(icuAvailability),
       };
-    });
-
-    return summary.sort((a, b) => b.availableBeds - a.availableBeds);
+    }).sort((a, b) => b.availableBeds - a.availableBeds);
   },
 
   /**
    * Validate if hospital has emergency services
    */
   hasEmergencyServices: async (hospitalId: string): Promise<boolean> => {
-    await simulateDelay(300);
-
-    const hospital = await hospitalService.getHospitalById(hospitalId);
-    return hospital.emergency;
+    try {
+      const hospital = await hospitalService.getHospitalById(hospitalId);
+      return hospital.emergency;
+    } catch {
+      return false;
+    }
   },
 
   /**
    * Get emergency contact for hospital
    */
   getEmergencyContact: async (hospitalId: string): Promise<{ phone: string; eta: number }> => {
-    await simulateDelay(300);
-
     const hospital = await hospitalService.getHospitalById(hospitalId);
-    
     return {
       phone: hospital.phone || '+1 (555) 911-0000',
-      eta: hospital.eta
+      eta: hospital.eta,
     };
-  }
+  },
 };
 
 // ============================================

@@ -1,5 +1,6 @@
+import { getAuthToken } from '../../services/api';
 // src/components/admin/AdminNotifications.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -55,12 +56,33 @@ const AdminNotifications: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [filter, setFilter] = useState('all');
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filtered = filter === 'all' ? notifications : filter === 'unread' ? notifications.filter(n => !n.read) : notifications.filter(n => n.type === filter);
-  const unreadCount = notifications.filter(n => !n.read).length;
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/notifications`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const data = await res.json();
+        setNotifications(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch notifications:', err);
+        setNotifications([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
 
-  const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  const filtered = filter === 'all' ? notifications : filter === 'unread' ? notifications.filter((n: any) => !n.is_read) : notifications.filter((n: any) => n.type === filter);
+  const unreadCount = notifications.filter((n: any) => !n.is_read).length;
+
+  const markAllRead = () => setNotifications((prev: any[]) => prev.map((n: any) => ({ ...n, is_read: true })));
 
   return (
     <div className="min-h-screen bg-[#020408] flex">
@@ -114,23 +136,24 @@ const AdminNotifications: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              {filtered.map((n, i) => {
-                const config = typeConfig[n.type];
+              {filtered.map((n: any, i: number) => {
+                const nType = n.type || 'info';
+                const config = typeConfig[nType] || typeConfig.info;
                 const Icon = config.icon;
                 return (
-                  <motion.div key={n.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}>
-                    <Card className={`p-4 hover:border-cyan-500/30 transition-all ${n.read ? '' : 'border-l-2 border-l-cyan-500 bg-cyan-500/3'}`}>
+                  <motion.div key={n.id || i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}>
+                    <Card className={`p-4 hover:border-cyan-500/30 transition-all ${n.is_read ? '' : 'border-l-2 border-l-cyan-500 bg-cyan-500/3'}`}>
                       <div className="flex items-start gap-4">
                         <div className={`p-2.5 rounded-xl ${config.bg}`}><Icon className={`w-5 h-5 ${config.color}`} /></div>
                         <div className="flex-1">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h4 className="text-white font-bold text-sm">{n.title}</h4>
-                              <p className="text-slate-400 text-xs mt-0.5">{n.message}</p>
+                              <h4 className="text-white font-bold text-sm">{n.title || 'Notification'}</h4>
+                              <p className="text-slate-400 text-xs mt-0.5">{n.body || n.message || ''}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-slate-500">{n.time}</span>
-                              {!n.read && <div className="w-2 h-2 rounded-full bg-cyan-400" />}
+                              <span className="text-xs text-slate-500">{n.created_at ? new Date(n.created_at).toLocaleTimeString() : ''}</span>
+                              {!n.is_read && <div className="w-2 h-2 rounded-full bg-cyan-400" />}
                             </div>
                           </div>
                           <div className="flex gap-2 mt-3">

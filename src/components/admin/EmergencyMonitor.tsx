@@ -1,3 +1,4 @@
+import { getAuthToken } from '../../services/api';
 // src/components/admin/EmergencyMonitor.tsx
 
 import React, { useState, useEffect } from 'react';
@@ -25,42 +26,20 @@ export const EmergencyMonitor: React.FC = () => {
 
   const fetchEmergencies = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      const mockEmergencies: EmergencyAlert[] = [
-        {
-          id: '1',
-          type: 'blood',
-          title: 'Emergency Blood Required',
-          description: 'O-negative blood needed for emergency surgery',
-          location: 'City General Hospital',
-          coordinates: { latitude: 40.7128, longitude: -74.006 },
-          severity: 'critical',
-          status: 'active',
-          reportedBy: 'Dr. Wilson',
-          reportedDate: '2024-02-16T10:00:00',
-          responders: [
-            {
-              id: 'r1',
-              name: 'Blood Bank Unit 1',
-              type: 'hospital',
-              status: 'dispatched',
-              estimatedArrival: '15 min',
-              contactPhone: '+1 (555) 111-2222'
-            }
-          ],
-          updates: [
-            {
-              id: 'u1',
-              message: 'Emergency declared - Critical patient needs O- blood',
-              timestamp: '2024-02-16T10:00:00',
-              updatedBy: 'System'
-            }
-          ]
-        }
-      ];
-      setEmergencies(mockEmergencies);
+    try {
+      const token = getAuthToken();
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/emergencies`,
+        { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+      );
+      const result = await res.json();
+      setEmergencies(Array.isArray(result) ? result : []);
+    } catch (err) {
+      console.error('Failed to fetch emergencies:', err);
+      setEmergencies([]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const getTypeIcon = (type: string) => {

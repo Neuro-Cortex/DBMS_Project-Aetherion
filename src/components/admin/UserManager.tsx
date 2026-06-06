@@ -1,3 +1,4 @@
+import { getAuthToken } from '../../services/api';
 // src/components/admin/UserManager.tsx
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,70 +37,45 @@ export const UserManager: React.FC<UserManagerProps> = ({
 
   const fetchUsers = async () => {
     setIsLoading(true);
-    const mockUsers: User[] = [
+    try {
+      const token = getAuthToken();
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      if (roleFilter !== 'all') params.append('role', roleFilter);
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      params.append('page', '1');
+      params.append('limit', '100');
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/users?${params.toString()}`,
         {
-          id: '1',
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john@email.com',
-          phone: '+1 (555) 123-4567',
-          role: 'client',
-          status: 'active',
-          isVerified: true,
-          registeredDate: '2024-01-15',
-          lastActive: '2024-02-15T10:30:00'
-        },
-        {
-          id: '2',
-          firstName: 'Sarah',
-          lastName: 'Johnson',
-          email: 'sarah@email.com',
-          phone: '+1 (555) 987-6543',
-          role: 'doctor',
-          status: 'active',
-          isVerified: true,
-          registeredDate: '2024-01-20',
-          lastActive: '2024-02-15T09:00:00'
-        },
-        {
-          id: '3',
-          firstName: 'Mike',
-          lastName: 'Wilson',
-          email: 'mike@email.com',
-          phone: '+1 (555) 456-7890',
-          role: 'client',
-          status: 'blocked',
-          isVerified: false,
-          registeredDate: '2024-02-01',
-          lastActive: '2024-02-10T15:00:00'
-        },
-        {
-          id: '4',
-          firstName: 'Emily',
-          lastName: 'Brown',
-          email: 'emily@email.com',
-          phone: '+1 (555) 111-2222',
-          role: 'blood-donor',
-          status: 'active',
-          isVerified: true,
-          registeredDate: '2024-01-25',
-          lastActive: '2024-02-14T12:00:00'
-        },
-        {
-          id: '5',
-          firstName: 'David',
-          lastName: 'Clark',
-          email: 'david@email.com',
-          phone: '+1 (555) 333-4444',
-          role: 'hospital',
-          status: 'pending',
-          isVerified: false,
-          registeredDate: '2024-02-10',
-          lastActive: '2024-02-10T08:00:00'
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
-      ];
-    setUsers(mockUsers);
-    setIsLoading(false);
+      );
+      const data = await res.json();
+      const rawUsers = data.users || data.data?.items || (Array.isArray(data) ? data : []);
+      const mapped: User[] = rawUsers.map((u: any) => ({
+        id: u.id,
+        firstName: u.full_name?.split(' ')[0] || u.firstName || '',
+        lastName: u.full_name?.split(' ').slice(1).join(' ') || u.lastName || '',
+        email: u.email,
+        phone: u.phone || '',
+        role: u.role_name || u.role || 'patient',
+        status: u.is_active === false ? 'inactive' : u.is_verified === false ? 'pending' : 'active',
+        isVerified: u.is_verified || false,
+        registeredDate: u.created_at ? new Date(u.created_at).toLocaleDateString() : '',
+        lastActive: u.last_login_at || u.created_at || new Date().toISOString(),
+      }));
+      setUsers(mapped);
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+      setUsers([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filteredUsers = users.filter(user => {
@@ -146,6 +122,26 @@ export const UserManager: React.FC<UserManagerProps> = ({
   const handleBulkAction = (action: 'block' | 'delete' | 'verify') => {
     if (window.confirm(`Are you sure you want to ${action} ${selectedUsers.length} users?`)) {
       console.log(`${action} users:`, selectedUsers);
+    }
+  };
+
+  const handleToggleActive = async (userId: string, currentStatus: boolean) => {
+    try {
+      const token = getAuthToken();
+      await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/users/${userId}/toggle-active`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ isActive: !currentStatus }),
+        }
+      );
+      fetchUsers();
+    } catch (err) {
+      console.error('Failed to toggle user status:', err);
     }
   };
 
@@ -370,9 +366,9 @@ export const UserManager: React.FC<UserManagerProps> = ({
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          onClick={() => onBlockUser(user.id)}
+                          onClick={() => handleToggleActive(user.id, user.status === 'active')}
                           className="p-2 rounded-lg hover:bg-amber-500/20 text-amber-400 transition-all"
-                          title="Block"
+                          title={user.status === 'active' ? 'Block' : 'Activate'}
                         >
                           <UserX className="w-4 h-4" />
                         </motion.button>

@@ -17,6 +17,7 @@ export { useAuth } from './useAuth';
 export { useDoctor } from './useDoctor';
 export { useAppointment } from './useAppointment';
 export { useEmergency } from './useEmergency';
+export type { EmergencyService, EmergencyRequest, CreateEmergencyRequest, BloodDonor, OxygenSupplier, EmergencyContact, EmergencyAlert } from './useEmergency';
 export { useHospital } from './useHospital';
 export { useAIAssistant } from './useAIAssistant';
 

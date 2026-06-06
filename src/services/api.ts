@@ -5,7 +5,7 @@
 // ============================================
 
 const BASE_URL: string =
-  import.meta.env.VITE_API_URL || "https://api.medicare.com/v1";
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
 
 const API_TIMEOUT = 15000;
 
@@ -49,6 +49,9 @@ const getAuthToken = (): string | null => {
   }
 };
 
+// Export for use in components that make direct fetch calls
+export { getAuthToken };
+
 // Get user from localStorage
 export const getCurrentUser = (): any => {
   try {
@@ -69,16 +72,6 @@ export const saveUser = (user: any): void => {
 export const clearUser = (): void => {
   localStorage.removeItem("medicare_user");
   localStorage.removeItem("medicare_token");
-};
-
-// Simulate network delay (for development)
-export const simulateDelay = (ms: number = 800): Promise<void> => {
-  if (import.meta.env.PROD && ms > 0) {
-    return Promise.resolve();
-  }
-  return new Promise((resolve) =>
-    setTimeout(resolve, ms + Math.random() * 300)
-  );
 };
 
 // Handle API errors
@@ -480,34 +473,6 @@ export const apiService = {
   updateProfile: async (updates: any) => {
     const response = await api.put('/auth/profile', updates);
     return response.data;
-  },
-};
-
-// ============================================
-// MOCK API (for development)
-// ============================================
-
-export const mockApi = {
-  async get<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
-    await simulateDelay(500);
-    console.log(`[MOCK API] GET ${endpoint}`, data);
-    return {
-      data: null as unknown as T,
-      success: true,
-      message: "Mock success",
-      statusCode: 200,
-    };
-  },
-  
-  async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
-    await simulateDelay(500);
-    console.log(`[MOCK API] POST ${endpoint}`, data);
-    return {
-      data: null as unknown as T,
-      success: true,
-      message: "Mock success",
-      statusCode: 200,
-    };
   },
 };
 

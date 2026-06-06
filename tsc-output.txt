@@ -1,0 +1,186 @@
+﻿src/components/appointment/BookingForm.tsx(102,5): error TS2322: Type '{ phone: string | undefined; email: string | undefined; emergencyContact: string; } | {}' is not assignable to type '{ phone: string; email: string; emergencyContact: string; } | undefined'.
+  Type '{ phone: string | undefined; email: string | undefined; emergencyContact: string; }' is not assignable to type '{ phone: string; email: string; emergencyContact: string; }'.
+    Types of property 'phone' are incompatible.
+      Type 'string | undefined' is not assignable to type 'string'.
+        Type 'undefined' is not assignable to type 'string'.
+src/components/appointment/BookingForm.tsx(180,13): error TS2740: Type 'Doctor' is missing the following properties from type 'Doctor': title, availableSlots, nextAvailable, verified, and 4 more.
+src/components/appointment/BookingForm.tsx(181,13): error TS2322: Type '"glass"' is not assignable to type '"default" | "compact" | "featured" | undefined'.
+src/components/appointment/BookingForm.tsx(216,13): error TS2322: Type '{ variant: string; type: "date"; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; min: string; leftIcon: LucideIcon; }' is not assignable to type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+src/components/appointment/BookingForm.tsx(263,13): error TS2322: Type '{ variant: string; placeholder: string; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; onKeyPress: (e: KeyboardEvent<HTMLInputElement>) => false | void; className: string; }' is not assignable to type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+src/components/appointment/BookingForm.tsx(336,11): error TS2322: Type '{ variant: string; label: string; type: "tel"; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; leftIcon: LucideIcon; placeholder: string; }' is not assignable to type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+src/components/appointment/BookingForm.tsx(340,43): error TS2345: Argument of type '(prev: Partial<BookingData>) => { contactInfo: { phone: string; email?: string | undefined; emergencyContact?: string | undefined; }; doctorId?: string | undefined; ... 7 more ...; insuranceDetails?: { ...; } | undefined; }' is not assignable to parameter of type 'SetStateAction<Partial<BookingData>>'.
+  Type '(prev: Partial<BookingData>) => { contactInfo: { phone: string; email?: string | undefined; emergencyContact?: string | undefined; }; doctorId?: string | undefined; ... 7 more ...; insuranceDetails?: { ...; } | undefined; }' is not assignable to type '(prevState: Partial<BookingData>) => Partial<BookingData>'.
+    Call signature return types '{ contactInfo: { phone: string; email?: string | undefined; emergencyContact?: string | undefined; }; doctorId?: string | undefined; patientId?: string | undefined; date?: string | undefined; ... 5 more ...; insuranceDetails?: { ...; } | undefined; }' and 'Partial<BookingData>' are incompatible.
+      The types of 'contactInfo.email' are incompatible between these types.
+        Type 'string | undefined' is not assignable to type 'string'.
+          Type 'undefined' is not assignable to type 'string'.
+src/components/appointment/BookingForm.tsx(349,11): error TS2322: Type '{ variant: string; label: string; type: "email"; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; leftIcon: LucideIcon; }' is not assignable to type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+src/components/appointment/BookingForm.tsx(353,43): error TS2345: Argument of type '(prev: Partial<BookingData>) => { contactInfo: { email: string; phone?: string | undefined; emergencyContact?: string | undefined; }; doctorId?: string | undefined; ... 7 more ...; insuranceDetails?: { ...; } | undefined; }' is not assignable to parameter of type 'SetStateAction<Partial<BookingData>>'.
+  Type '(prev: Partial<BookingData>) => { contactInfo: { email: string; phone?: string | undefined; emergencyContact?: string | undefined; }; doctorId?: string | undefined; ... 7 more ...; insuranceDetails?: { ...; } | undefined; }' is not assignable to type '(prevState: Partial<BookingData>) => Partial<BookingData>'.
+    Call signature return types '{ contactInfo: { email: string; phone?: string | undefined; emergencyContact?: string | undefined; }; doctorId?: string | undefined; patientId?: string | undefined; date?: string | undefined; ... 5 more ...; insuranceDetails?: { ...; } | undefined; }' and 'Partial<BookingData>' are incompatible.
+      The types of 'contactInfo.phone' are incompatible between these types.
+        Type 'string | undefined' is not assignable to type 'string'.
+          Type 'undefined' is not assignable to type 'string'.
+src/components/appointment/BookingForm.tsx(362,9): error TS2322: Type '{ variant: string; label: string; type: "tel"; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; leftIcon: LucideIcon; placeholder: string; }' is not assignable to type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+src/components/appointment/BookingForm.tsx(366,41): error TS2345: Argument of type '(prev: Partial<BookingData>) => { contactInfo: { emergencyContact: string; phone?: string | undefined; email?: string | undefined; }; doctorId?: string | undefined; ... 7 more ...; insuranceDetails?: { ...; } | undefined; }' is not assignable to parameter of type 'SetStateAction<Partial<BookingData>>'.
+  Type '(prev: Partial<BookingData>) => { contactInfo: { emergencyContact: string; phone?: string | undefined; email?: string | undefined; }; doctorId?: string | undefined; ... 7 more ...; insuranceDetails?: { ...; } | undefined; }' is not assignable to type '(prevState: Partial<BookingData>) => Partial<BookingData>'.
+    Call signature return types '{ contactInfo: { emergencyContact: string; phone?: string | undefined; email?: string | undefined; }; doctorId?: string | undefined; patientId?: string | undefined; date?: string | undefined; ... 5 more ...; insuranceDetails?: { ...; } | undefined; }' and 'Partial<BookingData>' are incompatible.
+      The types of 'contactInfo.phone' are incompatible between these types.
+        Type 'string | undefined' is not assignable to type 'string'.
+          Type 'undefined' is not assignable to type 'string'.
+src/components/appointment/BookingForm.tsx(404,13): error TS2322: Type '{ variant: string; label: string; placeholder: string; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; }' is not assignable to type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+src/components/appointment/BookingForm.tsx(408,45): error TS2345: Argument of type '(prev: Partial<BookingData>) => { insuranceDetails: { provider: string; policyNumber?: string | undefined; }; doctorId?: string | undefined; patientId?: string | undefined; ... 6 more ...; contactInfo?: { ...; } | undefined; }' is not assignable to parameter of type 'SetStateAction<Partial<BookingData>>'.
+  Type '(prev: Partial<BookingData>) => { insuranceDetails: { provider: string; policyNumber?: string | undefined; }; doctorId?: string | undefined; patientId?: string | undefined; ... 6 more ...; contactInfo?: { ...; } | undefined; }' is not assignable to type '(prevState: Partial<BookingData>) => Partial<BookingData>'.
+    Call signature return types '{ insuranceDetails: { provider: string; policyNumber?: string | undefined; }; doctorId?: string | undefined; patientId?: string | undefined; date?: string | undefined; time?: string | undefined; ... 4 more ...; contactInfo?: { ...; } | undefined; }' and 'Partial<BookingData>' are incompatible.
+      The types of 'insuranceDetails.policyNumber' are incompatible between these types.
+        Type 'string | undefined' is not assignable to type 'string'.
+          Type 'undefined' is not assignable to type 'string'.
+src/components/appointment/BookingForm.tsx(414,13): error TS2322: Type '{ variant: string; label: string; placeholder: string; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; }' is not assignable to type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+  Property 'variant' does not exist on type 'IntrinsicAttributes & InputProps & RefAttributes<HTMLInputElement>'.
+src/components/appointment/BookingForm.tsx(418,45): error TS2345: Argument of type '(prev: Partial<BookingData>) => { insuranceDetails: { policyNumber: string; provider?: string | undefined; }; doctorId?: string | undefined; patientId?: string | undefined; ... 6 more ...; contactInfo?: { ...; } | undefined; }' is not assignable to parameter of type 'SetStateAction<Partial<BookingData>>'.
+  Type '(prev: Partial<BookingData>) => { insuranceDetails: { policyNumber: string; provider?: string | undefined; }; doctorId?: string | undefined; patientId?: string | undefined; ... 6 more ...; contactInfo?: { ...; } | undefined; }' is not assignable to type '(prevState: Partial<BookingData>) => Partial<BookingData>'.
+    Call signature return types '{ insuranceDetails: { policyNumber: string; provider?: string | undefined; }; doctorId?: string | undefined; patientId?: string | undefined; date?: string | undefined; time?: string | undefined; ... 4 more ...; contactInfo?: { ...; } | undefined; }' and 'Partial<BookingData>' are incompatible.
+      The types of 'insuranceDetails.provider' are incompatible between these types.
+        Type 'string | undefined' is not assignable to type 'string'.
+          Type 'undefined' is not assignable to type 'string'.
+src/components/common/NotificationBell.tsx(17,24): error TS2307: Cannot find module './Avatar' or its corresponding type declarations.
+src/components/common/NotificationBell.tsx(18,23): error TS2307: Cannot find module './Badge' or its corresponding type declarations.
+src/components/common/QRMedicalCard.tsx(35,11): error TS2322: Type '{ value: string; size: number; level: string; includeMargin: boolean; imageSettings: { src: string; height: number; width: number; excavate: boolean; }; }' is not assignable to type 'IntrinsicAttributes & { value: string; size?: number | undefined; }'.
+  Property 'level' does not exist on type 'IntrinsicAttributes & { value: string; size?: number | undefined; }'.
+src/components/common/SearchBar.tsx(347,24): error TS2540: Cannot assign to 'current' because it is a read-only property.
+src/components/dashboard/Activitychart.tsx(3,32): error TS2307: Cannot find module 'react-chartjs-2' or its corresponding type declarations.
+src/components/dashboard/Activitychart.tsx(16,8): error TS2307: Cannot find module 'chart.js' or its corresponding type declarations.
+src/components/dashboard/Activitychart.tsx(118,20): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/components/dashboard/Activitychart.tsx(120,46): error TS7006: Parameter 'dataset' implicitly has an 'any' type.
+src/components/dashboard/Activitychart.tsx(122,34): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/dashboard/Activitychart.tsx(191,18): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/components/dashboard/Activitychart.tsx(198,35): error TS7006: Parameter 'dataset' implicitly has an 'any' type.
+src/components/dashboard/Activitychart.tsx(200,32): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/components/dashboard/Activitychart.tsx(303,35): error TS7006: Parameter 'dataset' implicitly has an 'any' type.
+src/components/dashboard/Activitychart.tsx(303,44): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/components/dashboard/Activitychart.tsx(313,37): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/components/dashboard/Activitychart.tsx(313,40): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/components/dashboard/ResoureStatur.tsx(145,18): error TS2304: Cannot find name 'twMerge'.
+src/components/doctors/Patient.tsx(243,9): error TS18046: 'p.condition' is of type 'unknown'.
+src/components/hospital/HospitalAccount.tsx(19,24): error TS2307: Cannot find module '../common/Avatar' or its corresponding type declarations.
+src/components/hospital/HospitalAccount.tsx(20,23): error TS2307: Cannot find module '../common/Badge' or its corresponding type declarations.
+src/components/hospital/HospitalAccount.tsx(253,64): error TS2322: Type '{ children: (string | Element)[]; variant: "primary"; onClick: () => Promise<void>; loading: boolean; }' is not assignable to type 'IntrinsicAttributes & ButtonProps & RefAttributes<HTMLButtonElement>'.
+  Property 'loading' does not exist on type 'IntrinsicAttributes & ButtonProps & RefAttributes<HTMLButtonElement>'. Did you mean 'isLoading'?
+src/components/hospital/HospitalAccount.tsx(290,10): error TS2552: Cannot find name 'Tab'. Did you mean 'tabs'?
+src/components/hospital/HospitalAccount.tsx(313,74): error TS2339: Property 'target' does not exist on type 'string | string[]'.
+  Property 'target' does not exist on type 'string'.
+src/components/hospital/HospitalAccount.tsx(366,17): error TS2322: Type '({ key: string; header: string; render?: undefined; } | { key: string; header: string; render: (dept: Department) => Element; })[]' is not assignable to type 'Column<Department>[]'.
+  Type '{ key: string; header: string; render?: undefined; } | { key: string; header: string; render: (dept: Department) => Element; }' is not assignable to type 'Column<Department>'.
+    Property 'title' is missing in type '{ key: string; header: string; render?: undefined; }' but required in type 'Column<Department>'.
+src/components/hospital/HospitalAccount.tsx(368,32): error TS7006: Parameter 'dept' implicitly has an 'any' type.
+src/components/hospital/hospitalAdminMockData.ts(1,15): error TS2614: Module '"@/components/hospital/BedAvailability"' has no exported member 'BedData'. Did you mean to use 'import BedData from "@/components/hospital/BedAvailability"' instead?
+src/components/hospital/HospitalAdminPanel.tsx(9,10): error TS2614: Module '"@/components/hospital/HospitalDashboard"' has no exported member 'HospitalDashboard'. Did you mean to use 'import HospitalDashboard from "@/components/hospital/HospitalDashboard"' instead?
+src/components/hospital/Hospitals.tsx(7,30): error TS2307: Cannot find module '@/pages/HospitalCard' or its corresponding type declarations.
+src/components/hospital/Hospitals.tsx(8,33): error TS2307: Cannot find module 'src/pages/BedAvailability' or its corresponding type declarations.
+src/components/oxygen/OxygenDashboard.tsx(58,34): error TS2503: Cannot find namespace 'google'.
+src/components/oxygen/OxygenDashboard.tsx(333,39): error TS2503: Cannot find namespace 'google'.
+src/components/oxygen/OxygenDashboard.tsx(510,15): error TS2322: Type '{ children: (Element | Element[] | null)[]; mapContainerStyle: { width: string; height: string; borderRadius: string; }; center: { lat: number; lng: number; }; zoom: number; options: { ...; }; onLoad: (map: google.maps.Map) => void; onUnmount: () => void; }' is not assignable to type 'IntrinsicAttributes & MapProps'.
+  Property 'options' does not exist on type 'IntrinsicAttributes & MapProps'.
+src/components/oxygen/OxygenDashboard.tsx(516,17): error TS2322: Type '{ position: { lat: number; lng: number; }; icon: { url: string; scaledSize: any; }; title: string; }' is not assignable to type 'IntrinsicAttributes & { onClick?: (() => void) | undefined; }'.
+  Property 'position' does not exist on type 'IntrinsicAttributes & { onClick?: (() => void) | undefined; }'.
+src/components/oxygen/OxygenDashboard.tsx(519,35): error TS2304: Cannot find name 'google'.
+src/components/oxygen/OxygenDashboard.tsx(526,17): error TS2322: Type '{ center: { lat: number; lng: number; }; radius: number; options: { fillColor: string; fillOpacity: number; strokeColor: string; strokeOpacity: number; strokeWeight: number; }; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'center' does not exist on type 'IntrinsicAttributes'.
+src/components/oxygen/OxygenDashboard.tsx(543,21): error TS2322: Type '{ key: string; position: { latitude: number; longitude: number; }; icon: { url: string; scaledSize: any; }; title: string; onClick: () => void; animation: any; }' is not assignable to type 'IntrinsicAttributes & { onClick?: (() => void) | undefined; }'.
+  Property 'position' does not exist on type 'IntrinsicAttributes & { onClick?: (() => void) | undefined; }'.
+src/components/oxygen/OxygenDashboard.tsx(546,39): error TS2304: Cannot find name 'google'.
+src/components/oxygen/OxygenDashboard.tsx(550,75): error TS2304: Cannot find name 'google'.
+src/components/oxygen/OxygenDashboard.tsx(557,19): error TS2322: Type '{ children: Element; position: { latitude: number; longitude: number; }; onCloseClick: () => void; }' is not assignable to type 'IntrinsicAttributes & { children?: ReactNode; onCloseClick?: (() => void) | undefined; }'.
+  Property 'position' does not exist on type 'IntrinsicAttributes & { children?: ReactNode; onCloseClick?: (() => void) | undefined; }'.
+src/components/pharmacy/PharmacyAccount.tsx(169,50): error TS2339: Property 'target' does not exist on type 'string | string[]'.
+  Property 'target' does not exist on type 'string'.
+src/components/pharmacy/PharmacyAccount.tsx(180,51): error TS2339: Property 'target' does not exist on type 'string | string[]'.
+  Property 'target' does not exist on type 'string'.
+src/components/pharmacy/PharmacyAccount.tsx(192,52): error TS2339: Property 'target' does not exist on type 'string | string[]'.
+  Property 'target' does not exist on type 'string'.
+src/components/pharmacy/PharmacyAccount.tsx(202,17): error TS2322: Type '"warning" | "ghost"' is not assignable to type 'Variant | undefined'.
+  Type '"warning"' is not assignable to type 'Variant | undefined'.
+src/components/pharmacy/PharmacyAccount.tsx(272,30): error TS7006: Parameter 'm' implicitly has an 'any' type.
+src/components/pharmacy/PharmacyAccount.tsx(273,15): error TS2322: Type 'Element' is not assignable to type 'string'.
+src/components/spline/SplineScene.tsx(2,20): error TS2307: Cannot find module '@splinetool/react-spline' or its corresponding type declarations.
+src/context/AuthContext.tsx(68,32): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/hooks/useAIAssistant.ts(213,42): error TS2339: Property 'textToSpeech' does not exist on type 'AIService'.
+src/hooks/useAuth.ts(125,40): error TS2345: Argument of type '{ currentPassword: string; newPassword: string; confirmNewPassword: string; }' is not assignable to parameter of type 'ChangePasswordData'.
+  Type '{ currentPassword: string; newPassword: string; confirmNewPassword: string; }' is missing the following properties from type 'ChangePasswordData': current_password, new_password, confirm_new_password
+src/hooks/useAuth.ts(152,30): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/pages/auth/Login.tsx(193,28): error TS2571: Object is of type 'unknown'.
+src/pages/auth/Login.tsx(193,37): error TS2345: Argument of type 'AsyncThunkAction<User, { email: string; password: string; role?: string | undefined; }, AsyncThunkConfig>' is not assignable to parameter of type 'UnknownAction'.
+src/pages/auth/Login.tsx(224,13): error TS2571: Object is of type 'unknown'.
+src/pages/auth/Login.tsx(224,22): error TS2345: Argument of type 'AsyncThunkAction<User, Partial<User> & { password: string; }, AsyncThunkConfig>' is not assignable to parameter of type 'UnknownAction'.
+src/pages/auth/Register.tsx(296,13): error TS2571: Object is of type 'unknown'.
+src/pages/auth/Register.tsx(296,22): error TS2345: Argument of type 'AsyncThunkAction<User, Partial<User> & { password: string; }, AsyncThunkConfig>' is not assignable to parameter of type 'UnknownAction'.
+src/pages/auth/Registration/RegistratinForm.tsx(11,37): error TS2307: Cannot find module '../../types/auth' or its corresponding type declarations.
+src/pages/auth/Registration/RegistratinForm.tsx(33,33): error TS2339: Property 'extend' does not exist on type 'ZodEffects<ZodObject<{ fullName: ZodString; email: ZodString; phone: ZodString; password: ZodString; confirmPassword: ZodString; gender: ZodEnum<["male", "female"]>; address: ZodString; }, "strip", ZodTypeAny, { ...; }, { ...; }>, { ...; }, { ...; }>'.
+src/pages/auth/Registration/RegistratinForm.tsx(41,35): error TS2339: Property 'extend' does not exist on type 'ZodEffects<ZodObject<{ fullName: ZodString; email: ZodString; phone: ZodString; password: ZodString; confirmPassword: ZodString; gender: ZodEnum<["male", "female"]>; address: ZodString; }, "strip", ZodTypeAny, { ...; }, { ...; }>, { ...; }, { ...; }>'.
+src/pages/auth/Registration/RegistratinForm.tsx(49,37): error TS2339: Property 'extend' does not exist on type 'ZodEffects<ZodObject<{ fullName: ZodString; email: ZodString; phone: ZodString; password: ZodString; confirmPassword: ZodString; gender: ZodEnum<["male", "female"]>; address: ZodString; }, "strip", ZodTypeAny, { ...; }, { ...; }>, { ...; }, { ...; }>'.
+src/pages/auth/Registration/RegistratinForm.tsx(55,35): error TS2339: Property 'extend' does not exist on type 'ZodEffects<ZodObject<{ fullName: ZodString; email: ZodString; phone: ZodString; password: ZodString; confirmPassword: ZodString; gender: ZodEnum<["male", "female"]>; address: ZodString; }, "strip", ZodTypeAny, { ...; }, { ...; }>, { ...; }, { ...; }>'.
+src/pages/auth/Registration/RoleSelector.tsx(8,29): error TS2307: Cannot find module '../../types/auth' or its corresponding type declarations.
+src/pages/Client/ClientDashboard.tsx(397,43): error TS2339: Property 'fullName' does not exist on type 'User | { name: string; email: string; }'.
+  Property 'fullName' does not exist on type '{ name: string; email: string; }'.
+src/pages/Client/Discover.tsx(19,24): error TS2307: Cannot find module '../../components/common/Avatar' or its corresponding type declarations.
+src/pages/Client/Discover.tsx(20,23): error TS2307: Cannot find module '../../components/common/Badge' or its corresponding type declarations.
+src/pages/Client/Discover.tsx(21,24): error TS2307: Cannot find module '../../components/common/Button' or its corresponding type declarations.
+src/pages/Client/Discover.tsx(23,34): error TS2307: Cannot find module '../../components/common/GlassmorphicCard' or its corresponding type declarations.
+src/pages/Client/Discover.tsx(24,23): error TS2307: Cannot find module '../../components/common/Input' or its corresponding type declarations.
+src/pages/Client/Discover.tsx(26,21): error TS2307: Cannot find module '../../components/common/Tab' or its corresponding type declarations.
+src/pages/Client/Discover.tsx(27,24): error TS2307: Cannot find module '../../components/common/Loader' or its corresponding type declarations.
+src/pages/Client/Discover.tsx(205,24): error TS7006: Parameter 'e' implicitly has an 'any' type.
+src/pages/Client/patients/MedicalHistory.tsx(312,45): error TS2339: Property 'map' does not exist on type 'string | string[]'.
+  Property 'map' does not exist on type 'string'.
+src/pages/Client/patients/VaccinationTracker.tsx(411,34): error TS2322: Type '"error" | "warning"' is not assignable to type '"success" | "warning" | "primary" | "secondary" | "outline" | "danger" | "gradient" | "neon" | "default" | "info" | undefined'.
+  Type '"error"' is not assignable to type '"success" | "warning" | "primary" | "secondary" | "outline" | "danger" | "gradient" | "neon" | "default" | "info" | undefined'.
+src/pages/Hospital.tsx(18,9): error TS2724: '"lucide-react"' has no exported member named 'ernalLink'. Did you mean 'ExternalLink'?
+src/pages/ImmersivePreview.tsx(18,42): error TS2307: Cannot find module '@react-three/fiber' or its corresponding type declarations.
+src/pages/ImmersivePreview.tsx(19,58): error TS2307: Cannot find module '@react-three/drei' or its corresponding type declarations.
+src/pages/ImmersivePreview.tsx(40,24): error TS2307: Cannot find module 'three' or its corresponding type declarations.
+src/pages/ImmersivePreview.tsx(48,13): error TS7006: Parameter 'state' implicitly has an 'any' type.
+src/pages/ImmersivePreview.tsx(75,11): error TS2339: Property 'mesh' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(76,13): error TS2339: Property 'sphereGeometry' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(77,13): error TS2339: Property 'meshStandardMaterial' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(78,11): error TS2339: Property 'mesh' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(79,11): error TS2339: Property 'mesh' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(80,13): error TS2339: Property 'sphereGeometry' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(81,13): error TS2339: Property 'meshStandardMaterial' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(82,11): error TS2339: Property 'mesh' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(94,13): error TS2339: Property 'bufferGeometry' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(95,13): error TS2339: Property 'lineBasicMaterial' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(105,5): error TS2339: Property 'group' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(108,7): error TS2339: Property 'pointLight' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(109,5): error TS2339: Property 'group' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/ImmersivePreview.tsx(148,11): error TS2339: Property 'ambientLight' does not exist on type 'JSX.IntrinsicElements'.
+src/store/slices/DoctorSlice.ts(14,8): error TS2307: Cannot find module '../doctor' or its corresponding type declarations.
+src/types/hospital.ts(20,3): error TS2300: Duplicate identifier 'rating'.
+src/types/hospital.ts(20,3): error TS2687: All declarations of 'rating' must have identical modifiers.
+src/types/hospital.ts(35,3): error TS2300: Duplicate identifier 'ambulanceAvailable'.
+src/types/hospital.ts(35,3): error TS2687: All declarations of 'ambulanceAvailable' must have identical modifiers.
+src/types/hospital.ts(39,3): error TS2300: Duplicate identifier 'departments'.
+src/types/hospital.ts(39,3): error TS2687: All declarations of 'departments' must have identical modifiers.
+src/types/hospital.ts(64,3): error TS2300: Duplicate identifier 'rating'.
+src/types/hospital.ts(64,3): error TS2687: All declarations of 'rating' must have identical modifiers.
+src/types/hospital.ts(64,3): error TS2717: Subsequent property declarations must have the same type.  Property 'rating' must be of type 'number', but here has type 'number | undefined'.
+src/types/hospital.ts(76,3): error TS2300: Duplicate identifier 'ambulanceAvailable'.
+src/types/hospital.ts(76,3): error TS2687: All declarations of 'ambulanceAvailable' must have identical modifiers.
+src/types/hospital.ts(76,3): error TS2717: Subsequent property declarations must have the same type.  Property 'ambulanceAvailable' must be of type 'number', but here has type 'boolean | undefined'.
+src/types/hospital.ts(79,3): error TS2300: Duplicate identifier 'departments'.
+src/types/hospital.ts(79,3): error TS2687: All declarations of 'departments' must have identical modifiers.
+src/types/hospital.ts(79,3): error TS2717: Subsequent property declarations must have the same type.  Property 'departments' must be of type 'Department[]', but here has type 'string[] | Department[] | undefined'.
+src/ui/Card.tsx(116,8): error TS2322: Type '{ children: ReactNode; id?: string | undefined; role?: AriaRole | undefined; title?: string | undefined; color?: string | undefined; style?: CSSProperties | undefined; ... 259 more ...; whileTap: { ...; } | undefined; }' is not assignable to type 'MotionProps'.
+  Types of property 'onDragStart' are incompatible.
+    Type 'DragEventHandler<HTMLDivElement> | undefined' is not assignable to type '((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void) | undefined'.
+      Type 'DragEventHandler<HTMLDivElement>' is not assignable to type '(event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void'.
+        Types of parameters 'event' and 'event' are incompatible.
+          Type 'MouseEvent | TouchEvent | PointerEvent' is not assignable to type 'DragEvent<HTMLDivElement>'.
+            Type 'MouseEvent' is missing the following properties from type 'DragEvent<HTMLDivElement>': dataTransfer, nativeEvent, isDefaultPrevented, isPropagationStopped, persist

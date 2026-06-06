@@ -15,6 +15,9 @@ import {
   Settings,
   LogOut
 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Badge } from '../ui/Badge';
@@ -65,37 +68,29 @@ const variantStyles = {
 };
 
 // ============================================
-// SIDEBAR ITEMS DATA
+// SIDEBAR ITEMS DATA (All routes connected to routeConfig)
 // ============================================
 const sidebarItems: SidebarItem[] = [
   {
     title: 'Dashboard',
-    path: '/dashboard',
+    path: '/patient/dashboard',
     icon: LayoutDashboard,
   },
   {
     title: 'Hospitals',
-    path: '/hospitals',
+    path: '/hospital',
     icon: Hospital,
-    badge: 12,
-    pro: true,
   },
   {
-    title: 'Doctors',
-    path: '/doctors',
+    title: 'Find Doctor',
+    path: '/doctor',
     icon: Stethoscope,
-    badge: 45,
-  },
-  {
-    title: 'Patients',
-    path: '/patients',
-    icon: Users,
+    badge: 65,
   },
   {
     title: 'Appointments',
-    path: '/appointments',
+    path: '/appointments/list',
     icon: Calendar,
-    badge: 8,
   },
   {
     title: 'Emergency',
@@ -109,25 +104,55 @@ const sidebarItems: SidebarItem[] = [
     icon: Pill,
   },
   {
-    title: 'Maternal Care',
-    path: '/maternal',
+    title: 'Women Care',
+    path: '/women-care',
     icon: Baby,
     children: [
       {
-        title: 'Pregnancy Tracker',
-        path: '/maternal/pregnancy',
+        title: 'Dashboard',
+        path: '/women-care',
         icon: Baby,
       },
       {
-        title: 'Vaccination',
-        path: '/maternal/vaccination',
+        title: 'Pregnancy Tracker',
+        path: '/women-care/pregnancy',
+        icon: Baby,
+      },
+      {
+        title: 'Menstrual Cycle',
+        path: '/women-care/menstrual-cycle',
+        icon: FileText,
+      },
+      {
+        title: 'Gynecologist',
+        path: '/women-care/gynecologist',
+        icon: Stethoscope,
+      },
+      {
+        title: 'Vaccine Schedule',
+        path: '/women-care/vaccine-schedule',
         icon: FileText,
       },
     ],
   },
   {
-    title: 'Reports',
-    path: '/reports',
+    title: 'AI Assistant',
+    path: '/ai-assistant',
+    icon: Activity,
+  },
+  {
+    title: 'Oxygen',
+    path: '/oxygen',
+    icon: Activity,
+  },
+  {
+    title: 'Blood Donors',
+    path: '/blood-donors',
+    icon: Users,
+  },
+  {
+    title: 'About',
+    path: '/about',
     icon: FileText,
   },
 ];
@@ -139,16 +164,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
   variant = 'glass',
   collapsed = false,
   onToggle,
-  activePath = '/dashboard',
-  onNavigate,
+  activePath: activePathProp,
+  onNavigate: onNavigateProp,
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const activePath = activePathProp || location.pathname;
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+
+  const handleNavigate = (path: string) => {
+    if (path === '/logout') {
+      dispatch(logout());
+      sessionStorage.clear();
+      navigate('/login');
+      return;
+    }
+    if (onNavigateProp) {
+      onNavigateProp(path);
+    } else {
+      navigate(path);
+    }
+  };
 
   const handleItemClick = (item: SidebarItem) => {
     if (item.children) {
       setOpenSubmenu(openSubmenu === item.path ? null : item.path);
     } else {
-      onNavigate?.(item.path);
+      handleNavigate(item.path);
     }
   };
 
@@ -171,7 +214,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        onClick={onToggle}
+        onClick={onToggle || (() => {})}
         className={clsx(
           'absolute -right-3 top-6 w-8 h-8',
           'bg-white/20 dark:bg-gray-700/50',
@@ -279,7 +322,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: childIndex * 0.05 }}
-                            onClick={() => onNavigate?.(child.path)}
+                            onClick={() => handleNavigate(child.path)}
                             className={clsx(
                               'w-full flex items-center gap-3 px-4 py-2 rounded-xl mb-1',
                               'text-white/60 hover:text-white hover:bg-white/10',
@@ -306,7 +349,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <motion.button
             whileHover={{ x: 5 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => onNavigate?.('/settings')}
+            onClick={() => handleNavigate('/settings')}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-white/70 hover:bg-white/10 hover:text-white transition-all mb-2"
           >
             <Settings className="w-6 h-6 flex-shrink-0" />
@@ -317,7 +360,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <motion.button
             whileHover={{ x: 5 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => onNavigate?.('/logout')}
+            onClick={() => handleNavigate('/logout')}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-all"
           >
             <LogOut className="w-6 h-6 flex-shrink-0" />
@@ -328,3 +371,5 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </motion.aside>
   );
 };
+
+export default Sidebar;

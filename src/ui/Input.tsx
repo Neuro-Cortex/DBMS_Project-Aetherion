@@ -10,6 +10,8 @@ export interface InputProps
   helperText?: string;
   leftIcon?: LucideIcon;
   rightIcon?: LucideIcon;
+  icon?: React.ReactNode;
+  rightElement?: React.ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -20,6 +22,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       helperText,
       leftIcon: LeftIcon,
       rightIcon: RightIcon,
+      icon,
+      rightElement,
       className,
       ...props
     },
@@ -38,6 +42,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             <LeftIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           )}
 
+          {!LeftIcon && icon && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 flex items-center justify-center">
+              {icon}
+            </div>
+          )}
+
           <input
             ref={ref}
             className={twMerge(
@@ -49,8 +59,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 error
                   ? 'border-red-500 focus:ring-red-500'
                   : 'border-gray-300 dark:border-gray-600',
-                LeftIcon && 'pl-10',
-                RightIcon && 'pr-10'
+                (LeftIcon || icon) && 'pl-10',
+                (RightIcon || rightElement) && 'pr-10'
               ),
               className
             )}
@@ -59,6 +69,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
           {RightIcon && (
             <RightIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          )}
+
+          {!RightIcon && rightElement && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+              {rightElement}
+            </div>
           )}
         </div>
 

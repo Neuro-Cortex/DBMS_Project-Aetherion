@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { getAuthToken } from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   MessageSquare, Send, Search, User, Stethoscope, Pill,
@@ -34,13 +35,36 @@ const mockMessages: Message[] = [
 ];
 
 const MessagesCenter: React.FC = () => {
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [messages, setMessages] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredMessages = mockMessages.filter(m => {
-    if (filter !== 'all' && m.role !== filter) return false;
-    if (searchTerm && !m.from.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/messages`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const data = await res.json();
+        setMessages(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch messages:', err);
+        setMessages([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchMessages();
+  }, []);
+
+  const filteredMessages = messages.filter((m: any) => {
+    const senderName = m.sender_name || '';
+    if (filter !== 'all' && !(m.sender_role || '').includes(filter)) return false;
+    if (searchTerm && !senderName.toLowerCase().includes(searchTerm.toLowerCase())) return false;
     return true;
   });
 
@@ -104,29 +128,28 @@ const MessagesCenter: React.FC = () => {
                 <Input placeholder="Search messages..." leftIcon={Search} value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)} className="mb-4" />
                 <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                  {filteredMessages.map((msg) => {
-                    const Icon = roleIcon(msg.role);
-                    const colorClass = roleColor(msg.role);
+                  {filteredMessages.map((msg: any) => {
+                    const Icon = roleIcon(msg.sender_name ? 'patient' : 'patient');
+                    const colorClass = roleColor('patient');
                     return (
                       <div key={msg.id}
                         onClick={() => setSelectedMessage(msg)}
                         className={`p-3 rounded-2xl cursor-pointer transition-all ${
                           selectedMessage?.id === msg.id ? 'bg-cyan-500/10 border border-cyan-500/30' : 'bg-white/[0.02] hover:bg-white/[0.04]'
-                        } ${msg.unread ? 'border-l-2 border-l-cyan-500' : ''}`}>
+                        } ${!msg.is_read ? 'border-l-2 border-l-cyan-500' : ''}`}>
                         <div className="flex items-start gap-3">
                           <div className={`p-2 rounded-xl ${colorClass}`}>
                             <Icon className="w-4 h-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <h4 className="text-white text-sm font-bold truncate">{msg.from}</h4>
-                              <span className="text-xs text-slate-500 shrink-0">{msg.time}</span>
+                              <h4 className="text-white text-sm font-bold truncate">{msg.sender_name || 'Unknown'}</h4>
+                              <span className="text-xs text-slate-500 shrink-0">{msg.created_at ? new Date(msg.created_at).toLocaleTimeString() : ''}</span>
                             </div>
-                            <p className="text-xs text-slate-400 truncate">{msg.subject}</p>
+                            <p className="text-xs text-slate-400 truncate">{msg.message_body?.substring(0, 60) || ''}</p>
                             <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="info" className="text-[8px]">{msg.role}</Badge>
-                              {msg.urgent && <Badge variant="danger" className="text-[8px]">URGENT</Badge>}
-                              {msg.unread && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                              <Badge variant="info" className="text-[8px]">{msg.message_type || 'text'}</Badge>
+                              {!msg.is_read && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
                             </div>
                           </div>
                         </div>
@@ -141,10 +164,10 @@ const MessagesCenter: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/[0.06]">
                       <div className="flex items-center gap-3">
-                        <Avatar name={selectedMessage.from.split(' ').map(n => n[0]).join('')} size="md" />
+                        <Avatar name={(selectedMessage.sender_name || 'U').split(' ').map((n: string) => n[0]).join('')} size="md" />
                         <div>
-                          <h3 className="text-white font-bold">{selectedMessage.from}</h3>
-                          <p className="text-xs text-slate-400">{selectedMessage.role} • {selectedMessage.time}</p>
+                          <h3 className="text-white font-bold">{selectedMessage.sender_name || 'Unknown'}</h3>
+                          <p className="text-xs text-slate-400">{selectedMessage.message_type || 'text'} • {selectedMessage.created_at ? new Date(selectedMessage.created_at).toLocaleString() : ''}</p>
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -154,8 +177,8 @@ const MessagesCenter: React.FC = () => {
                     </div>
                     <div className="space-y-4 mb-6">
                       <div>
-                        <h4 className="text-lg font-bold text-white">{selectedMessage.subject}</h4>
-                        <p className="text-slate-400 mt-2">{selectedMessage.preview}</p>
+                        <h4 className="text-lg font-bold text-white">Message</h4>
+                        <p className="text-slate-400 mt-2">{selectedMessage.message_body || ''}</p>
                       </div>
                       <div className="p-4 rounded-2xl bg-cyan-500/5 border border-cyan-500/10">
                         <p className="text-sm text-slate-300">

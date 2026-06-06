@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { login, type User, type AccountRole } from '../../store/slices/authSlice';
+import { loginUser, registerUser, type User, type AccountRole } from '../../store/slices/authSlice';
 import toast from 'react-hot-toast';
 import {
   Eye, EyeOff, Mail, Lock, ArrowRight, UserPlus,
@@ -54,7 +54,7 @@ const roleConfig: Record<UserRole, {
     color: 'cyan',
     gradient: 'from-cyan-500 via-blue-500 to-indigo-500',
     description: 'Access health records, appointments, and prescriptions',
-    demoEmail: 'pollob@gmail.com',
+    demoEmail: 'syeda@gmail.com',
     demoPassword: '123456',
     dashboardPath: '/patient/dashboard'
   },
@@ -100,165 +100,14 @@ const roleConfig: Record<UserRole, {
   }
 };
 
-// ============================================
-// MOCK DATABASE
-// ============================================
-interface StoredUser {
-  id: string;
-  email: string;
-  password: string;
-  fullName: string;
-  role: UserRole;
-  phone: string;
-  isApproved: boolean;
-  createdAt: string;
-  additionalData?: Record<string, unknown>;
-}
-
-class AuthService {
-  private users: StoredUser[] = [];
-
-  constructor() {
-    this.loadUsers();
-    this.initializeDemoUsers();
-  }
-
-  private loadUsers() {
-    const stored = localStorage.getItem('aetherion_users');
-    if (stored) {
-      this.users = JSON.parse(stored);
-    }
-  }
-
-  private saveUsers() {
-    localStorage.setItem('aetherion_users', JSON.stringify(this.users));
-  }
-
-  private initializeDemoUsers() {
-    if (this.users.length === 0) {
-      this.users = [
-        {
-          id: 'patient-1',
-          email: 'pollob@gmail.com',
-          password: '123456',
-          fullName: 'Pollob Patient',
-          role: 'patient',
-          phone: '+1 (555) 123-4567',
-          isApproved: true,
-          createdAt: new Date().toISOString(),
-          additionalData: { dateOfBirth: '1990-01-01', bloodGroup: 'O+' }
-        },
-        {
-          id: 'doctor-1',
-          email: 'pollob@gmail.com',
-          password: '123456',
-          fullName: 'Dr. Pollob Ahmed',
-          role: 'doctor',
-          phone: '+1 (555) 234-5678',
-          isApproved: true,
-          createdAt: new Date().toISOString(),
-          additionalData: { specialization: 'Cardiology', licenseNumber: 'MED-12345' }
-        },
-        {
-          id: 'hospital-1',
-          email: 'hospital@aetherion.com',
-          password: 'hospital123',
-          fullName: 'City General Hospital',
-          role: 'hospital',
-          phone: '+1 (555) 345-6789',
-          isApproved: true,
-          createdAt: new Date().toISOString(),
-          additionalData: { registrationNumber: 'HOSP-001', bedCapacity: 500 }
-        },
-        {
-          id: 'pharmacy-1',
-          email: 'pharmacy@aetherion.com',
-          password: 'pharmacy123',
-          fullName: 'MediCare Pharmacy',
-          role: 'pharmacy',
-          phone: '+1 (555) 456-7890',
-          isApproved: true,
-          createdAt: new Date().toISOString(),
-          additionalData: { licenseNumber: 'PHARM-001', gstNumber: 'GST123456' }
-        },
-        {
-          id: 'admin-1',
-          email: 'admin@aetherion.com',
-          password: 'admin123',
-          fullName: 'System Administrator',
-          role: 'admin',
-          phone: '+1 (555) 567-8901',
-          isApproved: true,
-          createdAt: new Date().toISOString(),
-          additionalData: { adminLevel: 'super' }
-        }
-      ];
-      this.saveUsers();
-    }
-  }
-
-  async login(email: string, password: string, role: UserRole): Promise<StoredUser | null> {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    const user = this.users.find(u => u.email === email && u.password === password && u.role === role);
-    if (user && user.isApproved) {
-      return user;
-    }
-    if (user && !user.isApproved) {
-      throw new Error('Your account is pending admin approval');
-    }
-    return null;
-  }
-
-  async register(userData: Omit<StoredUser, 'id' | 'createdAt' | 'isApproved'> & { confirmPassword: string }): Promise<StoredUser> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const existingUser = this.users.find(u => u.email === userData.email && u.role === userData.role);
-    if (existingUser) {
-      throw new Error('User with this email already exists for this role');
-    }
-
-    if (userData.password !== userData.confirmPassword) {
-      throw new Error('Passwords do not match');
-    }
-
-    const newUser: StoredUser = {
-      id: `${userData.role}-${Date.now()}`,
-      email: userData.email,
-      password: userData.password,
-      fullName: userData.fullName,
-      role: userData.role,
-      phone: userData.phone,
-      isApproved: userData.role === 'patient',
-      createdAt: new Date().toISOString(),
-      additionalData: {}
-    };
-
-    this.users.push(newUser);
-    this.saveUsers();
-    return newUser;
-  }
-
-  async requestPasswordReset(email: string): Promise<boolean> {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    const user = this.users.find(u => u.email === email);
-    if (user) {
-      toast.success(`Reset link sent to ${email}`);
-      return true;
-    }
-    return false;
-  }
-
-  resetAllUsers(): void {
-    localStorage.removeItem('aetherion_users');
-    localStorage.removeItem('aetherion_session');
-    sessionStorage.removeItem('auth_token');
-    this.users = [];
-    this.initializeDemoUsers();
-    console.log('All users reset to default');
-  }
-}
-
-const authService = new AuthService();
+// Map UI role to backend AccountRole
+const roleToAccountRole: Record<UserRole, AccountRole> = {
+  patient: 'client',
+  doctor: 'doctor',
+  hospital: 'hospital_admin',
+  pharmacy: 'pharmacy_admin',
+  admin: 'admin',
+};
 
 // ============================================
 // LOGIN COMPONENT
@@ -291,23 +140,6 @@ const Login: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  // ============================================
-  // ✅ FIX: sessionStorage check - NO auto-login
-  // ============================================
-  useEffect(() => {
-    // localStorage theke kono session check korbo na
-    // Browser close hole sessionStorage auto clear hoye jabe
-    const sessionToken = sessionStorage.getItem('auth_token');
-    
-    // Token na thakle kichu korbo na - user ke login korte hobe
-    if (!sessionToken) {
-      // Cleanup any leftover localStorage
-      localStorage.removeItem('aetherion_session');
-      return;
-    }
-    // Token expired check (optional)
-  }, []);
 
   const validateLogin = (): boolean => {
     const errors: Partial<Record<keyof LoginFormData, string>> = {};
@@ -352,69 +184,32 @@ const Login: React.FC = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateLogin()) return;
-
+  const doLogin = async (email: string, password: string, role: UserRole, rememberMe: boolean = false) => {
     setError('');
     setIsLoading(true);
 
     try {
-      const user = await authService.login(formData.email, formData.password, selectedRole);
+      const accountRole = roleToAccountRole[role];
+      const result = await dispatch(loginUser({ email, password, role: accountRole })).unwrap();
 
-      if (user) {
-        const userForRedux: User = {
-          id: user.id,
-          email: user.email,
-          fullName: user.fullName,
-          role: user.role as AccountRole,
-          phone: user.phone,
-          isAuthenticated: true,
-          roles: [user.role as AccountRole],
-          primaryRole: user.role as AccountRole,
-          upgrades: [],
-          createdAt: user.createdAt,
-          ...user.additionalData
-        };
+      toast.success(`Welcome back, ${result.fullName || result.name || email.split('@')[0]}! 🎉`, {
+        style: { background: '#1a1a2e', color: '#fff', border: '1px solid rgba(6,182,212,0.3)' }
+      });
 
-        dispatch(login(userForRedux));
-
-        // ============================================
-        // ✅ FIX: sessionStorage use kora (browser close = auto delete)
-        // ============================================
-        sessionStorage.setItem('auth_token', 'active_session');
-        sessionStorage.setItem('user_role', selectedRole);
-        sessionStorage.setItem('user_name', user.fullName);
-
-        // localStorage ONLY for "Remember Me"
-        if (formData.rememberMe) {
-          localStorage.setItem('aetherion_session', JSON.stringify({
-            user: userForRedux,
-            expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000)
-          }));
-        } else {
-          // Remember me off = kono localStorage save hobe na
-          localStorage.removeItem('aetherion_session');
-        }
-         
-
-        toast.success(`Welcome back, ${user.fullName}!`, {
-          icon: '🎉',
-          style: { background: '#1a1a2e', color: '#fff', border: '1px solid rgba(6,182,212,0.3)' }
-        });
-                
-        setTimeout(() => navigate(roleConfig[selectedRole].dashboardPath, { replace: true }), 500);
-      } else {
-        setError('Invalid email or password for the selected role');
-        toast.error('Login failed. Please check your credentials.');
-      }
+      setTimeout(() => navigate(roleConfig[role].dashboardPath, { replace: true }), 500);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
+      const message = err instanceof Error ? err.message : (typeof err === 'string' ? err : 'Login failed. Please check your credentials.');
       setError(message);
       toast.error(message);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateLogin()) return;
+    doLogin(formData.email, formData.password, selectedRole, formData.rememberMe);
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -425,31 +220,26 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const newUser = await authService.register({
+      const accountRole = roleToAccountRole[registerData.role];
+      await dispatch(registerUser({
         fullName: registerData.fullName,
+        name: registerData.fullName,
         email: registerData.email,
-        password: registerData.password,
-        confirmPassword: registerData.confirmPassword,
         phone: registerData.phone,
-        role: registerData.role
-      });
+        password: registerData.password,
+        primaryRole: accountRole,
+        role: accountRole,
+        gender: 'other',
+      } as any)).unwrap();
 
-      if (newUser.isApproved) {
-        toast.success('Registration successful! Please login.', {
-          icon: '✅',
-          style: { background: '#1a1a2e', color: '#fff' }
-        });
-        setIsRegistering(false);
-        setFormData({ ...formData, email: registerData.email, role: registerData.role });
-      } else {
-        toast.success('Registration submitted! Awaiting admin approval.', {
-          icon: '⏳',
-          style: { background: '#1a1a2e', color: '#fff' }
-        });
-        setIsRegistering(false);
-      }
+      toast.success('Registration successful! Please login.', {
+        icon: '✅',
+        style: { background: '#1a1a2e', color: '#fff' }
+      });
+      setIsRegistering(false);
+      setFormData({ ...formData, email: registerData.email, role: registerData.role });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Registration failed';
+      const message = err instanceof Error ? err.message : (typeof err === 'string' ? err : 'Registration failed');
       setError(message);
       toast.error(message);
     } finally {
@@ -459,17 +249,7 @@ const Login: React.FC = () => {
 
   const handleDemoLogin = (role: UserRole) => {
     const config = roleConfig[role];
-    setFormData({
-      email: config.demoEmail,
-      password: config.demoPassword,
-      role: role,
-      rememberMe: false
-    });
-    setSelectedRole(role);
-
-    setTimeout(() => {
-      handleLogin(new Event('submit') as unknown as React.FormEvent);
-    }, 100);
+    doLogin(config.demoEmail, config.demoPassword, role, false);
   };
 
   const togglePlay = () => {
@@ -507,22 +287,6 @@ const Login: React.FC = () => {
           animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.3, 0.2] }}
           transition={{ duration: 12, repeat: Infinity }}
         />
-      </div>
-
-      {/* Reset Button */}
-      <div className="absolute top-6 left-6 z-20">
-        <button
-          onClick={() => {
-            if (window.confirm('Reset all user data to default? You will need to login again.')) {
-              authService.resetAllUsers();
-              toast.success('Data reset! Using default credentials');
-              setTimeout(() => window.location.reload(), 1000);
-            }
-          }}
-          className="px-3 py-2 rounded-xl bg-red-500/20 backdrop-blur-xl border border-red-500/30 text-red-400 hover:bg-red-500/30 transition-all text-xs font-medium"
-        >
-          Reset Data
-        </button>
       </div>
 
       {/* Video Controls */}
@@ -569,7 +333,8 @@ const Login: React.FC = () => {
               <div className="text-white/40">🏥 Hospital: hospital@aetherion.com / hospital123</div>
               <div className="text-white/40">💊 Pharmacy: pharmacy@aetherion.com / pharmacy123</div>
               <div className="text-white/40">👑 Admin: admin@aetherion.com / admin123</div>
-              <div className="text-white/40">👤 Patient: pollob@gmail.com / 123456</div>
+              <div className="text-white/40">👩‍⚕️ Patient: syeda@gmail.com / 123456</div>
+              <div className="text-white/40">👨‍⚕️ Doctor: pollob@gmail.com / 123456</div>
             </div>
           </motion.div>
         )}
@@ -669,9 +434,11 @@ const Login: React.FC = () => {
                   {(Object.keys(roleConfig) as UserRole[]).map(role => (
                     <button
                       key={role}
+                      type="button"
                       onClick={() => handleDemoLogin(role)}
                       className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white/40 hover:text-white/70 text-xs transition-all"
                     >
+                      {roleConfig[role].icon && React.createElement(roleConfig[role].icon, { className: 'w-3 h-3 inline mr-1' })}
                       {roleConfig[role].label}
                     </button>
                   ))}
@@ -710,11 +477,12 @@ const Login: React.FC = () => {
                       type="button"
                       onClick={async () => {
                         if (formData.email) {
-                          const success = await authService.requestPasswordReset(formData.email);
-                          if (success) {
+                          try {
+                            const { authService } = await import('../../services/authService');
+                            await authService.forgotPassword(formData.email);
                             toast.success('Password reset link sent to your email');
-                          } else {
-                            toast.error('Email not found');
+                          } catch {
+                            toast.error('Failed to send reset email');
                           }
                         } else {
                           toast.error('Please enter your email first');
@@ -749,7 +517,6 @@ const Login: React.FC = () => {
                   {fieldErrors.password && <p className="text-red-400 text-[11px] mt-1.5">{fieldErrors.password}</p>}
                 </div>
 
-                {/* ✅ Remember Me Checkbox */}
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
@@ -906,11 +673,11 @@ const Login: React.FC = () => {
               </form>
             )}
 
-            {/* Toggle between Login/Register */}
             <div className="text-center mt-6 pt-4 border-t border-white/[0.04]">
               <p className="text-white/30 text-sm">
                 {isRegistering ? 'Already have an account?' : "Don't have an account?"}{' '}
                 <button
+                  type="button"
                   onClick={() => {
                     setIsRegistering(!isRegistering);
                     setError('');
@@ -926,7 +693,6 @@ const Login: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Security Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -936,7 +702,7 @@ const Login: React.FC = () => {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.02] border border-white/[0.04] backdrop-blur-sm">
             <Shield className="w-3.5 h-3.5 text-emerald-400/60" />
             <span className="text-white/15 text-[11px] font-medium tracking-wider">
-              HIPAA Compliant • 256-bit Encrypted • Secure Login
+              • 256-bit Encrypted • Secure Login
             </span>
           </div>
         </motion.div>

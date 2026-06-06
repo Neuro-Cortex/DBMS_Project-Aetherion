@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
 import {
   // Core
   Search, Bell, Settings, Calendar, Clock, 
@@ -140,6 +141,7 @@ const colorMap: Record<string, string> = {
 // MAIN DOCTOR DASHBOARD
 // ============================================
 const DoctorDashboard: React.FC = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [greeting, setGreeting] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -156,18 +158,18 @@ const DoctorDashboard: React.FC = () => {
   }, []);
 
   const sidebarLinks = [
-    { icon: Home, label: 'Dashboard', path: 'dashboard' },
-    { icon: Users, label: 'Patients', path: 'patients' },
-    { icon: Calendar, label: 'Appointments', path: 'appointments' },
-    { icon: FileText, label: 'Prescriptions', path: 'prescriptions' },
-    { icon: Baby, label: 'Women Care', path: 'women' },
-    { icon: Activity, label: 'Reports', path: 'reports' },
-    { icon: AlertCircle, label: 'Emergency', path: 'emergency' },
-    { icon: Pill, label: 'Pharmacy', path: 'pharmacy' },
-    { icon: Brain, label: 'AI Assistant', path: 'ai' },
-    { icon: TrendingUp, label: 'Analytics', path: 'analytics' },
-    { icon: MessageCircle, label: 'Messages', path: 'messages' },
-    { icon: Settings, label: 'Settings', path: 'settings' },
+    { icon: Home, label: 'Dashboard', path: '/doctor/dashboard', tab: 'dashboard' },
+    { icon: Users, label: 'Patients', path: '/doctor/patients', tab: 'patients' },
+    { icon: Calendar, label: 'Appointments', path: '/doctor/appointments', tab: 'appointments' },
+    { icon: FileText, label: 'Prescriptions', path: '/doctor/prescriptions', tab: 'prescriptions' },
+    { icon: Baby, label: 'Women Care', path: '/doctor/women-care', tab: 'women' },
+    { icon: Activity, label: 'Reports', path: '/doctor/reports', tab: 'reports' },
+    { icon: AlertCircle, label: 'Emergency', path: '/doctor/emergency', tab: 'emergency' },
+    { icon: Pill, label: 'Pharmacy', path: '/pharmacy', tab: 'pharmacy' },
+    { icon: Brain, label: 'AI Assistant', path: '/ai-assistant', tab: 'ai' },
+    { icon: TrendingUp, label: 'Analytics', path: '/doctor/analytics', tab: 'analytics' },
+    { icon: MessageCircle, label: 'Messages', path: '/doctor/messages', tab: 'messages' },
+    { icon: Settings, label: 'Settings', path: '/doctor/settings', tab: 'settings' },
   ];
 
   return (
@@ -200,10 +202,10 @@ const DoctorDashboard: React.FC = () => {
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {sidebarLinks.map((link) => {
             const Icon = link.icon;
-            const isActive = activeTab === link.path;
+            const isActive = activeTab === link.tab;
             return (
               <motion.button key={link.path} whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}
-                onClick={() => setActiveTab(link.path)}
+                onClick={() => { setActiveTab(link.tab); navigate(link.path); }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
                   isActive
                     ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-500/20 shadow-lg'
@@ -211,7 +213,7 @@ const DoctorDashboard: React.FC = () => {
                 }`}>
                 <Icon className="w-5 h-5" />
                 {link.label}
-                {link.path === 'emergency' && (
+                {link.tab === 'emergency' && (
                   <Badge variant="danger" className="text-[9px] ml-auto">2</Badge>
                 )}
               </motion.button>
@@ -221,7 +223,8 @@ const DoctorDashboard: React.FC = () => {
 
         {/* Bottom */}
         <div className="p-4 border-t border-white/[0.04]">
-          <Button variant="ghost" className="w-full text-slate-400 hover:text-red-400 justify-start">
+          <Button variant="ghost" className="w-full text-slate-400 hover:text-red-400 justify-start"
+            onClick={() => { dispatch(logout()); sessionStorage.clear(); navigate('/login'); }}>
             <XCircle className="w-4 h-4 mr-2" /> Sign Out
           </Button>
         </div>

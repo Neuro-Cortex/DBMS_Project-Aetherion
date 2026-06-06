@@ -1,94 +1,10 @@
 // src/hooks/useEmergency.ts
 
 import { useState, useCallback, useEffect } from 'react';
-import { emergencyService } from '../services/emergencyService';
+import { emergencyService, type EmergencyServiceType, type EmergencyRequest, type CreateEmergencyRequest, type BloodDonor, type OxygenSupplier, type EmergencyContact, type EmergencyAlert } from '../services/emergencyService';
 
-// ============================================
-// TYPES
-// ============================================
-
-export interface EmergencyService {
-  id: string;
-  name: string;
-  type: 'ambulance' | 'blood' | 'oxygen' | 'doctor' | 'emergency-room';
-  status: 'available' | 'busy' | 'critical' | 'dispatched';
-  location: {
-    lat: number;
-    lng: number;
-    address: string;
-  };
-  eta?: number;
-  provider: string;
-  phone: string;
-  rating?: number;
-  availableUnits?: number;
-  price?: number;
-}
-
-export interface EmergencyRequest {
-  id: string;
-  type: 'ambulance' | 'blood' | 'oxygen' | 'doctor';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  location: string;
-  status: 'pending' | 'dispatched' | 'completed' | 'cancelled';
-  timestamp: string;
-  estimatedTime?: number;
-  assignedServiceId?: string;
-  notes?: string;
-  patientId?: string;
-  resolvedAt?: string;
-}
-
-export interface CreateEmergencyRequest {
-  type: EmergencyRequest['type'];
-  priority: EmergencyRequest['priority'];
-  location: string;
-  patientId: string;
-  notes?: string;
-  contactNumber?: string;
-  patientName?: string;
-}
-
-export interface BloodDonor {
-  id: string;
-  name: string;
-  bloodGroup: 'A+' | 'A-' | 'B+' | 'B-' | 'O+' | 'O-' | 'AB+' | 'AB-';
-  location: string;
-  distance: number;
-  phone: string;
-  lastDonated?: string;
-  available: boolean;
-}
-
-export interface OxygenSupplier {
-  id: string;
-  name: string;
-  location: string;
-  distance: number;
-  price: number;
-  stock: 'in-stock' | 'limited' | 'out-of-stock';
-  phone: string;
-  deliveryTime: string;
-  is24Hours: boolean;
-}
-
-export interface EmergencyContact {
-  id: string;
-  name: string;
-  relation: string;
-  phone: string;
-  isPrimary: boolean;
-}
-
-export interface EmergencyAlert {
-  id: string;
-  type: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  message: string;
-  location: string;
-  timestamp: string;
-  status: 'active' | 'resolved' | 'dispatched';
-}
+// Re-export service types for consumers
+export type { EmergencyServiceType as EmergencyService, EmergencyRequest, CreateEmergencyRequest, BloodDonor, OxygenSupplier, EmergencyContact, EmergencyAlert };
 
 export interface EmergencyStats {
   averageResponseTime: number;
@@ -99,7 +15,7 @@ export interface EmergencyStats {
 
 interface UseEmergencyReturn {
   // State
-  services: EmergencyService[];
+  services: EmergencyServiceType[];
   requests: EmergencyRequest[];
   bloodDonors: BloodDonor[];
   oxygenSuppliers: OxygenSupplier[];
@@ -110,7 +26,7 @@ interface UseEmergencyReturn {
   stats: EmergencyStats | null;
   
   // Load Methods
-  loadServices: (type?: EmergencyService['type']) => Promise<void>;
+  loadServices: (type?: EmergencyServiceType['type']) => Promise<void>;
   loadRequests: (status?: EmergencyRequest['status']) => Promise<void>;
   loadBloodDonors: (bloodGroup?: string) => Promise<void>;
   loadOxygenSuppliers: () => Promise<void>;
@@ -124,8 +40,8 @@ interface UseEmergencyReturn {
   cancelRequest: (id: string, reason?: string) => Promise<EmergencyRequest | null>;
   searchBloodDonors: (bloodGroup: string, location: string, maxDistance?: number) => Promise<BloodDonor[]>;
   getNearbyOxygenSuppliers: (location: string, maxDistance?: number) => Promise<OxygenSupplier[]>;
-  getServiceById: (id: string) => Promise<EmergencyService | null>;
-  getAvailableAmbulances: () => Promise<EmergencyService[]>;
+  getServiceById: (id: string) => Promise<EmergencyServiceType | null>;
+  getAvailableAmbulances: () => Promise<EmergencyServiceType[]>;
   
   // Utilities
   subscribeToAlerts: (callback: (alert: EmergencyAlert) => void) => () => void;
@@ -139,7 +55,7 @@ interface UseEmergencyReturn {
 
 export const useEmergency = (): UseEmergencyReturn => {
   // State
-  const [services, setServices] = useState<EmergencyService[]>([]);
+  const [services, setServices] = useState<EmergencyServiceType[]>([]);
   const [requests, setRequests] = useState<EmergencyRequest[]>([]);
   const [bloodDonors, setBloodDonors] = useState<BloodDonor[]>([]);
   const [oxygenSuppliers, setOxygenSuppliers] = useState<OxygenSupplier[]>([]);
@@ -164,7 +80,7 @@ export const useEmergency = (): UseEmergencyReturn => {
   }, []);
   
   // Load emergency services
-  const loadServices = useCallback(async (type?: EmergencyService['type']): Promise<void> => {
+  const loadServices = useCallback(async (type?: EmergencyServiceType['type']): Promise<void> => {
     setIsLoading(true);
     setError(null);
     
@@ -383,7 +299,7 @@ export const useEmergency = (): UseEmergencyReturn => {
   }, []);
   
   // Get service by ID
-  const getServiceById = useCallback(async (id: string): Promise<EmergencyService | null> => {
+  const getServiceById = useCallback(async (id: string): Promise<EmergencyServiceType | null> => {
     setIsLoading(true);
     setError(null);
     
@@ -401,7 +317,7 @@ export const useEmergency = (): UseEmergencyReturn => {
   }, []);
   
   // Get available ambulances
-  const getAvailableAmbulances = useCallback(async (): Promise<EmergencyService[]> => {
+  const getAvailableAmbulances = useCallback(async (): Promise<EmergencyServiceType[]> => {
     setIsLoading(true);
     setError(null);
     
@@ -479,5 +395,4 @@ export const useEmergency = (): UseEmergencyReturn => {
 
 export default useEmergency;
 
-// src/hooks/useEmergency.ts - শেষের দিকে
 export type { UseEmergencyReturn };

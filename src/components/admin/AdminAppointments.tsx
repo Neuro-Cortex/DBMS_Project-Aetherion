@@ -1,5 +1,6 @@
+import { getAuthToken } from '../../services/api';
 // src/components/admin/AdminAppointments.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -13,18 +14,6 @@ import { Card } from 'src/ui/Card';
 import { Button } from 'src/ui/Button';
 import { Badge } from 'src/ui/Badge';
 import { Avatar } from 'src/ui/Avatar';
-
-const mockAppointments = Array.from({ length: 12 }, (_, i) => ({
-  id: `apt-${i + 1}`,
-  patient: `Patient ${i + 1}`,
-  doctor: `Dr. ${['Sarah Wilson', 'James Lee', 'Emily Chen', 'Michael Park', 'Lisa Anderson'][i % 5]}`,
-  specialization: ['Cardiology', 'Neurology', 'Pediatrics', 'Dermatology', 'Orthopedics'][i % 5],
-  date: `2024-${String(Math.floor(i / 4) + 1).padStart(2, '0')}-${String(10 + i).padStart(2, '0')}`,
-  time: `${8 + (i % 8)}:00 ${i % 2 === 0 ? 'AM' : 'PM'}`,
-  status: ['confirmed', 'pending', 'completed', 'cancelled'][i % 4] as 'confirmed' | 'pending' | 'completed' | 'cancelled',
-  mode: (['in-person', 'video', 'phone'] as const)[i % 3],
-  fee: `${150 + i * 10}`,
-}));
 
 const sidebarLinks = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
@@ -53,8 +42,30 @@ const AdminAppointments: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [filter, setFilter] = useState('all');
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filtered = filter === 'all' ? mockAppointments : mockAppointments.filter(a => a.status === filter);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/appointments`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const result = await res.json();
+        setAppointments(Array.isArray(result) ? result : []);
+      } catch (err) {
+        console.error('Failed to fetch appointments:', err);
+        setAppointments([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const filtered = filter === 'all' ? appointments : appointments.filter((a: any) => a.status === filter);
 
   return (
     <div className="min-h-screen bg-[#020408] flex">

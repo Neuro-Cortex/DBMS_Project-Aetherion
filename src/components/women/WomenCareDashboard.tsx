@@ -11,7 +11,7 @@ import {
   Siren, MapPin, Share2, Mic,
   MessageCircle, Users, ThumbsUp,
   CheckCircle2, FileText, Download,
-  Syringe, Stethoscope, Dumbbell,
+  Syringe, Stethoscope, Dumbbell, Lock, ArrowLeft,
 } from 'lucide-react';
 
 // ============================================
@@ -128,6 +128,70 @@ const colorMap: Record<string, string> = {
 };
 
 // ============================================
+// 🔒 GENDER GATE SCREEN
+// ============================================
+const AccessRestricted: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen bg-[#030508] flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-lg w-full bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-2xl border border-pink-500/20 rounded-3xl p-8 lg:p-12 text-center relative overflow-hidden"
+      >
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10">
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center border border-pink-500/20"
+          >
+            <Lock className="w-10 h-10 text-pink-400" />
+          </motion.div>
+
+          <h1 className="text-3xl font-black text-white mb-4">
+            🔒 Protected Women's Section
+          </h1>
+
+          <div className="space-y-4 mb-8">
+            <p className="text-slate-300 leading-relaxed">
+              To maintain <span className="text-pink-400 font-bold">privacy</span>,{' '}
+              <span className="text-purple-400 font-bold">safety</span>, and a{' '}
+              <span className="text-cyan-400 font-bold">supportive environment</span>,
+              this section is accessible only to <span className="text-white font-bold">women users</span> of the platform.
+            </p>
+            <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-4">
+              <p className="text-red-400 text-sm font-medium flex items-center justify-center gap-2">
+                <Shield className="w-4 h-4" />
+                Unauthorized access is restricted.
+              </p>
+            </div>
+            <p className="text-slate-500 text-sm">
+              Thank you for helping us keep this community safe and respectful. 💕
+            </p>
+          </div>
+
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => navigate(-1)}
+            className="border-pink-500/30 text-pink-400 hover:bg-pink-500/5 w-full"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Go Back
+          </Button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+// ============================================
 // MAIN COMPONENT
 // ============================================
 const WomenCareDashboard: React.FC = () => {
@@ -138,6 +202,10 @@ const WomenCareDashboard: React.FC = () => {
   const [medicines, setMedicines] = useState(medicineSchedules);
   const [mood, setMood] = useState<string | null>(null);
   const user = useSelector((state: any) => state?.auth?.user) || { name: 'John Doe' };
+
+  // 🔒 Gender check - only female users can access
+  const userGender = user?.gender?.toLowerCase();
+  const isFemale = userGender === 'female';
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -157,6 +225,11 @@ const WomenCareDashboard: React.FC = () => {
   ];
 
   const pendingMeds = medicines.filter(m => !m.taken).length;
+
+  // 🔒 Show restricted access screen for non-female users
+  if (!isFemale) {
+    return <AccessRestricted />;
+  }
 
   return (
     <div className="min-h-screen bg-[#030508]">

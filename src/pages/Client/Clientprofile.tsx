@@ -235,7 +235,8 @@ export const ClientProfile: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('medicare_user');
+    localStorage.removeItem('medicare_refresh_token');
     window.location.href = '/login';
   };
 

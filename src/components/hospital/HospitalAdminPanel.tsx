@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 import { HospitalSidebar } from '@/components/hospital/HospitalSidebar';
 import { HospitalDashboard } from '@/components/hospital/HospitalDashboard';
-import { resetAuth } from '@/components/slices/slices/authSlice';
+import { logout } from '@/store/slices/authSlice';
 import type { RootState } from '@/store';
 
 import {
@@ -49,7 +49,7 @@ const HospitalAdminPanel: React.FC = () => {
   };
 
   const handleLogout = () => {
-    dispatch(resetAuth());
+    dispatch(logout());
     toast.success('Logged out');
     navigate('/login');
   };

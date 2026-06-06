@@ -15,7 +15,6 @@ import {
   Scissors,
   Pill,
   FileText,
-  TrendingUp,
   Clock,
   CheckCircle,
   Users,
@@ -26,11 +25,11 @@ import {
 // COMMON COMPONENTS
 // ============================================
 import { Card } from 'src/ui/Card';
-import { GlassmorphicCard } from 'src/ui/GlassmorphicCard';
+
 import { Badge } from 'src/ui/Badge';
 import { Button } from 'src/ui/Button';
 import { Input } from 'src/ui/Input';
-import { Loader } from 'src/ui/Loader';
+
 
 // ============================================
 // TYPES & INTERFACES
@@ -205,7 +204,6 @@ export const MedicalHistory: React.FC<MedicalHistoryProps> = ({
     familyHistory: [],
     immunizations: []
   },
-  variant = 'glass',
   isEditing = false,
   onEdit,
   onAddItem,

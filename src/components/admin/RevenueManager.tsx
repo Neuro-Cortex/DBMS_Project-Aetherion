@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { getAuthToken } from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   DollarSign, TrendingUp, Pill, Stethoscope,
@@ -41,6 +42,35 @@ const pendingPayments = [
 
 const RevenueManager: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
+  const [revenueData, setRevenueData] = useState<any[]>([]);
+  const [revenueSources, setRevenueSources] = useState<any[]>([]);
+  const [pendingPayments, setPendingPayments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/revenue`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const result = await res.json();
+        if (Array.isArray(result)) {
+          setRevenueData(result);
+        } else {
+          setRevenueData(result.revenueData || []);
+          setRevenueSources(result.revenueSources || []);
+          setPendingPayments(result.pendingPayments || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch revenue data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#020408] flex">

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { getAuthToken } from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
    XCircle,  Search, 
@@ -13,21 +14,34 @@ import { Badge } from 'src/ui/Badge';
 import { Avatar } from 'src/ui/Avatar';
 import { Input } from 'src/ui/Input';
 
-const mockVerifications = [
-  { id: 1, name: 'Dr. Sarah Johnson', type: 'doctor', document: 'Medical License #ML-2024-001', submitted: '2 days ago', status: 'pending', risk: 'low' },
-  { id: 2, name: 'MediPlus Pharmacy', type: 'pharmacy', document: 'Pharmacy License #PL-2024-045', submitted: '3 days ago', status: 'pending', risk: 'low' },
-  { id: 3, name: 'City General Hospital', type: 'hospital', document: 'Hospital Registration #HR-2024-012', submitted: '1 week ago', status: 'approved', risk: 'low' },
-  { id: 4, name: 'Dr. James Lee', type: 'doctor', document: 'Medical License #ML-2024-089', submitted: '5 days ago', status: 'rejected', risk: 'high' },
-  { id: 5, name: 'Premium Health Club', type: 'premium', document: 'Premium Membership Application', submitted: '1 day ago', status: 'pending', risk: 'medium' },
-  { id: 6, name: 'HealthCare Pharmacy', type: 'pharmacy', document: 'Medicine Import License #MIL-2024-023', submitted: '4 days ago', status: 'pending', risk: 'low' },
-];
-
 const VerificationCenter: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterStatus] = useState('all');
+  const [verifications, setVerifications] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filtered = mockVerifications.filter(v => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/verifications`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const result = await res.json();
+        setVerifications(Array.isArray(result) ? result : []);
+      } catch (err) {
+        console.error('Failed to fetch verifications:', err);
+        setVerifications([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const filtered = verifications.filter(v => {
     const matchSearch = v.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchType = filterType === 'all' || v.type === filterType;
     const matchStatus = filterStatus === 'all' || v.status === filterStatus;
@@ -50,10 +64,10 @@ const VerificationCenter: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <Card className="p-4"><p className="text-2xl font-black text-white">{mockVerifications.filter(v => v.status === 'pending').length}</p><p className="text-xs text-slate-400">Pending Verifications</p></Card>
-              <Card className="p-4"><p className="text-2xl font-black text-white">{mockVerifications.filter(v => v.status === 'approved').length}</p><p className="text-xs text-slate-400">Approved</p></Card>
-              <Card className="p-4"><p className="text-2xl font-black text-white">{mockVerifications.filter(v => v.status === 'rejected').length}</p><p className="text-xs text-slate-400">Rejected</p></Card>
-              <Card className="p-4"><p className="text-2xl font-black text-white">{mockVerifications.filter(v => v.risk === 'high').length}</p><p className="text-xs text-slate-400">High Risk</p></Card>
+              <Card className="p-4"><p className="text-2xl font-black text-white">{verifications.filter(v => v.status === 'pending').length}</p><p className="text-xs text-slate-400">Pending Verifications</p></Card>
+              <Card className="p-4"><p className="text-2xl font-black text-white">{verifications.filter(v => v.status === 'approved').length}</p><p className="text-xs text-slate-400">Approved</p></Card>
+              <Card className="p-4"><p className="text-2xl font-black text-white">{verifications.filter(v => v.status === 'rejected').length}</p><p className="text-xs text-slate-400">Rejected</p></Card>
+              <Card className="p-4"><p className="text-2xl font-black text-white">{verifications.filter(v => v.risk === 'high').length}</p><p className="text-xs text-slate-400">High Risk</p></Card>
             </div>
 
             <GlassmorphicCard className="p-6">
@@ -75,7 +89,7 @@ const VerificationCenter: React.FC = () => {
                     className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04]">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Avatar name={item.name.split(' ').map(n => n[0]).join('')} size="md" />
+                        <Avatar name={item.name.split(' ').map((n: string) => n[0]).join('')} size="md" />
                         <div>
                           <h4 className="text-white font-bold text-sm">{item.name}</h4>
                           <p className="text-xs text-slate-400">{item.document}</p>

@@ -1,3 +1,4 @@
+import { getAuthToken } from '../../services/api';
 // src/components/admin/DoctorVerification.tsx
 
 import React, { useState, useEffect } from 'react';
@@ -20,78 +21,83 @@ export const DoctorVerificationComponent: React.FC = () => {
 
   const fetchVerifications = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      const mockData: DoctorVerification[] = [
+    try {
+      const token = getAuthToken();
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/doctors/pending`,
         {
-          id: '1',
-          doctorId: 'd1',
-          doctorName: 'Dr. Sarah Wilson',
-          email: 'sarah.wilson@email.com',
-          phone: '+1 (555) 111-2233',
-          specialization: 'Cardiology',
-          qualification: 'MD, FACC',
-          licenseNumber: 'MED-2020-12345',
-          documents: [
-            {
-              id: 'doc1',
-              type: 'license',
-              name: 'Medical License',
-              fileUrl: '#',
-              uploadDate: '2024-01-15',
-              verified: false
-            },
-            {
-              id: 'doc2',
-              type: 'degree',
-              name: 'MD Degree Certificate',
-              fileUrl: '#',
-              uploadDate: '2024-01-15',
-              verified: false
-            }
-          ],
-          status: 'pending',
-          submittedDate: '2024-01-15'
-        },
-        {
-          id: '2',
-          doctorId: 'd2',
-          doctorName: 'Dr. James Brown',
-          email: 'james.brown@email.com',
-          phone: '+1 (555) 444-5566',
-          specialization: 'Dermatology',
-          qualification: 'MD, FAAD',
-          licenseNumber: 'MED-2019-67890',
-          documents: [
-            {
-              id: 'doc3',
-              type: 'license',
-              name: 'Medical License',
-              fileUrl: '#',
-              uploadDate: '2024-01-20',
-              verified: false
-            }
-          ],
-          status: 'pending',
-          submittedDate: '2024-01-20'
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
-      ];
-      setVerifications(mockData);
-      setIsLoading(false);
-    }, 1000);
+      );
+      const data = await res.json();
+      const rawDoctors = Array.isArray(data) ? data : [];
+      const mapped: DoctorVerification[] = rawDoctors.map((d: any) => ({
+        id: d.id,
+        doctorId: d.id,
+        doctorName: d.full_name || 'Unknown',
+        email: d.email || '',
+        phone: d.phone || '',
+        specialization: d.specialization || '',
+        qualification: d.qualification || '',
+        licenseNumber: d.license_number || '',
+        documents: [],
+        status: d.is_verified ? 'approved' : 'pending',
+        submittedDate: d.created_at ? new Date(d.created_at).toLocaleDateString() : '',
+      }));
+      setVerifications(mapped);
+    } catch (err) {
+      console.error('Failed to fetch doctor verifications:', err);
+      setVerifications([]);
+    }
   };
 
-  const handleApprove = (id: string) => {
-    setVerifications(verifications.map(v => 
-      v.id === id ? { ...v, status: 'approved' as const } : v
-    ));
+  const handleApprove = async (id: string) => {
+    try {
+      const token = getAuthToken();
+      const doctorId = verifications.find(v => v.id === id)?.doctorId || id;
+      await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/doctors/${doctorId}/verify`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      setVerifications(verifications.map(v => 
+        v.id === id ? { ...v, status: 'approved' as const } : v
+      ));
+    } catch (err) {
+      console.error('Failed to approve doctor:', err);
+    }
   };
 
-  const handleReject = (id: string) => {
+  const handleReject = async (id: string) => {
     const reason = window.prompt('Rejection reason:');
-    if (reason) {
+    if (!reason) return;
+    try {
+      const token = getAuthToken();
+      const doctorId = verifications.find(v => v.id === id)?.doctorId || id;
+      await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/doctors/${doctorId}/reject`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ reason }),
+        }
+      );
       setVerifications(verifications.map(v => 
         v.id === id ? { ...v, status: 'rejected' as const, rejectionReason: reason } : v
       ));
+    } catch (err) {
+      console.error('Failed to reject doctor:', err);
     }
   };
 

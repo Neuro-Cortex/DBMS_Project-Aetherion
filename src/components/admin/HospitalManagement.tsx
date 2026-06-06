@@ -1,5 +1,6 @@
+import { getAuthToken } from '../../services/api';
 // src/components/admin/HospitalManagement.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -69,10 +70,45 @@ const HospitalManagement: React.FC = () => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [hospitals, setHospitals] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredHospitals = mockHospitals.filter(h => {
-    const matchesSearch = h.name.toLowerCase().includes(searchQuery.toLowerCase()) || h.city.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || h.status === statusFilter;
+  useEffect(() => {
+    const fetchHospitals = async () => {
+      try {
+        const token = getAuthToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/hospitals`,
+          { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+        );
+        const data = await res.json();
+        setHospitals(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch hospitals:', err);
+        setHospitals([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchHospitals();
+  }, []);
+
+  const handleVerify = async (hospitalId: string) => {
+    try {
+      const token = getAuthToken();
+      await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/admin/hospitals/${hospitalId}/verify`,
+        { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+      );
+      setHospitals(hospitals.map(h => h.id === hospitalId ? { ...h, is_verified: true } : h));
+    } catch (err) {
+      console.error('Failed to verify hospital:', err);
+    }
+  };
+
+  const filteredHospitals = hospitals.filter(h => {
+    const matchesSearch = h.name?.toLowerCase().includes(searchQuery.toLowerCase()) || h.city?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || (statusFilter === 'active' ? h.is_active : !h.is_active);
     return matchesSearch && matchesStatus;
   });
 
@@ -137,11 +173,11 @@ const HospitalManagement: React.FC = () => {
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { icon: Building2, label: 'Total Hospitals', value: mockHospitals.length, color: 'purple', change: '+3%' },
-              { icon: Bed, label: 'Total Beds', value: mockHospitals.reduce((a, h) => a + h.totalBeds, 0).toLocaleString(), color: 'blue', change: '+5%' },
-              { icon: Users, label: 'Total Doctors', value: mockHospitals.reduce((a, h) => a + h.totalDoctors, 0).toLocaleString(), color: 'teal', change: '+8%' },
-              { icon: CheckCircle, label: 'Verified', value: mockHospitals.filter(h => h.verified).length, color: 'emerald', change: '+2%' },
+            {[ 
+              { icon: Building2, label: 'Total Hospitals', value: hospitals.length, color: 'purple', change: '+3%' },
+              { icon: Bed, label: 'Total Beds', value: hospitals.reduce((a: number, h: any) => a + (h.total_beds || 0), 0).toLocaleString(), color: 'blue', change: '+5%' },
+              { icon: Users, label: 'Total Doctors', value: hospitals.reduce((a: number, h: any) => a + (h.total_doctors || 0), 0).toLocaleString(), color: 'teal', change: '+8%' },
+              { icon: CheckCircle, label: 'Verified', value: hospitals.filter((h: any) => h.is_verified).length, color: 'emerald', change: '+2%' },
             ].map((stat, i) => {
               const Icon = stat.icon;
               const [bg, text] = (colorMap[stat.color] || '').split(' ');
@@ -168,30 +204,35 @@ const HospitalManagement: React.FC = () => {
 
           {/* Hospital List */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredHospitals.map((hospital, i) => (
+            {filteredHospitals.map((hospital: any, i: number) => (
               <motion.div key={hospital.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                 <Card className="p-5 hover:border-purple-500/30 transition-all">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`p-3 rounded-xl ${hospital.type === 'Government' ? 'bg-blue-500/10' : hospital.type === 'Teaching' ? 'bg-purple-500/10' : 'bg-amber-500/10'}`}>
-                        <Building2 className={`w-6 h-6 ${hospital.type === 'Government' ? 'text-blue-400' : hospital.type === 'Teaching' ? 'text-purple-400' : 'text-amber-400'}`} />
+                      <div className={`p-3 rounded-xl ${hospital.type === 'government' ? 'bg-blue-500/10' : hospital.type === 'teaching' ? 'bg-purple-500/10' : 'bg-amber-500/10'}`}>
+                        <Building2 className={`w-6 h-6 ${hospital.type === 'government' ? 'text-blue-400' : hospital.type === 'teaching' ? 'text-purple-400' : 'text-amber-400'}`} />
                       </div>
                       <div>
                         <h3 className="text-white font-bold">{hospital.name}</h3>
-                        <p className="text-xs text-slate-400 flex items-center gap-1"><MapPin className="w-3 h-3" /> {hospital.city}</p>
+                        <p className="text-xs text-slate-400 flex items-center gap-1"><MapPin className="w-3 h-3" /> {hospital.city}, {hospital.state}</p>
                       </div>
                     </div>
-                    <Badge variant={hospital.status === 'active' ? 'success' : hospital.status === 'inactive' ? 'default' : 'warning'} className="text-[10px]">{hospital.status}</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={hospital.is_verified ? 'success' : 'warning'} className="text-[10px]">{hospital.is_verified ? 'Verified' : 'Unverified'}</Badge>
+                      <Badge variant={hospital.is_active !== false ? 'success' : 'default'} className="text-[10px]">{hospital.is_active !== false ? 'Active' : 'Inactive'}</Badge>
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-3 mb-3">
-                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><Bed className="w-4 h-4 text-blue-400 mx-auto mb-1" /><p className="text-white font-bold text-sm">{hospital.availableBeds}/{hospital.totalBeds}</p><p className="text-[10px] text-slate-500">Beds</p></div>
-                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><Users className="w-4 h-4 text-cyan-400 mx-auto mb-1" /><p className="text-white font-bold text-sm">{hospital.totalDoctors}</p><p className="text-[10px] text-slate-500">Doctors</p></div>
-                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mx-auto mb-1" /><p className="text-white font-bold text-sm">{hospital.rating}</p><p className="text-[10px] text-slate-500">Rating</p></div>
+                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><Bed className="w-4 h-4 text-blue-400 mx-auto mb-1" /><p className="text-white font-bold text-sm">{hospital.available_beds || 0}/{hospital.total_beds || 0}</p><p className="text-[10px] text-slate-500">Beds</p></div>
+                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><Users className="w-4 h-4 text-cyan-400 mx-auto mb-1" /><p className="text-white font-bold text-sm">{hospital.total_doctors || 0}</p><p className="text-[10px] text-slate-500">Doctors</p></div>
+                    <div className="text-center p-2 rounded-xl bg-white/[0.02]"><Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mx-auto mb-1" /><p className="text-white font-bold text-sm">{hospital.rating || 0}</p><p className="text-[10px] text-slate-500">Rating</p></div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-400 mb-3"><Phone className="w-3 h-3" /> {hospital.phone}<span className="mx-1">•</span><Mail className="w-3 h-3" /> {hospital.email}</div>
+                  <div className="flex items-center gap-2 text-xs text-slate-400 mb-3"><Phone className="w-3 h-3" /> {hospital.phone || 'N/A'}<span className="mx-1">•</span><Mail className="w-3 h-3" /> {hospital.email || 'N/A'}</div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" className="flex-1 border-purple-500/30 text-purple-400"><Eye className="w-3.5 h-3.5 mr-1" /> View</Button>
-                    <Button variant="outline" size="sm" className="flex-1 border-blue-500/30 text-blue-400"><Edit3 className="w-3.5 h-3.5 mr-1" /> Edit</Button>
+                    {!hospital.is_verified && (
+                      <Button variant="outline" size="sm" className="flex-1 border-emerald-500/30 text-emerald-400" onClick={() => handleVerify(hospital.id)}><CheckCircle className="w-3.5 h-3.5 mr-1" /> Verify</Button>
+                    )}
                   </div>
                 </Card>
               </motion.div>
