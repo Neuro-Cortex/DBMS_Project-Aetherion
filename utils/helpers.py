@@ -1,40 +1,36 @@
-from typing import Optional
-import uuid
-from math import ceil
+# utils/helpers.py - Helper utilities
+import json
+from flask import jsonify as flask_jsonify
 
+def make_response(data=None, message='Success', status=200):
+    """Standard API response format"""
+    body = {'success': True, 'message': message}
+    if data is not None:
+        body['data'] = data
+    return flask_jsonify(body), status
 
-def generate_uuid() -> str:
-    return str(uuid.uuid4())
+def make_error(message='Error', status=400):
+    """Standard error response format"""
+    return flask_jsonify({'success': False, 'error': message}), status
 
-
-def paginate(page: int = 1, size: int = 20) -> dict:
-    return {"offset": (page - 1) * size, "limit": size}
-
-
-def calculate_pages(total: int, size: int) -> int:
-    """Calculate total number of pages."""
-    if size <= 0:
-        return 0
-    return ceil(total / size)
-
-
-def build_pagination_meta(total: int, page: int, size: int) -> dict:
-    """Build pagination metadata for API responses."""
+def paginate(query, params=None, page=1, per_page=20):
+    """Add pagination to a query"""
+    from ..database import DB
+    offset = (page - 1) * per_page
+    
+    # Get total count
+    count_sql = f"SELECT COUNT(*) as total FROM ({query}) as counted"
+    total = DB.fetch_one(count_sql, params or ())['total']
+    
+    # Get paginated results
+    paginated_query = f"{query} LIMIT %s OFFSET %s"
+    p = list(params or []) + [per_page, offset]
+    results = DB.fetch_all(paginated_query, p)
+    
     return {
-        "total": total,
-        "page": page,
-        "size": size,
-        "pages": calculate_pages(total, size),
+        'items': results,
+        'total': total,
+        'page': page,
+        'per_page': per_page,
+        'total_pages': (total + per_page - 1) // per_page
     }
-
-
-def generate_order_number(prefix: str = "ORD") -> str:
-    """Generate a unique order number."""
-    import time
-    return f"{prefix}-{int(time.time())}-{uuid.uuid4().hex[:6].upper()}"
-
-
-def generate_request_number(prefix: str = "REQ") -> str:
-    """Generate a unique request number."""
-    import time
-    return f"{prefix}-{int(time.time())}-{uuid.uuid4().hex[:6].upper()}"
