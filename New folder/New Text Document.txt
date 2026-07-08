@@ -1,0 +1,92 @@
+Task ID,Task Name,Module,Assigned To,Start Date,Deadline,Status,Progress %,Remarks,Priority
+"━━━━━━━━━━━━━ PHASE 1: PROJECT INITIATION (MARCH 1-7, 2026) ━━━━━━━━━━━━━","","","","","","","","",""
+HC-001,Project Topic Finalization: Healthcare Management System,Planning,All Members,01-Mar-2026,02-Mar-2026,Completed,100%,Topic approved by supervisor - DBMS focused,High
+HC-002,Requirements Gathering: Patient Doctor Appointment Modules,Planning,Pollob,03-Mar-2026,05-Mar-2026,Completed,100%,Functional & non-functional requirements collected,High
+HC-003,Requirements Gathering: Billing Prescription & Reports,Planning,Shihab,03-Mar-2026,05-Mar-2026,Completed,100%,All billing & report requirements listed,High
+HC-004,Requirements Gathering: Admin Dashboard & User Roles,Planning,Afrin,03-Mar-2026,05-Mar-2026,Completed,100%,Admin superadmin doctor patient roles defined,High
+HC-005,Feasibility Study & Technology Stack Finalization,Planning,All Members,04-Mar-2026,06-Mar-2026,Completed,100%,Python Flask React PostgreSQL chosen,High
+HC-006,Project Proposal Draft Writing (Chapters 1-3),Documentation,Pollob,05-Mar-2026,07-Mar-2026,Completed,100%,Introduction Literature Review Methodology,High
+HC-007,ER Diagram Design - Healthcare System (Complete),Database Design,Shihab,05-Mar-2026,07-Mar-2026,Completed,100%,Patient Doctor Appointment Prescription Billing entities,High
+"━━━━━━━━━━━━━ PHASE 2: DATABASE DESIGN (MARCH 8-14, 2026) ━━━━━━━━━━━━━","","","","","","","","",""
+HC-008,Database Schema Design - All Tables Normalized,Database Design,Shihab,08-Mar-2026,10-Mar-2026,Completed,100%,3NF normalization applied all tables,High
+HC-009,Patient Table Design (Demographics Medical History),Database Design,Shihab,09-Mar-2026,11-Mar-2026,Completed,100%,Patient demographics blood group allergies fields,High
+HC-010,Doctor Table & Specialization Table Design,Database Design,Shihab,09-Mar-2026,11-Mar-2026,Completed,100%,Doctor schedule availability included,Medium
+HC-011,Appointment & Scheduling Tables Design,Database Design,Shihab,10-Mar-2026,12-Mar-2026,Completed,100%,Status tracking date time slot management,High
+HC-012,Prescription & Medication Tables Design,Database Design,Shihab,10-Mar-2026,12-Mar-2026,Completed,100%,Medicine dosage frequency duration fields,Medium
+HC-013,Billing Invoice & Payment Tables Design,Database Design,Shihab,11-Mar-2026,13-Mar-2026,Completed,100%,Payment status mode transaction tracking,High
+HC-014,SQL Script Writing - All Table Creation,Database Design,Shihab,12-Mar-2026,14-Mar-2026,Completed,100%,CREATE TABLE scripts with constraints indexes,High
+HC-015,Sample Data Insertion (Dummy Patients Doctors),Database Design,Shihab,13-Mar-2026,14-Mar-2026,Completed,100%,50+ dummy records for testing,Medium
+"━━━━━━━━━━━━━ PHASE 3: BACKEND SETUP & CORE API (MARCH 15-28, 2026) ━━━━━━━━━━━━━","","","","","","","","",""
+HC-016,Python Flask Project Setup & Virtual Environment,Backend Development,Pollob,15-Mar-2026,16-Mar-2026,Completed,100%,Flask app structure venv requirements.txt,High
+HC-017,PostgreSQL Database Connection & Configuration,Backend Development,Pollob,15-Mar-2026,17-Mar-2026,Completed,100%,SQLAlchemy ORM psycopg2 connection pool,High
+HC-018,User Authentication Model (Flask-Login JWT),Backend Development,Pollob,17-Mar-2026,20-Mar-2026,Completed,100%,Bcrypt hashing JWT token generation,High
+HC-019,Patient Registration API - POST Endpoint,Backend Development,Pollob,18-Mar-2026,21-Mar-2026,Completed,100%,Full CRUD for patient management,High
+HC-020,Doctor Management API - CRUD Endpoints,Backend Development,Pollob,19-Mar-2026,22-Mar-2026,Completed,100%,Doctor registration specialization assignment,High
+HC-021,Appointment Booking API Development,Backend Development,Pollob,21-Mar-2026,25-Mar-2026,Completed,100%,Slot checking conflict resolution booking logic,High
+HC-022,Appointment Status Update API (Confirm/Cancel),Backend Development,Pollob,23-Mar-2026,26-Mar-2026,Completed,100%,Status workflow pending-confirmed-cancelled,High
+HC-023,Prescription Creation API Development,Backend Development,Pollob,24-Mar-2026,28-Mar-2026,Completed,100%,Doctor creates prescription with medicines,High
+HC-024,Billing & Invoice Generation API,Backend Development,Pollob,26-Mar-2026,28-Mar-2026,Completed,100%,Auto-calculate charges generate invoice PDF,Medium
+"━━━━━━━━━━━━━ PHASE 4: FRONTEND DEVELOPMENT START (MARCH 22 - APRIL 11, 2026) ━━━━━━━━━━━━━","","","","","","","","",""
+HC-025,React Project Initialization & Folder Structure,Frontend Development,Afrin,22-Mar-2026,23-Mar-2026,Completed,100%,React Router Axios Material-UI setup,High
+HC-026,Login & Registration Pages (Frontend),Frontend Development,Afrin,23-Mar-2026,26-Mar-2026,Completed,100%,Form validation error handling UI,High
+HC-027,Admin Dashboard Layout & Navigation,Frontend Development,Afrin,25-Mar-2026,29-Mar-2026,Completed,100%,Sidebar topbar responsive design,High
+HC-028,Doctor Dashboard Design & Development,Frontend Development,Afrin,27-Mar-2026,31-Mar-2026,Completed,100%,Doctor-specific views appointments list,High
+HC-029,Patient Dashboard Design & Development,Frontend Development,Afrin,28-Mar-2026,01-Apr-2026,Completed,100%,Patient profile appointment history,High
+HC-030,Patient Registration Form UI,Frontend Development,Afrin,30-Mar-2026,03-Apr-2026,Completed,100%,Multi-step form with validation,Medium
+HC-031,Doctor Management Page (Admin Panel),Frontend Development,Afrin,01-Apr-2026,05-Apr-2026,Completed,100%,Add edit delete doctors table view,High
+HC-032,Appointment Booking Interface (Patient Side),Frontend Development,Afrin,03-Apr-2026,07-Apr-2026,Completed,100%,Calendar view slot selection doctor filter,High
+HC-033,Appointment Management Page (Admin/Doctor),Frontend Development,Afrin,05-Apr-2026,09-Apr-2026,Completed,100%,Approve reject reschedule appointments,High
+HC-034,Prescription View & Print Page,Frontend Development,Afrin,07-Apr-2026,11-Apr-2026,Completed,100%,Printable prescription with doctor signature,Medium
+"━━━━━━━━━━━━━ PHASE 5: ADVANCED FEATURES (APRIL 12-30, 2026) ━━━━━━━━━━━━━","","","","","","","","",""
+HC-035,Billing & Invoice Module Frontend,Frontend Development,Afrin,12-Apr-2026,16-Apr-2026,Completed,100%,Invoice list generate download PDF,High
+HC-036,Payment Integration (Dummy/Test Gateway),Backend Development,Pollob,13-Apr-2026,18-Apr-2026,Completed,100%,Payment simulation status tracking,Medium
+HC-037,Medical History & Records View,Frontend Development,Afrin,14-Apr-2026,18-Apr-2026,Completed,100%,Patient-wise complete medical timeline,Medium
+HC-038,Search & Filter Functionality (Patients Doctors),Backend Development,Pollob,16-Apr-2026,20-Apr-2026,Completed,100%,Full-text search with filters,High
+HC-039,Search UI with Advanced Filters,Frontend Development,Afrin,17-Apr-2026,21-Apr-2026,Completed,100%,Dynamic filter components debounce search,Medium
+HC-040,Reporting Module - Daily/Monthly Reports,Backend Development,Pollob,19-Apr-2026,24-Apr-2026,Completed,100%,Patient count revenue appointment stats,High
+HC-041,Reports Dashboard with Charts & Graphs,Frontend Development,Afrin,20-Apr-2026,25-Apr-2026,Completed,100%,Chart.js / Recharts integration,Medium
+HC-042,Notification System (Email Alerts for Appointments),Backend Development,Pollob,22-Apr-2026,27-Apr-2026,Completed,100%,SMTP email booking confirmation reminder,Medium
+HC-043,Role-Based Access Control Enhancement,Backend Development,Pollob,24-Apr-2026,28-Apr-2026,Completed,100%,Decorator-based permission checks,High
+HC-044,User Profile Management & Settings,Frontend + Backend,Afrin & Pollob,26-Apr-2026,30-Apr-2026,Completed,100%,Edit profile change password avatar upload,Medium
+"━━━━━━━━━━━━━ PHASE 6: TESTING & BUG FIXING (MAY 1-15, 2026) ━━━━━━━━━━━━━","","","","","","","","",""
+HC-045,Unit Testing - Backend APIs (Pytest),Testing,Pollob,01-May-2026,05-May-2026,In Progress,80%,Test cases for all API endpoints,High
+HC-046,Unit Testing - Frontend Components (Jest),Testing,Afrin,02-May-2026,06-May-2026,In Progress,70%,Component rendering & interaction tests,High
+HC-047,Integration Testing - Booking Flow End-to-End,Testing,Shihab,03-May-2026,07-May-2026,In Progress,50%,Patient books doctor prescribes billing flow,High
+HC-048,Database Query Optimization & Indexing,Database Performance,Shihab,04-May-2026,08-May-2026,Pending,0%,Slow query analysis index creation,High
+HC-049,API Security Testing (SQL Injection XSS CSRF),Testing,Pollob,06-May-2026,10-May-2026,Pending,0%,Security vulnerability scan,High
+HC-050,Bug Tracking & Fixing - Priority 1 (Critical),Bug Fixing,All Members,08-May-2026,12-May-2026,Pending,0%,Critical bugs from testing phase,High
+HC-051,Bug Fixing - Priority 2 & 3 (Medium & Low),Bug Fixing,All Members,10-May-2026,14-May-2026,Pending,0%,UI fixes minor logic errors,Medium
+HC-052,Cross-Browser Testing (Chrome Firefox Edge),Testing,Afrin,11-May-2026,14-May-2026,Pending,0%,Browser compatibility check,Medium
+HC-053,Responsive Design Testing (Mobile Tablet),Testing,Afrin,12-May-2026,15-May-2026,Pending,0%,All screen sizes responsive,Medium
+"━━━━━━━━━━━━━ PHASE 7: DEPLOYMENT & DOCUMENTATION (MAY 16-31, 2026) ━━━━━━━━━━━━━","","","","","","","","",""
+HC-054,Production Environment Configuration,Deployment,Pollob,16-May-2026,18-May-2026,Pending,0%,Environment variables production settings,High
+HC-055,Frontend Build & Optimization for Production,Deployment,Afrin,17-May-2026,19-May-2026,Pending,0%,npm run build minification bundling,High
+HC-056,Backend Deployment (AWS EC2 / Render),Deployment,Pollob,18-May-2026,21-May-2026,Pending,0%,Gunicorn Nginx supervisor setup,High
+HC-057,PostgreSQL Database Deployment (AWS RDS / Supabase),Deployment,Shihab,19-May-2026,22-May-2026,Pending,0%,Production database migration data seeding,High
+HC-058,Frontend Deployment (Vercel / Netlify),Deployment,Afrin,20-May-2026,22-May-2026,Pending,0%,Domain SSL configuration,High
+HC-059,SSL Certificate & Custom Domain Setup,Deployment,Shihab,21-May-2026,23-May-2026,Pending,0%,HTTPS enforced domain pointed,Medium
+HC-060,Full System Integration Testing (Production),Testing,All Members,23-May-2026,25-May-2026,Pending,0%,End-to-end testing on live server,High
+HC-061,Project Report - Chapter 1 & 2 (Final),Documentation,Shihab,22-May-2026,27-May-2026,Pending,0%,Introduction & Literature Review,High
+HC-062,Project Report - Chapter 3 & 4 (Methodology & Implementation),Documentation,Pollob,24-May-2026,29-May-2026,Pending,0%,System architecture code snippets,High
+HC-063,Project Report - Chapter 5 & 6 (Testing & Conclusion),Documentation,Shihab,26-May-2026,31-May-2026,Pending,0%,Results discussion future work,High
+HC-064,User Manual & System Documentation,Documentation,Afrin,27-May-2026,31-May-2026,Pending,0%,Step-by-step guide with screenshots,Medium
+"━━━━━━━━━━━━━ PHASE 8: FINAL PRESENTATION (JUNE 1-15, 2026) ━━━━━━━━━━━━━","","","","","","","","",""
+HC-065,Project Report Formatting & Plagiarism Check,Documentation,Shihab,01-Jun-2026,04-Jun-2026,Pending,0%,Turnitin check report binding,High
+HC-066,Final Presentation Slides Creation (Draft),Presentation,All Members,02-Jun-2026,06-Jun-2026,Pending,0%,20-25 professional slides,High
+HC-067,Project Demo Video Recording,Presentation,Afrin,04-Jun-2026,08-Jun-2026,Pending,0%,Screen recording with voiceover 5-7 mins,High
+HC-068,Live Demo Preparation & Dry Run,Presentation,Pollob,06-Jun-2026,10-Jun-2026,Pending,0%,Complete flow demonstration practice,High
+HC-069,Presentation Slide Review & Polish,Presentation,All Members,08-Jun-2026,11-Jun-2026,Pending,0%,Feedback incorporation final touches,High
+HC-070,Q&A Preparation (Expected Questions),Presentation,All Members,09-Jun-2026,12-Jun-2026,Pending,0%,Common viva questions answers preparation,Medium
+HC-071,Final Presentation Rehearsal (Full Run),Presentation,All Members,11-Jun-2026,13-Jun-2026,Pending,0%,Complete dress rehearsal with timing,High
+HC-072,Source Code Final Commit & GitHub Repository,Documentation,Pollob,12-Jun-2026,14-Jun-2026,Pending,0%,README documentation license,High
+HC-073,Final Project Submission (Report + Code),Documentation,Shihab,13-Jun-2026,15-Jun-2026,Pending,0%,Hard copy soft copy CD,High
+HC-074,Final Defense Day - Presentation & Viva,Presentation,All Members,15-Jun-2026,15-Jun-2026,Pending,0%,🎯 PROJECT DEFENSE DAY,High
+"━━━━━━━━━━━━━ MILESTONES & DEADLINES SUMMARY ━━━━━━━━━━━━━","","","","","","","","",""
+HC-M1,MILESTONE: Database Design Complete,,Shihab,,14-Mar-2026,Achieved,100%,✔ All tables created & populated,High
+HC-M2,MILESTONE: Backend Core API Complete,,Pollob,,28-Mar-2026,Achieved,100%,✔ All major APIs functional,High
+HC-M3,MILESTONE: Frontend All Pages Complete,,Afrin,,11-Apr-2026,Achieved,100%,✔ All UI pages developed,High
+HC-M4,MILESTONE: Advanced Features Complete,,All Members,,30-Apr-2026,Achieved,100%,✔ Reports notifications payment,High
+HC-M5,MILESTONE: Testing Phase Complete,,All Members,,15-May-2026,Upcoming,70%,🔄 Currently in testing,High
+HC-M6,MILESTONE: Production Deployment,,All Members,,25-May-2026,Upcoming,0%,📅 Scheduled,High
+HC-M7,MILESTONE: Final Report Submission,,All Members,,15-Jun-2026,Upcoming,0%,📅 Deadline,High
+HC-M8,MILESTONE: Final Defense Day,,All Members,,15-Jun-2026,Upcoming,0%,🎤 Presentation Day,High
