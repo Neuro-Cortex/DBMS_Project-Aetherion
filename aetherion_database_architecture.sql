@@ -1,55 +1,4 @@
--- ================================================================
--- ================================================================
--- 🏥 AETHERION HEALTHCARE PLATFORM
--- COMPLETE PRODUCTION-GRADE MYSQL DATABASE SCHEMA
--- ================================================================
--- Version  : 3.0.0 (Final Production Release)
--- Engine   : InnoDB | Charset: utf8mb4 | Collation: utf8mb4_unicode_ci
--- Tables   : 85
--- Views    : 8
--- Procedures: 6
--- Triggers  : 8
--- Indexes  : 180+
--- ================================================================
--- MODULES COVERED (13 Subsystems):
---   1. Authentication & Authorization (Role-based JWT)
---   2. User Management (Profiles, Addresses, Settings)
---   3. Doctor Module (Profiles, Availability, Earnings)
---   4. Hospital Module (Beds, ICU, Blood Bank, Oxygen, Ambulance)
---   5. Pharmacy Module (Inventory, Orders, Delivery)
---   6. Appointment & Booking (Scheduling, Calendar)
---   7. Prescription System (Items, Tests, Digital Sign)
---   8. Patient Health Records (Medical, Vaccination, Medication)
---   9. Women's Health (Menstrual, Pregnancy, Baby Care)
---  10. Blood Donation (Donors, Camps, Certificates)
---  11. Emergency Services (Ambulance, ICU Tracker, SOS)
---  12. Messaging & Notifications (Chat, Alerts)
---  13. Admin & Analytics (Verification, Audit, Security, Reports)
---  14. AI Assistant (Chat, Voice, Symptom Checker)
---  15. Reviews & Feedback (Ratings, Complaints)
---  16. Billing & Payments (Invoices, Insurance)
---  17. Wellness (Mental Health, Nutrition, Sleep, Fitness, Physiotherapy)
---  18. Search & Discovery (Global Search, Recommendations)
--- ================================================================
--- TABLE CREATION ORDER (Dependency-Based, 14 Phases)
--- ================================================================
--- PHASE 1  : Core Auth         (5 tables)
--- PHASE 2  : User Profiles     (7 tables)
--- PHASE 3  : Doctor Module      (6 tables)
--- PHASE 4  : Hospital Module    (9 tables)
--- PHASE 5  : Pharmacy Module    (5 tables)
--- PHASE 6  : Appointments       (1 table)
--- PHASE 7  : Prescriptions      (3 tables)
--- PHASE 8  : Patient Health     (8 tables)
--- PHASE 9  : Women's Health     (10 tables)
--- PHASE 10 : Blood Donation     (5 tables)
--- PHASE 11 : Emergency         (3 tables)
--- PHASE 12 : Communication     (5 tables)
--- PHASE 13 : Admin & Analytics (7 tables)
--- PHASE 14 : AI, Reviews, Billing, Wellness, Misc (11 tables)
--- ================================================================
--- TOTAL: 85 TABLES
--- ================================================================
+
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -200,9 +149,7 @@ CREATE TABLE `user_profiles` (
   `created_at`                TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
   `updated_at`                TIMESTAMP   DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT `fk_up_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Extended user profiles';
-
--- ---------------------------------------------------------------
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Extended user profiles';---------------------------------------------------------------
 -- T7: user_addresses — Multiple addresses per user
 -- ---------------------------------------------------------------
 DROP TABLE IF EXISTS `user_addresses`;
@@ -954,6 +901,10 @@ CREATE TABLE `appointments` (
   INDEX `idx_appt_priority`  (`priority`),
   INDEX `idx_appt_doctor_date` (`doctor_id`, `appointment_date`, `status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Patient appointments';
+
+
+
+
 
 -- ================================================================
 -- ██████  PHASE 7: PRESCRIPTIONS  ██████
@@ -2177,11 +2128,6 @@ CREATE TABLE `bed_bookings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Bed booking records';
 
 
--- ================================================================
--- ██████████████████████████████████████████████████████████████
--- ██████  VIEWS (Analytics & Reporting) — 8 Views  ██████
--- ██████████████████████████████████████████████████████████████
--- ================================================================
 
 CREATE OR REPLACE VIEW `v_doctor_dashboard` AS
 SELECT
@@ -2493,13 +2439,8 @@ END //
 DELIMITER ;
 
 
--- ================================================================
--- ██████████████████████████████████████████████████████████████
--- ██████  TRIGGERS (8)  ██████
--- ██████████████████████████████████████████████████████████████
--- ================================================================
 
--- Trigger 1: Auto-sync hospital bed counts on bed status change
+-- Trigger 1
 DELIMITER //
 CREATE TRIGGER `trg_bed_status_update`
 AFTER UPDATE ON `hospital_beds`
@@ -2514,7 +2455,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- Trigger 2: Update user online status on session activity
+-- Trigger 2
 DELIMITER //
 CREATE TRIGGER `trg_session_activity`
 AFTER UPDATE ON `user_sessions`
@@ -2526,7 +2467,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- Trigger 3: Auto-decrement pharmacy inventory on order delivery
+-- Trigger 3: 
 DELIMITER //
 CREATE TRIGGER `trg_order_delivered`
 AFTER UPDATE ON `medicine_orders`
@@ -2557,7 +2498,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- Trigger 5: Auto-update blood donor eligibility after donation
+-- Trigger 5
 DELIMITER //
 CREATE TRIGGER `trg_blood_donation_created`
 AFTER INSERT ON `blood_donations`
@@ -2573,7 +2514,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- Trigger 6: Audit log on user registration
+-- Trigger 6
 DELIMITER //
 CREATE TRIGGER `trg_user_registration`
 AFTER INSERT ON `users`
@@ -2585,7 +2526,8 @@ BEGIN
 END //
 DELIMITER ;
 
--- Trigger 7: Auto-create stock alert when inventory drops below minimum
+
+
 DELIMITER //
 CREATE TRIGGER `trg_inventory_low_stock`
 AFTER UPDATE ON `pharmacy_inventory`
@@ -2599,7 +2541,6 @@ BEGIN
 END //
 DELIMITER ;
 
--- Trigger 8: Update pharmacy total_orders counter on new order
 DELIMITER //
 CREATE TRIGGER `trg_pharmacy_order_created`
 AFTER INSERT ON `medicine_orders`
@@ -2610,11 +2551,6 @@ END //
 DELIMITER ;
 
 
--- ================================================================
--- ██████████████████████████████████████████████████████████████
--- ██████  SEED DATA  ██████
--- ██████████████████████████████████████████████████████████████
--- ================================================================
 
 INSERT INTO `roles` (`name`, `display_name`, `description`, `priority`, `is_system_role`) VALUES
 ('super_admin',           'Super Admin',           'Full system access with all privileges',             100, TRUE),
@@ -2634,11 +2570,6 @@ INSERT INTO `roles` (`name`, `display_name`, `description`, `priority`, `is_syst
 ('admin_applicant',      'Admin Applicant',      'Pending admin access request',                         15, TRUE);
 
 
--- ================================================================
--- ██████████████████████████████████████████████████████████████
--- ██████  ADDITIONAL PERFORMANCE INDEXES  ██████
--- ██████████████████████████████████████████████████████████████
--- ================================================================
 
 CREATE INDEX `idx_appt_patient_date`     ON `appointments`(`patient_id`, `appointment_date` DESC);
 CREATE INDEX `idx_hosp_beds_availability` ON `hospitals`(`available_beds`, `icu_available_beds`);
@@ -2649,16 +2580,5 @@ CREATE INDEX `idx_prescription_patient_active` ON `prescriptions`(`patient_id`, 
 CREATE INDEX `idx_doctor_specialty_verified` ON `doctor_profiles`(`specialization`, `is_verified`);
 CREATE INDEX `idx_appointment_date_priority` ON `appointments`(`appointment_date`, `priority`);
 
-
--- ================================================================
--- END OF SCHEMA
--- ================================================================
--- Total Tables     : 85
--- Total Views      : 8
--- Total Procedures : 6
--- Total Triggers   : 8
--- Total Indexes    : 180+
--- Total Roles      : 15
--- ================================================================
 
 SET FOREIGN_KEY_CHECKS = 1;
